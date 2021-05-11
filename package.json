@@ -4,8 +4,8 @@
 	"description": "Three.js game for CGV",
 	"main": "main.js",
 	"scripts": {
-		"build": "rollup -c \"rollup_config.js\"",
-		"start": "serve"
+		"build": "rollup -c  \"rollup_config.js\" -w",
+		"start": "serve -n"
 	},
 	"author": "",
 	"license": "ISC",
@@ -15,6 +15,8 @@
 	"devDependencies": {
 		"@rollup/plugin-node-resolve": "^11.2.0",
 		"rollup": "^2.39.1",
+		"rollup-plugin-hotreload": "^2.3.1",
+		"rollup-plugin-sourcemaps": "^0.6.3",
 		"rollup-plugin-terser": "^7.0.2",
 		"serve": "^11.3.2"
 	}

@@ -1,4 +1,4 @@
-import App from './App.js';
+import GameManager from './GameManager.js';
 
-const app = new App();
+const app = new GameManager();
 app.init();
