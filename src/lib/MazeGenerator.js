@@ -97,8 +97,14 @@ class Maze {
     return this.getRandomCell(unvisited);
   }
 
-  chooseNextCellIndex(frontier) {
-    return frontier.length - 1;
+  chooseNextCellIndex(frontier, ratio) {
+    //0 = Recursive backtracking
+    //1 = Prims
+    if (Math.random() > ratio) {
+      return frontier.length - 1;
+    } else {
+      return Math.floor(Math.random() * frontier.length);
+    }
   }
 
   growingTree() {
@@ -113,7 +119,7 @@ class Maze {
     initial.visited = true;
 
     while (frontier.length) {
-      var nextCellIndex = this.chooseNextCellIndex(frontier);
+      var nextCellIndex = this.chooseNextCellIndex(frontier, 0.4);
       var nextCell = frontier[nextCellIndex];
       var neighbourToCarve = this.getRandomUnvisitedNeighbour(
         nextCell.x,
@@ -131,6 +137,48 @@ class Maze {
 
       neighbourToCarve.visited = true;
       frontier.push(neighbourToCarve);
+    }
+  }
+
+  drawRect(ctx, x, y, size) {
+    ctx.fillRect(x, y, size, size);
+  }
+
+  getThickGrid() {
+    var grid = [];
+    var drawWidth = 2 * this.width + 1;
+    var drawHeight = 2 * this.height + 1;
+    for (var y = 0; y < drawHeight; y++) {
+      for (var x = 0; x < drawWidth; x++) {
+        grid.push(true);
+      }
+    }
+
+    for (var y = 0; y < this.height; y++) {
+      for (var x = 0; x < this.width; x++) {
+        var cell = this.getCellAt(x, y);
+        grid[(2 * y + 1) * drawWidth + (2 * x + 1)] = false;
+
+        if (!cell.east) {
+          grid[(2 * y + 1) * drawWidth + (2 * x + 2)] = false;
+        }
+        if (!cell.south) {
+          grid[(2 * y + 2) * drawWidth + (2 * x + 1)] = false;
+        }
+      }
+    }
+
+    return grid;
+  }
+
+  drawThickMaze(ctx) {
+    var thickMaze = this.getThickGrid();
+    var stepSize = 20;
+    for (var y = 0; y < 2 * this.height + 1; y++) {
+      for (var x = 0; x < 2 * this.width + 1; x++) {
+        if (!thickMaze[y * (2 * this.width + 1) + x]) continue;
+        this.drawRect(ctx, x * stepSize, y * stepSize, stepSize);
+      }
     }
   }
 }
