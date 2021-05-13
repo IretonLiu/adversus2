@@ -1,16 +1,6 @@
-import GameManager from './GameManager.js';
-import Maze from './lib/MazeGenerator';
+import GameManager from "./GameManager.js";
 
-// const app = new GameManager();
-// app.init();
-var size = 15;
-var maze = new Maze(size,size);
-maze.growingTree();
-// console.log(maze.grid);
-
-
-var c = document.getElementById("canvas");
-var ctx = c.getContext("2d");
-maze.drawThickMaze(ctx);
+const app = new GameManager();
+app.init();
 
 console.log("Initialized");
