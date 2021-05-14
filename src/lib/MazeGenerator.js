@@ -171,6 +171,10 @@ class Maze {
     return grid;
   }
 
+  getThickIndex(x,y){
+    return y * (2 * this.width + 1) + x;
+  }
+
   drawThickMaze(ctx) {
     var thickMaze = this.getThickGrid();
     var stepSize = 20;
@@ -181,6 +185,8 @@ class Maze {
       }
     }
   }
+
+
 }
 
 export default Maze;
