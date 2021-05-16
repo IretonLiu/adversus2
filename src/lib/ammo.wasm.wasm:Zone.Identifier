@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://github.com/kripken/ammo.js/blob/main/builds/ammo.wasm.wasm
+HostUrl=https://raw.githubusercontent.com/kripken/ammo.js/main/builds/ammo.wasm.wasm
