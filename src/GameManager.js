@@ -1,11 +1,12 @@
 import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
+import minimap from "./minimap.js"
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 
-let playerController, scene, renderer;
-const blockiness = 6;
+let playerController, scene, renderer,mMap;
+const blockiness = 4;
 
 const clock = new THREE.Clock();
 
@@ -35,6 +36,7 @@ class GameManager {
     renderer = new THREE.WebGLRenderer({ antialias: false });
 
     playerController = new PlayerController(-30, 0, 20, renderer.domElement);
+    mMap = new minimap(playerController)
     scene.add(playerController.controls.getObject());
 
     // scene.add(playerController.target);
@@ -113,6 +115,7 @@ function renderMaze(scene) {
     }
   }
 
+
   var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);
   mazeGeo.computeVertexNormals();
   var mazeMesh = new THREE.Mesh(mazeGeo, wallMaterial);
@@ -134,6 +137,8 @@ function onWindowResize() {
 function animate() {
   requestAnimationFrame(animate);
   playerController.update();
+  mMap.mapControls();
+  mMap.placePos();
   render();
 }
 
