@@ -5,7 +5,7 @@ import minimap from "./minimap.js"
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 
-let playerController, scene, renderer,mMap;
+let playerController, scene, renderer,mMap, maze, grid;
 const blockiness = 4;
 
 const clock = new THREE.Clock();
@@ -16,6 +16,10 @@ class GameManager {
     const innerWidth = window.innerWidth;
     const innerHeight = window.innerHeight;
     scene = new THREE.Scene();
+
+    maze = new Maze(5, 5);
+    maze.growingTree();
+    grid = maze.getThickGrid();
 
     const light = new THREE.AmbientLight(0x050505);
     scene.add(light);
@@ -59,9 +63,7 @@ class GameManager {
 }
 
 function renderMaze(scene) {
-  var maze = new Maze(5, 5);
-  maze.growingTree();
-  var grid = maze.getThickGrid();
+  
   grid[maze.getThickIndex(0, 1)] = false;
   grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
@@ -139,6 +141,7 @@ function animate() {
   playerController.update();
   mMap.mapControls();
   mMap.placePos();
+  mMap.drawMaze(maze,grid);
   render();
 }
 
