@@ -4,6 +4,7 @@ import PlayerController from "./PlayerController.js";
 import minimap from "./minimap.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
+import Physics from "./Physics.js";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid;
 const blockiness = 6;
@@ -24,9 +25,6 @@ class GameManager {
     tmpTrans = new Ammo.btTransform();
 
     initGraphics();
-    initPhysics();
-    // initPlane();
-    // initBox();
 
     playerController = new PlayerController(-30, 0, 20, renderer.domElement);
     mMap = new minimap(playerController);
@@ -53,25 +51,10 @@ class GameManager {
   }
 }
 
-function initPhysics() {
-  let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
-    dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
-    overlappingPairCache = new Ammo.btDbvtBroadphase(),
-    solver = new Ammo.btSequentialImpulseConstraintSolver();
-
-  physicsWorld = new Ammo.btDiscreteDynamicsWorld(
-    dispatcher,
-    overlappingPairCache,
-    solver,
-    collisionConfiguration
-  );
-  physicsWorld.setGravity(new Ammo.btVector3(0, -100, 0));
-}
-
 function initGraphics() {
   scene = new THREE.Scene();
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
   renderer.domElement.style.width = innerWidth;
@@ -84,7 +67,6 @@ function initGraphics() {
 
 function animate() {
   let deltaTime = clock.getDelta();
-  updatePhysics(deltaTime);
   requestAnimationFrame(animate);
   playerController.update();
   mMap.mapControls();
@@ -167,26 +149,6 @@ function onWindowResize() {
 
 function render() {
   renderer.render(scene, playerController.camera);
-}
-
-function updatePhysics(deltaTime) {
-  // Step world, next time stamp
-  physicsWorld.stepSimulation(deltaTime, 10);
-  // Update rigid bodies
-  for (let i = 0; i < rigidBodies.length; i++) {
-    let objThree = rigidBodies[i];
-    console.log(objThree.position);
-    let objAmmo = objThree.userData.physicsBody;
-    let ms = objAmmo.getMotionState();
-    if (ms) {
-      ms.getWorldTransform(tmpTrans);
-
-      let p = tmpTrans.getOrigin();
-      let q = tmpTrans.getRotation();
-      objThree.position.set(p.x(), p.y(), p.z());
-      objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
-    }
-  }
 }
 
 export default GameManager;
