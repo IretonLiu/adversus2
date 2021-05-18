@@ -133,17 +133,17 @@ class PlayerController {
 
   initTorch() {
     var torch = new SpotLight(0xffffff);
-    torch.castShadow = false;
+    torch.castShadow = true;
 
     torch.shadow.mapSize.width = 1024;
     torch.shadow.mapSize.height = 1024;
-    torch.penumbra = 1;
-    torch.decay = 0.4;
-    torch.distance = 200;
+    torch.penumbra = 0.6;
+    torch.decay = 20;
+    torch.distance = 2000;
     torch.shadow.mapSize.width = 2048;
     torch.shadow.mapSize.height = 2048;
     torch.shadow.camera.far = 20;
-    torch.angle = Math.PI / 6;
+    torch.angle = Math.PI / 7;
     return torch;
   }
 

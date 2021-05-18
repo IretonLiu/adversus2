@@ -7,7 +7,9 @@ import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHel
 import Physics from "./Physics.js";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid;
-const blockiness = 6;
+const blockiness = 7;
+const mapSize = 10;
+
 let rigidBodies = [],
   tmpTrans;
 
@@ -15,7 +17,7 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    maze = new Maze(5, 5);
+    maze = new Maze(mapSize, mapSize);
     maze.growingTree();
     grid = maze.getThickGrid();
 
@@ -26,12 +28,8 @@ class GameManager {
 
     initGraphics();
 
-    playerController = new PlayerController(-30, 0, 20, renderer.domElement);
-    mMap = new minimap(playerController);
-    scene.add(playerController.controls.getObject());
-
     window.addEventListener("resize", onWindowResize, false);
-    const light = new THREE.AmbientLight(0x050505);
+    const light = new THREE.AmbientLight(0x060606);
     scene.add(light);
 
     renderMaze(scene);
@@ -47,6 +45,7 @@ class GameManager {
     floor.receiveShadow = true;
     scene.add(floor);
 
+    console.log(scene);
     animate();
   }
 }
@@ -54,7 +53,7 @@ class GameManager {
 function initGraphics() {
   scene = new THREE.Scene();
 
-  renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
   renderer.domElement.style.width = innerWidth;
@@ -63,6 +62,8 @@ function initGraphics() {
 
   playerController = new PlayerController(-30, 0, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
+
+  mMap = new minimap(playerController);
 }
 
 function animate() {
@@ -82,10 +83,8 @@ function renderMaze(scene) {
   const wallSize = 20;
   const wallHeight = 0.2 * wallSize;
   const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  wallMaterial.flatShading = true;
-
   var geometryArr = [];
-  var wallRes = 50;
+  var wallRes = 25;
   for (var y = 0; y < 2 * maze.height + 1; y++) {
     for (var x = 0; x < 2 * maze.width + 1; x++) {
       if (grid[maze.getThickIndex(x, y)]) {
@@ -132,8 +131,7 @@ function renderMaze(scene) {
   var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);
   mazeGeo.computeVertexNormals();
   var mazeMesh = new THREE.Mesh(mazeGeo, wallMaterial);
-  // mazeMesh.castShadow = true;
-  // console.log(mazeMesh);
+  mazeMesh.castShadow = true;
   mazeMesh.receiveShadow = true;
   scene.add(mazeMesh);
 }
