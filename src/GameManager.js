@@ -1,26 +1,38 @@
 import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
-import minimap from "./minimap.js"
+import minimap from "./minimap.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 
-let playerController, scene, renderer,mMap, maze, grid;
-const blockiness = 4;
+let playerController, scene, renderer, physicsWorld, mMap, maze, grid;
+const blockiness = 6;
+let rigidBodies = [],
+  tmpTrans;
 
 const clock = new THREE.Clock();
 
 class GameManager {
-  init() {
-    // get width and height of viewport
-    const innerWidth = window.innerWidth;
-    const innerHeight = window.innerHeight;
-    scene = new THREE.Scene();
-
+  async init() {
     maze = new Maze(5, 5);
     maze.growingTree();
     grid = maze.getThickGrid();
 
+    // initializing physics
+    await Ammo();
+
+    tmpTrans = new Ammo.btTransform();
+
+    initGraphics();
+    initPhysics();
+    // initPlane();
+    // initBox();
+
+    playerController = new PlayerController(-30, 0, 20, renderer.domElement);
+    mMap = new minimap(playerController);
+    scene.add(playerController.controls.getObject());
+
+    window.addEventListener("resize", onWindowResize, false);
     const light = new THREE.AmbientLight(0x050505);
     scene.add(light);
 
@@ -37,38 +49,56 @@ class GameManager {
     floor.receiveShadow = true;
     scene.add(floor);
 
-    renderer = new THREE.WebGLRenderer({ antialias: false });
-
-    playerController = new PlayerController(-30, 0, 20, renderer.domElement);
-    mMap = new minimap(playerController)
-    scene.add(playerController.controls.getObject());
-
-    // scene.add(playerController.target);
-
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
-    renderer.domElement.style.width = innerWidth;
-    renderer.domElement.style.height = innerHeight;
-
-    // renderer.shadowMap.enabled = true;
-    // renderer.shadowMap.width = 2048;
-    // renderer.shadowMap.height = 2048;
-    // renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    document.body.appendChild(renderer.domElement);
-    window.addEventListener("resize", onWindowResize, false);
-
     animate();
   }
 }
 
+function initPhysics() {
+  let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
+    dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
+    overlappingPairCache = new Ammo.btDbvtBroadphase(),
+    solver = new Ammo.btSequentialImpulseConstraintSolver();
+
+  physicsWorld = new Ammo.btDiscreteDynamicsWorld(
+    dispatcher,
+    overlappingPairCache,
+    solver,
+    collisionConfiguration
+  );
+  physicsWorld.setGravity(new Ammo.btVector3(0, -100, 0));
+}
+
+function initGraphics() {
+  scene = new THREE.Scene();
+
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
+  renderer.domElement.style.width = innerWidth;
+  renderer.domElement.style.height = innerHeight;
+  document.body.appendChild(renderer.domElement);
+
+  playerController = new PlayerController(-30, 0, 20, renderer.domElement);
+  scene.add(playerController.controls.getObject());
+}
+
+function animate() {
+  let deltaTime = clock.getDelta();
+  updatePhysics(deltaTime);
+  requestAnimationFrame(animate);
+  playerController.update();
+  mMap.mapControls();
+  mMap.placePos();
+  mMap.drawMaze(maze, grid);
+  render();
+}
+
 function renderMaze(scene) {
-  
   grid[maze.getThickIndex(0, 1)] = false;
   grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
   const wallSize = 20;
-	const wallHeight = 0.2 * wallSize;
+  const wallHeight = 0.2 * wallSize;
   const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
   wallMaterial.flatShading = true;
 
@@ -117,7 +147,6 @@ function renderMaze(scene) {
     }
   }
 
-
   var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);
   mazeGeo.computeVertexNormals();
   var mazeMesh = new THREE.Mesh(mazeGeo, wallMaterial);
@@ -136,17 +165,28 @@ function onWindowResize() {
   renderer.domElement.style.height = innerHeight;
 }
 
-function animate() {
-  requestAnimationFrame(animate);
-  playerController.update();
-  mMap.mapControls();
-  mMap.placePos();
-  mMap.drawMaze(maze,grid);
-  render();
-}
-
 function render() {
   renderer.render(scene, playerController.camera);
+}
+
+function updatePhysics(deltaTime) {
+  // Step world, next time stamp
+  physicsWorld.stepSimulation(deltaTime, 10);
+  // Update rigid bodies
+  for (let i = 0; i < rigidBodies.length; i++) {
+    let objThree = rigidBodies[i];
+    console.log(objThree.position);
+    let objAmmo = objThree.userData.physicsBody;
+    let ms = objAmmo.getMotionState();
+    if (ms) {
+      ms.getWorldTransform(tmpTrans);
+
+      let p = tmpTrans.getOrigin();
+      let q = tmpTrans.getRotation();
+      objThree.position.set(p.x(), p.y(), p.z());
+      objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+    }
+  }
 }
 
 export default GameManager;
