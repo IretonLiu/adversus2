@@ -7,8 +7,8 @@ import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHel
 import Physics from "./Physics.js";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid;
-const blockiness = 7;
-const mapSize = 10;
+const blockiness = 6;
+const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -28,8 +28,8 @@ class GameManager {
 
     initGraphics();
 
-    window.addEventListener("resize", onWindowResize, false);
-    const light = new THREE.AmbientLight(0x060606);
+    window.addEventListener("resize", onWindowResize, true);
+    const light = new THREE.AmbientLight(0x080808);
     scene.add(light);
 
     renderMaze(scene);
@@ -53,7 +53,7 @@ class GameManager {
 function initGraphics() {
   scene = new THREE.Scene();
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
   renderer.domElement.style.width = innerWidth;

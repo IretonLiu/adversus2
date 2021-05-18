@@ -116,7 +116,7 @@ class PlayerController {
           self.controls.lock();
           break;
         case 2:
-          self.torch.intensity = 1 - self.torch.intensity;
+          self.torch.visible = !self.torch.visible;
           break;
       }
     };
@@ -134,11 +134,11 @@ class PlayerController {
   initTorch() {
     var torch = new SpotLight(0xffffff);
     torch.castShadow = true;
-
+    torch.intensity = 1.2;
     torch.shadow.mapSize.width = 1024;
     torch.shadow.mapSize.height = 1024;
     torch.penumbra = 0.6;
-    torch.decay = 20;
+    torch.decay = 50;
     torch.distance = 2000;
     torch.shadow.mapSize.width = 2048;
     torch.shadow.mapSize.height = 2048;
