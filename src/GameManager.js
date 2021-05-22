@@ -14,6 +14,7 @@ let pathGraph = [];
 const blockiness = 1;
 const mapSize = 7;
 const wallSize = 20;
+const monseterSpeedInverse = 50;
 
 let rigidBodies = [],
   tmpTrans;
@@ -55,14 +56,13 @@ function initGraphics() {
 
   const axesHelper = new THREE.AxesHelper(5);
   scene.add(axesHelper);
-
 }
 
 function animate() {
   let deltaTime = clock.getDelta();
   requestAnimationFrame(animate);
   playerController.update();
-  if (monster.path != "" && Math.floor(deltaTime) % 500000000 === 0) monster.update(scene);
+  if (monster.path != "") monster.update(scene);
   mMap.mapControls();
   mMap.placePos();
   mMap.drawMaze(maze, grid);
@@ -97,9 +97,9 @@ function initWorld() {
   let monsterPosition = {
     x: (2 * mapSize - 1) * wallSize,
     y: 0,
-    z: (2 * mapSize - 1) * wallSize
-  }
-  monster = new Monster(monsterPosition);
+    z: (2 * mapSize - 1) * wallSize,
+  };
+  monster = new Monster(monsterPosition, monseterSpeedInverse);
   monster.getAstarPath(grid, { x: 1 * wallSize, y: 0, z: 1 * wallSize });
   console.log(monster.path);
   scene.add(monster.monsterObject);
@@ -153,7 +153,6 @@ function renderMaze() {
 // mazeMesh.castShadow = true;
 // mazeMesh.receiveShadow = true;
 // scene.add(mazeMesh);
-
 
 function onWindowResize() {
   playerController.camera.aspect = window.innerWidth / window.innerHeight;
