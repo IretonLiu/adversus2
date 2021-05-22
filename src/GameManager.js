@@ -4,7 +4,7 @@ import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
 import minimap from "./minimap.js";
 import WallGenerator from "./WallGenerator.js";
-import GraphNode from "./pathfinder/PathGraph";
+// import GraphNode from "./pathfinder/PathGraph";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
@@ -13,9 +13,7 @@ import Constants from "./Constants";
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
 const blockiness = 1;
-const mapSize = 7;
-// const wallSize = 20;
-const monseterSpeedInverse = 50;
+// const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -24,7 +22,7 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    maze = new Maze(mapSize, mapSize);
+    maze = new Maze(Constants.MAP_SIZE, Constants.MAP_SIZE);
     maze.growingTree();
     grid = maze.getThickGrid();
 
@@ -48,7 +46,10 @@ function initGraphics() {
 
   renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
+  renderer.setSize(
+    innerWidth / Constants.BLOCKINESS,
+    innerHeight / Constants.BLOCKINESS
+  );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
   renderer.shadowMap.enabled = true;
@@ -96,11 +97,11 @@ function initWorld() {
   scene.add(spotLightHelper);
 
   let monsterPosition = {
-    x: (2 * mapSize - 1) * Constants.WALL_SIZE,
+    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
-    z: (2 * mapSize - 1) * Constants.WALL_SIZE,
+    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(monsterPosition, monseterSpeedInverse);
+  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE);
   monster.getAstarPath(grid, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
@@ -171,7 +172,10 @@ function onWindowResize() {
   playerController.camera.aspect = window.innerWidth / window.innerHeight;
   playerController.camera.updateProjectionMatrix();
 
-  renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
+  renderer.setSize(
+    innerWidth / Constants.BLOCKINESS,
+    innerHeight / Constants.BLOCKINESS
+  );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
 }
