@@ -133,6 +133,7 @@ class PlayerController {
 
   initTorch() {
     var torch = new SpotLight(0xffffff);
+    torch.shadow.bias = - 0.0001
     torch.castShadow = true;
     torch.intensity = 1.2;
     torch.shadow.mapSize.width = 1024;
@@ -142,7 +143,7 @@ class PlayerController {
     torch.distance = 2000;
     torch.shadow.mapSize.width = 2048;
     torch.shadow.mapSize.height = 2048;
-    torch.shadow.camera.far = 20;
+    torch.shadow.camera.far = 100;
     torch.angle = Math.PI / 7;
     return torch;
   }
@@ -153,7 +154,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = 20;
+    const speed = 40;
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
