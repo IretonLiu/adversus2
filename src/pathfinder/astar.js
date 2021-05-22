@@ -13,6 +13,10 @@ class Point {
     this.x = x;
     this.y = y;
 
+    // world coordinates
+    this.worldX = y * constants.WALLSIZE;
+    this.worldZ = x * constants.WALLSIZE;
+
     // this point's cost
     this.g = g;
     this.h = h;
@@ -37,17 +41,19 @@ class Point {
   }
 }
 
-class astar {
-  constructor(maze, initialX, initialY, targetX, targetY) {
+export class Astar {
+  constructor(grid, initialX, initialY, targetX, targetY) {
     // thick mazem (our search grid)
-    this.grid = initGrid(maze.getThickGrid());
+    this.grid = this.initGrid(grid);
 
     // starting point (x, y)
-    this.initial = new Point(initialX, initialY, 0, 0, false);
+    this.initial = this.grid[initialY][initialX]; // new Point(initialX, initialY, 0, 0, false);
+    this.initial.h = 0;
 
     // target point (x, y)
     // todo - confirm target isn't a wall
-    this.target = new Point(targetX, targetY, 0, 0, false);
+    this.target = this.grid[targetY][targetX]; // new Point(targetX, targetY, 0, 0, false);
+    this.target.h = 0;
 
     // keep track of current path
     this.path = "";
@@ -60,39 +66,43 @@ class astar {
     return this.path;
   }
 
-  initGrid(maze) {
+  initGrid(mazeGrid) {
+
     let grid = [];
     // make our own grid representation to use with astar
-    for (let row = 0; row < maze.height; row++) {
+    for (let row = 0; row < mazeGrid.length; row++) {
       let temp = [];
-      for (let col = 0; col < maze.width; col++) {
+      for (let col = 0; col < mazeGrid[0].length; col++) {
         // maze[row][col] is true if a wall is present
         temp.push(
-          new Point(col, row, 0, Number.MAX_SAFE_INTEGER, maze[row][col])
+          new Point(col, row, 0, Number.MAX_SAFE_INTEGER, mazeGrid[row][col])
         );
       }
       grid.push(temp);
     }
-
+    console.log(grid);
+    return grid;
     // now have grid representation
   }
 
   // todo implement open list as priority qeue
   getCheapestIndex(arr) {
     let min = arr[0].getF();
+    let index = 0;
     // let minPoint = arr[0];
     for (let i = 1; i < arr.length; i++) {
       if (arr[i].getF() < min) {
         min = arr[i].getF();
+        index = i;
         // minPoint = arr[i];
       }
     }
 
-    return min;
+    return index;
   }
 
   heuristic(x, y) {
-    return Math.abs(x - target.x) + Math.abs((y = target.y));
+    return Math.abs(x - this.target.x) + Math.abs(y - this.target.y);
   }
 
   isValid(x, y) {
@@ -109,16 +119,16 @@ class astar {
     let neighbours = [];
 
     // north
-    if (this.isValid(x, y - 1)) this.push(this.grid[y - 1][x]);
+    if (this.isValid(x, y - 1)) neighbours.push(this.grid[y - 1][x]);
 
     // south
-    if (this.isValid(x, y + 1)) this.push(this.grid[y + 1][x]);
+    if (this.isValid(x, y + 1)) neighbours.push(this.grid[y + 1][x]);
 
     // east
-    if (this.isValid(x + 1, y)) this.push(this.grid[y][x + 1]);
+    if (this.isValid(x + 1, y)) neighbours.push(this.grid[y][x + 1]);
 
     // west
-    if (this.isValid(x - 1, y)) this.push(this.grid[y][x - 1]);
+    if (this.isValid(x - 1, y)) neighbours.push(this.grid[y][x - 1]);
 
     return neighbours;
   }
@@ -163,6 +173,7 @@ class astar {
           path += constants.SOUTH;
         }
       }
+      current = current.parent;
     }
 
     return path;
@@ -181,7 +192,7 @@ class astar {
       const current = open[currentIndex];
 
       // remove the current node
-      open.splice(nextIndex, 1);
+      open.splice(currentIndex, 1);
 
       // close current
       current.closed = true;
@@ -231,13 +242,14 @@ class astar {
     // backtrack and find the path
     if (found) {
       // have found a path
-      this.path = backtrack();
+      this.path = this.backtrack();
     } else {
       // no path exists
       this.spath = "";
     }
   }
 }
+
 
 // https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/
 
