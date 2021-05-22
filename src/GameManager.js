@@ -8,12 +8,13 @@ import GraphNode from "./pathfinder/PathGraph";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
+import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
 const blockiness = 1;
 const mapSize = 7;
-const wallSize = 20;
+// const wallSize = 20;
 const monseterSpeedInverse = 50;
 
 let rigidBodies = [],
@@ -95,12 +96,16 @@ function initWorld() {
   scene.add(spotLightHelper);
 
   let monsterPosition = {
-    x: (2 * mapSize - 1) * wallSize,
+    x: (2 * mapSize - 1) * Constants.WALL_SIZE,
     y: 0,
-    z: (2 * mapSize - 1) * wallSize,
+    z: (2 * mapSize - 1) * Constants.WALL_SIZE,
   };
   monster = new Monster(monsterPosition, monseterSpeedInverse);
-  monster.getAstarPath(grid, { x: 1 * wallSize, y: 0, z: 1 * wallSize });
+  monster.getAstarPath(grid, {
+    x: 1 * Constants.WALL_SIZE,
+    y: 0,
+    z: 1 * Constants.WALL_SIZE,
+  });
   console.log(monster.path);
   scene.add(monster.monsterObject);
 
@@ -115,7 +120,7 @@ function renderMaze() {
 
   const wallGenerator = new WallGenerator();
 
-  // const wallHeight = 0.2 * wallSize;
+  // const wallHeight = 0.2 * Constants.WALL_SIZE;
   // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
   // var geometryArr = [];
   // var wallRes = 5;
@@ -130,15 +135,23 @@ function renderMaze() {
 
         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
         let config = wallGenerator.getWallConfig(binString);
-        wallMesh = wallGenerator.createWall(config, wallSize, wallSize);
-        wallMesh.position.set(x * wallSize, 0, y * wallSize);
+        wallMesh = wallGenerator.createWall(
+          config,
+          Constants.WALL_SIZE,
+          Constants.WALL_SIZE
+        );
+        wallMesh.position.set(
+          x * Constants.WALL_SIZE,
+          0,
+          y * Constants.WALL_SIZE
+        );
         mazeGroup.add(wallMesh);
         continue;
         // check if its the
 
         //        scene.add(wallMesh)
         // const m = new THREE.Matrix4();
-        //m.set(1, 0, 0, x * wallSize, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * wallSize, 0, 0, 0, 1);
+        //m.set(1, 0, 0, x * Constants.WALL_SIZE, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * Constants.WALL_SIZE, 0, 0, 0, 1);
 
         // geometryArr.push(wallGeometry.applyMatrix4(m));
       }

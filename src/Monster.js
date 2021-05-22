@@ -1,6 +1,6 @@
 import { CylinderGeometry, Mesh, MeshBasicMaterial } from "three";
 import { Astar } from "./pathfinder/astar";
-import constants from "./constants";
+import Constants from "./Constants";
 
 class Monster {
   constructor(position, inverseSpeed) {
@@ -8,7 +8,7 @@ class Monster {
     this.position = position;
 
     // velocity is constant
-    this.velocity = 20;
+    this.velocity = Constants.WALL_SIZE;
 
     // inverseSpeed is the multiplier to slow down the movement of the monster
     this.inverseSpeed = 1 / inverseSpeed;
@@ -33,10 +33,10 @@ class Monster {
   getAstarPath(grid, target) {
     const astar = new Astar(
       grid,
-      Math.floor(this.position.x / 20),
-      Math.floor(this.position.z / 20),
-      Math.floor(target.x / 20),
-      Math.floor(target.z / 20)
+      Math.floor(this.position.x / Constants.WALL_SIZE),
+      Math.floor(this.position.z / Constants.WALL_SIZE),
+      Math.floor(target.x / Constants.WALL_SIZE),
+      Math.floor(target.z / Constants.WALL_SIZE)
     );
     astar.calculatePath();
     this.path = astar.getCurrentPath();
@@ -48,16 +48,16 @@ class Monster {
     var dirRep = this.path.charAt(this.path.length - 1); // the char representation of the path
     var dir;
     switch (dirRep) {
-      case constants.NORTH:
+      case Constants.NORTH:
         dir = { x: 0, z: -1 };
         break;
-      case constants.SOUTH:
+      case Constants.SOUTH:
         dir = { x: 0, z: 1 };
         break;
-      case constants.WEST:
+      case Constants.WEST:
         dir = { x: -1, z: 0 };
         break;
-      case constants.EAST:
+      case Constants.EAST:
         dir = { x: 1, z: 0 };
         break;
     }
