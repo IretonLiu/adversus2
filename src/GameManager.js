@@ -2,7 +2,7 @@ import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import minimap from "./minimap.js";
-import WallGenerator from "./WallGenerator.js"
+import WallGenerator from "./WallGenerator.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
@@ -72,7 +72,9 @@ function initGraphics() {
   playerController = new PlayerController(-30, 0, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
 
-  const spotLightHelper = new THREE.CameraHelper(playerController.torch.shadow.camera);
+  const spotLightHelper = new THREE.CameraHelper(
+    playerController.torch.shadow.camera
+  );
   scene.add(spotLightHelper);
   const axesHelper = new THREE.AxesHelper(5);
   scene.add(axesHelper);
@@ -90,8 +92,10 @@ function animate() {
 }
 
 function renderMaze() {
-  grid[maze.getThickIndex(0, 1)] = false;
-  grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+  // grid[maze.getThickIndex(0, 1)] = false;
+  // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+  grid[1][0] = false;
+  grid[2 * maze.width - 1][2 * maze.height] = false;
 
   const wallGenerator = new WallGenerator();
 
@@ -105,9 +109,7 @@ function renderMaze() {
   console.log(grid);
   for (var y = 0; y < 2 * maze.height + 1; y++) {
     for (var x = 0; x < 2 * maze.width + 1; x++) {
-      if (grid[maze.getThickIndex(x, y)]) {
-
-
+      if (grid[y][x]) {
         //var wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
         var wallMesh;
 
@@ -117,7 +119,7 @@ function renderMaze() {
         wallMesh.position.set(x * wallSize, 0, y * wallSize);
         mazeGroup.add(wallMesh);
         continue;
-        // check if its the 
+        // check if its the
 
         //        scene.add(wallMesh)
         // const m = new THREE.Matrix4();

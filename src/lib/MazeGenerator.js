@@ -149,21 +149,28 @@ class Maze {
     var drawWidth = 2 * this.width + 1;
     var drawHeight = 2 * this.height + 1;
     for (var y = 0; y < drawHeight; y++) {
+      let row = [];
       for (var x = 0; x < drawWidth; x++) {
-        grid.push(true);
+        row.push(true);
       }
+      grid.push(row);
     }
 
     for (var y = 0; y < this.height; y++) {
       for (var x = 0; x < this.width; x++) {
         var cell = this.getCellAt(x, y);
-        grid[(2 * y + 1) * drawWidth + (2 * x + 1)] = false;
+
+        // set actual cell as clear
+        grid[2 * y + 1][2 * x + 1] = false;
+        // grid[(2 * y + 1) * drawWidth + (2 * x + 1)] = false;
 
         if (!cell.east) {
-          grid[(2 * y + 1) * drawWidth + (2 * x + 2)] = false;
+          grid[2 * y + 1][2 * x + 2] = false;
+          // grid[(2 * y + 1) * drawWidth + (2 * x + 2)] = false;
         }
         if (!cell.south) {
-          grid[(2 * y + 2) * drawWidth + (2 * x + 1)] = false;
+          grid[2 * y + 2][2 * x + 1] = false;
+          // grid[(2 * y + 2) * drawWidth + (2 * x + 1)] = false;
         }
       }
     }
@@ -171,7 +178,7 @@ class Maze {
     return grid;
   }
 
-  getThickIndex(x,y){
+  getThickIndex(x, y) {
     return y * (2 * this.width + 1) + x;
   }
 
@@ -185,8 +192,6 @@ class Maze {
       }
     }
   }
-
-
 }
 
 export default Maze;
