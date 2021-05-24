@@ -20,7 +20,7 @@ let Constants = {
   MAP_SIZE: 20,
 
   // percentage of walls removed
-  PERCENTAGE_WALLS_REMOVED: 0.1,
+  PROBABILITY_WALLS_REMOVED: 0.5,
 
   // blockiness of visuals
   BLOCKINESS: 6,

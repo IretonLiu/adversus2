@@ -5,7 +5,7 @@ class WallGenerator {
   constructor(width, height) {
     this.width = width;
     this.height = height;
-    this.noiseGenerator = new NoiseGenerator();
+    // this.noiseGenerator = new NoiseGenerator();
   }
 
   createWall(type) {
@@ -41,14 +41,13 @@ class WallGenerator {
     // wallThree.rotateY(-Math.PI / 2);
     // wallThree.position.x = -this.width / 2;
 
-
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.width,
       segments,
       segments
     );
-    this.applyNoise(segments, topPlaneGeometry);
+    // this.applyNoise(segments, topPlaneGeometry);
 
     // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     // topPlane.receiveShadow = true;
@@ -129,8 +128,6 @@ class WallGenerator {
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(4, sideWallGeometry, wallMaterial));
         break;
-
-
     }
     return wallGroup;
   }
@@ -172,7 +169,6 @@ class WallGenerator {
         wallFour.position.x = this.width / 2;
         return wallFour;
     }
-
   }
 
   applyNoise(segments, geometry, seed) {
@@ -181,12 +177,9 @@ class WallGenerator {
     var vertices = geometry.attributes.position.array;
 
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-
       vertices[j + 2] += noise[i] * 2;
-
     }
   }
-
 
   genBinaryString(x, y, grid, maze) {
     // a binary string specifying the neighbours of cell in thick grid

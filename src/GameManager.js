@@ -7,7 +7,7 @@ import WallGenerator from "./WallGenerator.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
-import NoiseGenerator from "./lib/NoiseGenerator"
+import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
@@ -21,11 +21,11 @@ const clock = new THREE.Clock();
 class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
-    noiseGen.generateNoiseMap();
+    // noiseGen.generateNoiseMap();
     maze = new Maze(
       Constants.MAP_SIZE,
       Constants.MAP_SIZE,
-      Constants.PERCENTAGE_WALLS_REMOVED
+      Constants.PROBABILITY_WALLS_REMOVED
     );
     maze.growingTree();
     grid = maze.getThickGrid();
@@ -135,7 +135,12 @@ function renderMaze() {
 
         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
         let config = wallGenerator.getWallConfig(binString);
-        wallMesh = wallGenerator.createWall(config, wallWidth, wallHeight, x + y);
+        wallMesh = wallGenerator.createWall(
+          config,
+          wallWidth,
+          wallHeight,
+          x + y
+        );
         wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
         mazeGroup.add(wallMesh);
         continue;
