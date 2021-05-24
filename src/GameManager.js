@@ -2,20 +2,18 @@ import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
-import minimap from "./minimap.js";
+import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
-// import GraphNode from "./pathfinder/PathGraph";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
+import NoiseGenerator from "./lib/NoiseGenerator"
 
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, worldManager, monster;
 let pathGraph = [];
-const blockiness = 1;
-// const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -24,7 +22,13 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    maze = new Maze(Constants.MAP_SIZE, Constants.MAP_SIZE);
+    let noiseGen = new NoiseGenerator();
+    noiseGen.generateNoiseMap();
+    maze = new Maze(
+      Constants.MAP_SIZE,
+      Constants.MAP_SIZE,
+      Constants.PERCENTAGE_WALLS_REMOVED
+    );
     maze.growingTree();
     grid = maze.getThickGrid();
 
@@ -37,8 +41,7 @@ class GameManager {
     initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
-    const helper = new THREE.AxesHelper(5);
-    scene.add(helper);
+
     animate();
   }
 }
@@ -57,9 +60,6 @@ function initGraphics() {
   renderer.shadowMap.enabled = true;
 
   document.body.appendChild(renderer.domElement);
-
-  const axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper);
 }
 
 function animate() {
@@ -67,11 +67,11 @@ function animate() {
   requestAnimationFrame(animate);
   playerController.update();
   if (monster.path != "") monster.update(scene);
-  mMap.mapControls();
-  mMap.placePos();
-  mMap.drawMaze(maze, grid);
+
   worldManager.updateObjs();//this needs to be just update for both battery and key
 
+
+  mMap.worldUpdate();
   render();
 }
 
@@ -90,16 +90,13 @@ function initWorld() {
   scene.add(floor);
 
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xbbbbbb); // 0x080808
+  const light = new THREE.AmbientLight(0x121212); // 0x080808
   scene.add(light);
 
-  playerController = new PlayerController(-30, 50, 20, renderer.domElement);
+  playerController = new PlayerController(-30, 3, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
-  const spotLightHelper = new THREE.CameraHelper(
-    playerController.torch.shadow.camera
-  );
-  scene.add(spotLightHelper);
 
+  let wallWidth = 20;
   let monsterPosition = {
     x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
@@ -111,23 +108,27 @@ function initWorld() {
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
-  console.log(monster.path);
+  // console.log(monster.path);
   scene.add(monster.monsterObject);
 
-  mMap = new minimap(playerController);
+  mMap = new MiniMap(playerController, grid);
 }
 
 function renderMaze() {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
+  const wallHeight = 15;
+  const wallWidth = 20;
 
-  const wallGenerator = new WallGenerator();
+
   worldManager = new WorldManager(scene, grid);
   //worldManager.loadBattery();
   worldManager.setKey();
   worldManager.setBatteries();
+  const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
   // const wallHeight = 0.2 * Constants.WALL_SIZE;
   // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
@@ -135,7 +136,7 @@ function renderMaze() {
   // var wallRes = 5;
 
   const mazeGroup = new THREE.Group();
-  console.log(grid);
+
   for (var y = 0; y < 2 * maze.height + 1; y++) {
     for (var x = 0; x < 2 * maze.width + 1; x++) {
       if (grid[y][x]) {
@@ -144,16 +145,8 @@ function renderMaze() {
 
         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
         let config = wallGenerator.getWallConfig(binString);
-        wallMesh = wallGenerator.createWall(
-          config,
-          Constants.WALL_SIZE,
-          Constants.WALL_SIZE
-        );
-        wallMesh.position.set(
-          x * Constants.WALL_SIZE,
-          0,
-          y * Constants.WALL_SIZE
-        );
+        wallMesh = wallGenerator.createWall(config, wallWidth, wallHeight, x + y);
+        wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
         mazeGroup.add(wallMesh);
         continue;
         // check if its the
@@ -166,6 +159,8 @@ function renderMaze() {
       }
     }
   }
+  console.log(mazeGroup);
+  mazeGroup.position.y -= wallHeight / 4;
   scene.add(mazeGroup);
 }
 
@@ -186,6 +181,7 @@ function onWindowResize() {
   );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
+  mMap.updateFullScreenSizes();
 }
 
 function render() {

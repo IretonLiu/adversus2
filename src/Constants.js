@@ -7,13 +7,23 @@ let Constants = {
 
   // Wall sizes
   WALL_SIZE: 20,
-  WALL_SIZE_MINIMAP: 10,
+  WALL_SIZE_MINIMAP: 15,
+
+  PLAYER_SIZE_MINIMAP: 10,
+
+  MINIMAP_SIDE_LENGTH: 256,
+
+  //The percentage to take up of the shortest side of the viewport
+  MINIMAP_FULLSCREEN_PERC: 0.9,
 
   // map size
   MAP_SIZE: 20,
 
+  // percentage of walls removed
+  PERCENTAGE_WALLS_REMOVED: 0.1,
+
   // blockiness of visuals
-  BLOCKINESS: 1,
+  BLOCKINESS: 6,
 
   // monster controls
   MONSTER_SPEED_INVERSE: 50,

@@ -1,3 +1,4 @@
+import Constants from "../Constants";
 class Cell {
   constructor(x, y) {
     this.north = true;
@@ -13,10 +14,24 @@ class Cell {
 }
 
 class Maze {
-  constructor(width, height) {
+  constructor(width, height, percentageWallsRemoved) {
     this.width = width;
     this.height = height;
+    this.percentageWallsRemoved = percentageWallsRemoved;
     this.grid = this.newCellGrid();
+  }
+
+  shuffleArray(array) {
+    /**
+     * Randomize array element order in-place.
+     * Using Durstenfeld shuffle algorithm.
+     */
+    for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      let temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
   }
 
   newCellGrid() {
@@ -137,6 +152,89 @@ class Maze {
 
       neighbourToCarve.visited = true;
       frontier.push(neighbourToCarve);
+    }
+
+    this.removeWalls(
+      Math.floor(
+        this.percentageWallsRemoved *
+          (2 * this.width * this.height - this.width - this.height)
+      )
+    );
+  }
+
+  removeWall(cell) {
+    // define an array of walls that can/can't be removed
+    let walls = [
+      Constants.NORTH,
+      Constants.SOUTH,
+      Constants.WEST,
+      Constants.EAST,
+    ];
+
+    // shuffle the walls
+    this.shuffleArray(walls);
+
+    // walk through the walls and try and remove until get a successful one
+    for (let i = 0; i < walls.length; i++) {
+      switch (walls[i]) {
+        case Constants.NORTH:
+          // make sure a wall doesn't already exist
+          if (cell.north) {
+            this.carvePassage(cell, this.getCellAt(cell.x, cell.y - 1));
+            return true;
+          }
+          break;
+        case Constants.SOUTH:
+          if (cell.south) {
+            this.carvePassage(cell, this.getCellAt(cell.x, cell.y + 1));
+            return true;
+          }
+          break;
+        case Constants.WEST:
+          if (cell.west) {
+            this.carvePassage(cell, this.getCellAt(cell.x - 1, cell.y));
+            return true;
+          }
+          break;
+        case Constants.EAST:
+          if (cell.east) {
+            this.carvePassage(cell, this.getCellAt(cell.x + 1, cell.y));
+            return true;
+          }
+          break;
+      }
+    }
+
+    return false;
+  }
+
+  removeWalls(numWalls) {
+    // choose random row and column (except the beginning/last ones)
+
+    while (numWalls--) {
+      // choose random row
+      const rowIndex = Math.floor(Math.random() * (this.height - 2)) + 1; // -2 so don't include first and last rows
+      // const colIndex = Math.floor(Math.random() * (this.width - 2)) + 1;
+
+      // get row
+      let row = this.grid.slice(
+        rowIndex * this.width,
+        (rowIndex + 1) * this.width
+      );
+
+      // clone row
+      row = JSON.parse(JSON.stringify(row));
+
+      // shuffle row
+      this.shuffleArray(row);
+
+      // try and remove a wall
+      for (let i = 0; i < row.length; i++) {
+        if (this.removeWall(this.getCellAt(row[i].x, row[i].y))) {
+          console.log("removed");
+          break;
+        }
+      }
     }
   }
 

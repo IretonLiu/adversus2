@@ -97,7 +97,6 @@ class Physics {
         // Update rigid bodies
         for (let i = 0; i < rigidBodies.length; i++) {
             let objThree = rigidBodies[i];
-            console.log(objThree.position);
             let objAmmo = objThree.userData.physicsBody;
             let ms = objAmmo.getMotionState();
             if (ms) {
