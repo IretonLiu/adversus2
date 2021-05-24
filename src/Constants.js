@@ -10,7 +10,10 @@ let Constants = {
   WALL_SIZE_MINIMAP: 10,
 
   // map size
-  MAP_SIZE: 20,
+  MAP_SIZE: 7,
+
+  // percentage of walls removed
+  PERCENTAGE_WALLS_REMOVED: 0.1,
 
   // blockiness of visuals
   BLOCKINESS: 1,
