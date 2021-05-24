@@ -19,8 +19,11 @@ let Constants = {
   // map size
   MAP_SIZE: 20,
 
+  // percentage of walls removed
+  PERCENTAGE_WALLS_REMOVED: 0.1,
+
   // blockiness of visuals
-  BLOCKINESS: 1,
+  BLOCKINESS: 6,
 
   // monster controls
   MONSTER_SPEED_INVERSE: 50,

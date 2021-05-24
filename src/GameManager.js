@@ -2,7 +2,6 @@ import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
-// import minimap from "./minimap.js";
 import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
 // import GraphNode from "./pathfinder/PathGraph";
@@ -13,8 +12,6 @@ import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
-const blockiness = 1;
-// const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -23,7 +20,11 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    maze = new Maze(Constants.MAP_SIZE, Constants.MAP_SIZE);
+    maze = new Maze(
+      Constants.MAP_SIZE,
+      Constants.MAP_SIZE,
+      Constants.PERCENTAGE_WALLS_REMOVED
+    );
     maze.growingTree();
     grid = maze.getThickGrid();
 
@@ -55,7 +56,6 @@ function initGraphics() {
   renderer.shadowMap.enabled = true;
 
   document.body.appendChild(renderer.domElement);
-
 }
 
 function animate() {
