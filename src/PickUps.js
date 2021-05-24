@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import PlayerController from './PlayerController.js';
-import GameManager from './GameManager.js';
+import WorldManager from './WorldManager.js';
+import Constants from './Constants.js';
+
 
 const loader = new GLTFLoader();
+
 
 class PickUps {
     //methods, functions and properties that are shared with all children are defined here
@@ -23,17 +26,17 @@ class Battery extends PickUps {
 
     }
 
-    batteryLife() {
 
-    }
+    makeBattery(scene, x, z) {
 
-    makeBattery(scene) {
-
-        gameManager = new GameManager();
         loader.load('./assets/models/Battery.glb', (gltf) => {
             this.mesh = gltf.scene;
-            //console.log(this.mesh)
+            this.mesh.translateY(-4);
             this.mesh.scale.set(2, 3, 2);
+
+            this.mesh.position.x = x * Constants.WALL_SIZE;
+            this.mesh.position.z = z * Constants.WALL_SIZE;
+            console.log("this is where the battery is: ", this.mesh.position.x, this.mesh.position.y, this.mesh.position.z)
             scene.add(this.mesh);
 
         }, undefined, function (error) {
@@ -41,13 +44,7 @@ class Battery extends PickUps {
         });
     }
 
-    setBatteries(scene, grid) {
 
-
-        for (var i = 0; i < 5; i++) {
-
-        }
-    }
 
 
 }
@@ -58,12 +55,16 @@ class GateKey extends PickUps {
         super();
     }
 
-    makeKey(scene) {
+    makeKey(scene, x, z) {
 
         loader.load('./assets/models/Worn_Key.glb', (gltf) => {
             this.mesh = gltf.scene;
             //console.log(this.mesh)
             this.mesh.scale.set(30, 30, 30);
+            this.mesh.position.x = x * Constants.WALL_SIZE;
+            this.mesh.position.z = z * Constants.WALL_SIZE;
+            this.mesh.position.y = 20;
+            console.log("this is where the Key is: ", this.mesh.position.x, this.mesh.position.y, this.mesh.position.z)
             scene.add(this.mesh);
 
         }, undefined, function (error) {

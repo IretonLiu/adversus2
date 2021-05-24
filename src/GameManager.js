@@ -9,7 +9,7 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
 import WorldManager from "./WorldManager.js";
-import Constants from "./Constants";
+import Constants from "./Constants.js";
 
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, worldManager, monster;
@@ -125,9 +125,9 @@ function renderMaze() {
 
   const wallGenerator = new WallGenerator();
   worldManager = new WorldManager(scene, grid);
-  worldManager.loadBattery();
-  worldManager.loadKey();
-
+  //worldManager.loadBattery();
+  worldManager.setKey();
+  worldManager.setBatteries();
 
   // const wallHeight = 0.2 * Constants.WALL_SIZE;
   // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
