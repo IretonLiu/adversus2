@@ -12,7 +12,7 @@ import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
-const blockiness = 1;
+// const blockiness = 1;
 // const mapSize = 7;
 
 let rigidBodies = [],
@@ -22,7 +22,11 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    maze = new Maze(Constants.MAP_SIZE, Constants.MAP_SIZE);
+    maze = new Maze(
+      Constants.MAP_SIZE,
+      Constants.MAP_SIZE,
+      Constants.PERCENTAGE_WALLS_REMOVED
+    );
     maze.growingTree();
     grid = maze.getThickGrid();
 
