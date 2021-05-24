@@ -2,147 +2,177 @@ import * as THREE from "three";
 import NoiseGenerator from "./lib/NoiseGenerator";
 
 class WallGenerator {
-  constructor() {
-
+  constructor(width, height) {
+    this.width = width;
+    this.height = height;
     this.noiseGenerator = new NoiseGenerator();
   }
 
-  createWall(type, width, height) {
-    var segments = 5;
+  createWall(type) {
+    var segments = 10;
     var tiltAngle = 0; //Math.PI / 12;
 
     const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
     var sideWallGeometry = new THREE.PlaneBufferGeometry(
-      width,
-      height,
+      this.width,
+      this.height,
       segments,
       segments
     );
     var wallGroup = new THREE.Group();
 
-    var wallOne = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    wallOne.receiveShadow = true;
-    wallOne.castShadow = true;
-    wallOne.rotateX(-tiltAngle);
-    wallOne.position.z = width / 2;
+    // var wallOne = new THREE.Mesh(sideWallGeometry, wallMaterial);
+    // wallOne.receiveShadow = true;
+    // wallOne.castShadow = true;
+    // wallOne.rotateX(-tiltAngle);
+    // wallOne.position.z = this.width / 2;
 
-    var wallTwo = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    wallTwo.receiveShadow = true;
-    wallTwo.castShadow = true;
-    wallTwo.rotateX(tiltAngle);
-    wallTwo.rotateY(Math.PI);
-    wallTwo.position.z = -width / 2;
+    // var wallTwo = new THREE.Mesh(sideWallGeometry, wallMaterial);
+    // wallTwo.receiveShadow = true;
+    // wallTwo.castShadow = true;
+    // wallTwo.rotateX(tiltAngle);
+    // wallTwo.rotateY(Math.PI);
+    // wallTwo.position.z = -this.width / 2;
 
-    var wallThree = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    wallThree.receiveShadow = true;
-    wallThree.castShadow = true;
-    wallThree.rotateX(tiltAngle);
-    wallThree.rotateY(-Math.PI / 2);
-    wallThree.position.x = -width / 2;
+    // var wallThree = new THREE.Mesh(sideWallGeometry, wallMaterial);
+    // wallThree.receiveShadow = true;
+    // wallThree.castShadow = true;
+    // wallThree.rotateX(tiltAngle);
+    // wallThree.rotateY(-Math.PI / 2);
+    // wallThree.position.x = -this.width / 2;
+
 
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
-      width,
-      width,
+      this.width,
+      this.width,
       segments,
       segments
     );
     this.applyNoise(segments, topPlaneGeometry);
 
-    var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
-    topPlane.receiveShadow = true;
-    topPlane.castShadow = true;
-    topPlane.rotateX(-Math.PI / 2);
-    topPlane.position.y = height / 2;
+    // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
+    // topPlane.receiveShadow = true;
+    // topPlane.castShadow = true;
+    // topPlane.rotateX(-Math.PI / 2);
+    // topPlane.position.y = this.height / 2;
+    wallGroup.add(this.generatePlane(0, topPlaneGeometry, wallMaterial));
 
     switch (type) {
       case 0: // side walls front facing
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         break;
       case 1: // side walls side facing
-
-        //frontWall.add(wireframe);
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI / 2);
         break;
       case 2: // protruding wall facing forward
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         break;
       case 3: // protruding wall facing backward
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI);
         break;
       case 4: // protruding wall facing right
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI / 2);
         break;
       case 5: // protruding wall facing left
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(-Math.PI / 2);
         break;
       case 6: // corner, left, down empty
-        wallGroup.add(topPlane);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         break;
       case 7: // corner, right, down empty
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         break;
       case 8: // corners left up empty
-        wallGroup.add(topPlane);
-        wallGroup.add(wallOne);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI);
         break;
       case 9: // corners right up empty
-        wallGroup.add(topPlane);
-        wallGroup.add(wallTwo);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI);
         break;
       case 10: // T junction, down empty
-        wallGroup.add(topPlane);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         break;
       case 11:
-        wallGroup.add(topPlane);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI);
         break;
       case 12:
-        wallGroup.add(topPlane);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(-Math.PI / 2);
         break;
       case 13:
-        wallGroup.add(topPlane);
-        wallGroup.add(wallThree);
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.rotateY(Math.PI / 2);
         break;
-      case 14:
-        wallGroup.add(topPlane);
+      case 15: // completely alone:
+        wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(this.generatePlane(4, sideWallGeometry, wallMaterial));
         break;
+
+
     }
-    wallGroup.receiveShadow = true;
-    wallGroup.castShadow = true;
     return wallGroup;
+  }
+
+  generatePlane(config, geometry, material) {
+    switch (config) {
+      case 0:
+        var topPlane = new THREE.Mesh(geometry, material);
+        topPlane.receiveShadow = true;
+        topPlane.castShadow = true;
+        topPlane.rotateX(-Math.PI / 2);
+        topPlane.position.y = this.height / 2;
+        return topPlane;
+      case 1:
+        var wallOne = new THREE.Mesh(geometry, material);
+        wallOne.receiveShadow = true;
+        wallOne.castShadow = true;
+        wallOne.position.z = this.width / 2;
+        return wallOne;
+      case 2:
+        var wallTwo = new THREE.Mesh(geometry, material);
+        wallTwo.receiveShadow = true;
+        wallTwo.castShadow = true;
+        wallTwo.rotateY(Math.PI);
+        wallTwo.position.z = -this.width / 2;
+        return wallTwo;
+      case 3:
+        var wallThree = new THREE.Mesh(geometry, material);
+        wallThree.receiveShadow = true;
+        wallThree.castShadow = true;
+        wallThree.rotateY(-Math.PI / 2);
+        wallThree.position.x = -this.width / 2;
+        return wallThree;
+      case 4:
+        var wallFour = new THREE.Mesh(geometry, material);
+        wallFour.receiveShadow = true;
+        wallFour.castShadow = true;
+        wallFour.rotateY(Math.PI / 2);
+        wallFour.position.x = this.width / 2;
+        return wallFour;
+    }
+
   }
 
   applyNoise(segments, geometry, seed) {
@@ -152,7 +182,7 @@ class WallGenerator {
 
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
 
-      vertices[j + 2] += noise[i];
+      vertices[j + 2] += noise[i] * 2;
 
     }
   }
@@ -185,6 +215,8 @@ class WallGenerator {
 
   getWallConfig(binaryString) {
     switch (binaryString) {
+      case "0000":
+        return 15; // completely alone
       case "0001":
         return 5; // protruding facing left
       case "0010":

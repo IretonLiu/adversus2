@@ -128,7 +128,7 @@ function renderMaze() {
   const wallHeight = 15;
   const wallWidth = 20;
 
-  const wallGenerator = new WallGenerator();
+  const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
   // const wallHeight = 0.2 * Constants.WALL_SIZE;
   // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
