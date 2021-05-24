@@ -30,11 +30,11 @@ const clock = new THREE.Clock();
 class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
-    noiseGen.generateNoiseMap();
+    // noiseGen.generateNoiseMap();
     maze = new Maze(
       Constants.MAP_SIZE,
       Constants.MAP_SIZE,
-      Constants.PERCENTAGE_WALLS_REMOVED
+      Constants.PROBABILITY_WALLS_REMOVED
     );
     maze.growingTree();
     grid = maze.getThickGrid();

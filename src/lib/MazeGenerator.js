@@ -14,10 +14,10 @@ class Cell {
 }
 
 class Maze {
-  constructor(width, height, percentageWallsRemoved) {
+  constructor(width, height, probabilityWallsRemoved) {
     this.width = width;
     this.height = height;
-    this.percentageWallsRemoved = percentageWallsRemoved;
+    this.probabilityWallsRemoved = probabilityWallsRemoved;
     this.grid = this.newCellGrid();
   }
 
@@ -32,6 +32,10 @@ class Maze {
       array[i] = array[j];
       array[j] = temp;
     }
+  }
+
+  inBounds(x, y) {
+    return x >= 0 && y >= 0 && x < this.width - 1 && y < this.height - 1;
   }
 
   newCellGrid() {
@@ -154,88 +158,122 @@ class Maze {
       frontier.push(neighbourToCarve);
     }
 
-    this.removeWalls(
-      Math.floor(
-        this.percentageWallsRemoved *
-          (2 * this.width * this.height - this.width - this.height)
-      )
-    );
+    this.removeWalls();
   }
 
-  removeWall(cell) {
-    // define an array of walls that can/can't be removed
-    let walls = [
-      Constants.NORTH,
-      Constants.SOUTH,
-      Constants.WEST,
-      Constants.EAST,
-    ];
+  checkEastWestWalls(cell, bound, checkWest) {
+    // check that the two cells above and below all have a west/east wall
 
-    // shuffle the walls
-    this.shuffleArray(walls);
-
-    // walk through the walls and try and remove until get a successful one
-    for (let i = 0; i < walls.length; i++) {
-      switch (walls[i]) {
-        case Constants.NORTH:
-          // make sure a wall doesn't already exist
-          if (cell.north) {
-            this.carvePassage(cell, this.getCellAt(cell.x, cell.y - 1));
-            return true;
-          }
-          break;
-        case Constants.SOUTH:
-          if (cell.south) {
-            this.carvePassage(cell, this.getCellAt(cell.x, cell.y + 1));
-            return true;
-          }
-          break;
-        case Constants.WEST:
-          if (cell.west) {
-            this.carvePassage(cell, this.getCellAt(cell.x - 1, cell.y));
-            return true;
-          }
-          break;
-        case Constants.EAST:
-          if (cell.east) {
-            this.carvePassage(cell, this.getCellAt(cell.x + 1, cell.y));
-            return true;
-          }
-          break;
-      }
+    if (checkWest) {
+      // if on the west side of maze return
+      if (cell.x === 0) return false;
+    } else {
+      // if on the east side of maze return
+      if (cell.x === this.width - 1) return false;
     }
 
-    return false;
-  }
-
-  removeWalls(numWalls) {
-    // choose random row and column (except the beginning/last ones)
-
-    while (numWalls--) {
-      // choose random row
-      const rowIndex = Math.floor(Math.random() * (this.height - 2)) + 1; // -2 so don't include first and last rows
-      // const colIndex = Math.floor(Math.random() * (this.width - 2)) + 1;
-
-      // get row
-      let row = this.grid.slice(
-        rowIndex * this.width,
-        (rowIndex + 1) * this.width
-      );
-
-      // clone row
-      row = JSON.parse(JSON.stringify(row));
-
-      // shuffle row
-      this.shuffleArray(row);
-
-      // try and remove a wall
-      for (let i = 0; i < row.length; i++) {
-        if (this.removeWall(this.getCellAt(row[i].x, row[i].y))) {
-          console.log("removed");
-          break;
+    // check walls
+    for (let y = cell.y - bound; y <= cell.y + bound; y++) {
+      // no wall
+      if (this.inBounds(cell.x, y)) {
+        if (checkWest) {
+          if (!this.getCellAt(cell.x, y).west) return false;
+        } else {
+          if (!this.getCellAt(cell.x, y).east) return false;
         }
       }
     }
+
+    // all relevant walls are present
+    return true;
+  }
+
+  checkNorthSouthWalls(cell, bound, checkNorth) {
+    // check that the two cells above and below all have a west/east wall
+
+    if (checkNorth) {
+      // if on the north side of maze return
+      if (cell.y === 0) return false;
+    } else {
+      // if on the south side of maze return
+      if (cell.y === this.height - 1) return false;
+    }
+
+    // check walls
+    for (let x = cell.x - bound; x <= cell.x + bound; x++) {
+      // no wall
+      if (this.inBounds(x, cell.y)) {
+        if (this.checkNorth) {
+          if (!this.getCellAt(x, cell.y).north) return false;
+        } else {
+          if (!this.getCellAt(x, cell.y).south) return false;
+        }
+      }
+    }
+
+    // all relevant walls are present
+    return true;
+  }
+
+  removeWalls() {
+    let count = 0;
+    for (let y = 0; y < this.height - 1; y++) {
+      for (let x = 0; x < this.width - 1; x++) {
+        // loop over all walls
+        // only check if can remove east/south walls
+        const cell = this.getCellAt(x, y);
+        if (
+          cell.east &&
+          this.checkEastWestWalls(cell, 1, false) &&
+          Math.random() < this.probabilityWallsRemoved
+        ) {
+          this.carvePassage(cell, this.getCellAt(cell.x + 1, cell.y));
+          count++;
+        }
+        if (
+          cell.south &&
+          this.checkNorthSouthWalls(cell, 1, false) &&
+          Math.random() < this.probabilityWallsRemoved
+        ) {
+          this.carvePassage(cell, this.getCellAt(cell.x, cell.y + 1));
+          count++;
+        }
+      }
+    }
+    console.log(count);
+
+    // check last col
+
+    // check last row
+
+    // choose random row and column (except the beginning/last ones)
+    // let iter = 0, // number of times tried to remove wall
+    //   iterWalls = 0; // number of walls removed
+    // console.log(numWalls);
+    // while (iterWalls < numWalls && iter <= 100 * numWalls) {
+    //   // choose random row
+    //   const rowIndex = Math.floor(Math.random() * (this.height - 2)) + 1; // -2 so don't include first and last rows
+    //   // const colIndex = Math.floor(Math.random() * (this.width - 2)) + 1;
+    //   // get row
+    //   let row = this.grid.slice(
+    //     rowIndex * this.width,
+    //     (rowIndex + 1) * this.width
+    //   );
+    //   // clone row
+    //   row = JSON.parse(JSON.stringify(row));
+    //   // shuffle row
+    //   this.shuffleArray(row);
+    //   // try and remove a wall
+    //   for (let i = 0; i < row.length; i++) {
+    //     if (this.removeWall(this.getCellAt(row[i].x, row[i].y))) {
+    //       console.log(row[i].x, row[i].y);
+    //       iterWalls++;
+    //       break;
+    //     }
+    //   }
+    //   iter++;
+    // }
+    // console.log(iterWalls);
   }
 
   drawRect(ctx, x, y, size) {

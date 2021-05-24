@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import NoiseGenerator from "./lib/NoiseGenerator";
-import Constants from './Constants';
+import Constants from "./Constants";
 
 class WallGenerator {
   constructor(width, height) {
@@ -59,7 +59,7 @@ class WallGenerator {
       segments,
       segments
     );
-    this.applyNoise(segments, topPlaneGeometry);
+    // this.applyNoise(segments, topPlaneGeometry);
 
     // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     // topPlane.receiveShadow = true;
