@@ -5,7 +5,7 @@
 // save path - don't recompute every frame
 
 import Maze from "../lib/MazeGenerator";
-import constants from "../constants";
+import Constants from "../Constants";
 
 class Point {
   constructor(x, y, g, h, isWall) {
@@ -14,8 +14,8 @@ class Point {
     this.y = y;
 
     // world coordinates
-    this.worldX = y * constants.WALLSIZE;
-    this.worldZ = x * constants.WALLSIZE;
+    this.worldX = y * Constants.WALL_SIZE;
+    this.worldZ = x * Constants.WALL_SIZE;
 
     // this point's cost
     this.g = g;
@@ -67,7 +67,6 @@ export class Astar {
   }
 
   initGrid(mazeGrid) {
-
     let grid = [];
     // make our own grid representation to use with astar
     for (let row = 0; row < mazeGrid.length; row++) {
@@ -157,19 +156,19 @@ export class Astar {
 
         if (parent.x > current.x) {
           // parent right
-          path += constants.WEST;
+          path += Constants.WEST;
         } else {
           // parent left
-          path += constants.EAST;
+          path += Constants.EAST;
         }
       } else {
         // diff rows, same col
         if (parent.y > current.y) {
           // parent below
-          path += constants.NORTH;
+          path += Constants.NORTH;
         } else {
           // parent above
-          path += constants.SOUTH;
+          path += Constants.SOUTH;
         }
       }
       current = current.parent;
@@ -248,7 +247,6 @@ export class Astar {
     }
   }
 }
-
 
 // https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/
 

@@ -8,11 +8,14 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator"
+// import GraphNode from "./pathfinder/PathGraph";
+import Physics from "./Physics.js";
+import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
 const blockiness = 1;
-const mapSize = 20;
+// const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -23,7 +26,7 @@ class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
     noiseGen.generateNoiseMap();
-    maze = new Maze(mapSize, mapSize);
+    maze = new Maze(Constants.MAP_SIZE, Constants.MAP_SIZE);
     maze.growingTree();
     grid = maze.getThickGrid();
 
@@ -47,7 +50,10 @@ function initGraphics() {
 
   renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setPixelRatio(window.devicePixelRatio);
-  renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
+  renderer.setSize(
+    innerWidth / Constants.BLOCKINESS,
+    innerHeight / Constants.BLOCKINESS
+  );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
   renderer.shadowMap.enabled = true;
@@ -56,15 +62,13 @@ function initGraphics() {
 
   const axesHelper = new THREE.AxesHelper(5);
   scene.add(axesHelper);
-
 }
 
 function animate() {
   let deltaTime = clock.getDelta();
   requestAnimationFrame(animate);
   playerController.update();
-  console.log(playerController.controls.getObject().quaternion.w)
-  if (monster.path != "" && Math.floor(deltaTime) % 500000000 === 0) monster.update(scene);
+  if (monster.path != "") monster.update(scene);
   mMap.mapControls();
   mMap.placePos();
   mMap.drawMaze(maze, grid);
@@ -98,12 +102,17 @@ function initWorld() {
 
   let wallWidth = 20;
   let monsterPosition = {
-    x: (2 * mapSize - 1) * wallWidth,
+    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
-    z: (2 * mapSize - 1) * wallWidth,
-  }
-  monster = new Monster(monsterPosition);
-  monster.getAstarPath(grid, { x: 1 * wallWidth, y: 0, z: 1 * wallWidth });
+    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+  };
+  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE);
+  monster.getAstarPath(grid, {
+    x: 1 * Constants.WALL_SIZE,
+    y: 0,
+    z: 1 * Constants.WALL_SIZE,
+  });
+  console.log(monster.path);
   scene.add(monster.monsterObject);
 
   mMap = new minimap(playerController);
@@ -118,7 +127,8 @@ function renderMaze() {
   const wallWidth = 20;
 
   const wallGenerator = new WallGenerator();
-  // const wallHeight = 0.2 * wallSize;
+
+  // const wallHeight = 0.2 * Constants.WALL_SIZE;
   // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
   // var geometryArr = [];
   // var wallRes = 5;
@@ -140,7 +150,7 @@ function renderMaze() {
 
         //        scene.add(wallMesh)
         // const m = new THREE.Matrix4();
-        //m.set(1, 0, 0, x * wallSize, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * wallSize, 0, 0, 0, 1);
+        //m.set(1, 0, 0, x * Constants.WALL_SIZE, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * Constants.WALL_SIZE, 0, 0, 0, 1);
 
         // geometryArr.push(wallGeometry.applyMatrix4(m));
       }
@@ -158,12 +168,14 @@ function renderMaze() {
 // mazeMesh.receiveShadow = true;
 // scene.add(mazeMesh);
 
-
 function onWindowResize() {
   playerController.camera.aspect = window.innerWidth / window.innerHeight;
   playerController.camera.updateProjectionMatrix();
 
-  renderer.setSize(innerWidth / blockiness, innerHeight / blockiness);
+  renderer.setSize(
+    innerWidth / Constants.BLOCKINESS,
+    innerHeight / Constants.BLOCKINESS
+  );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
 }
