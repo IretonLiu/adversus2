@@ -2,7 +2,7 @@ import * as THREE from "three";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
-import minimap from "./minimap.js";
+import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
@@ -12,8 +12,6 @@ import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
 let pathGraph = [];
-// const blockiness = 1;
-// const mapSize = 7;
 
 let rigidBodies = [],
   tmpTrans;
@@ -41,8 +39,7 @@ class GameManager {
     initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
-    const helper = new THREE.AxesHelper(5);
-    scene.add(helper);
+
     animate();
   }
 }
@@ -61,9 +58,6 @@ function initGraphics() {
   renderer.shadowMap.enabled = true;
 
   document.body.appendChild(renderer.domElement);
-
-  const axesHelper = new THREE.AxesHelper(5);
-  scene.add(axesHelper);
 }
 
 function animate() {
@@ -71,9 +65,8 @@ function animate() {
   requestAnimationFrame(animate);
   playerController.update();
   if (monster.path != "") monster.update(scene);
-  mMap.mapControls();
-  mMap.placePos();
-  mMap.drawMaze(maze, grid);
+
+  mMap.worldUpdate();
   render();
 }
 
@@ -92,15 +85,11 @@ function initWorld() {
   scene.add(floor);
 
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xbbbbbb); // 0x080808
+  const light = new THREE.AmbientLight(0x121212); // 0x080808
   scene.add(light);
 
   playerController = new PlayerController(-30, 3, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
-  const spotLightHelper = new THREE.CameraHelper(
-    playerController.torch.shadow.camera
-  );
-  scene.add(spotLightHelper);
 
   let wallWidth = 20;
   let monsterPosition = {
@@ -114,15 +103,16 @@ function initWorld() {
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
-  console.log(monster.path);
+  // console.log(monster.path);
   scene.add(monster.monsterObject);
 
-  mMap = new minimap(playerController);
+  mMap = new MiniMap(playerController, grid);
 }
 
 function renderMaze() {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
   const wallHeight = 15;
@@ -136,6 +126,7 @@ function renderMaze() {
   // var wallRes = 5;
 
   const mazeGroup = new THREE.Group();
+
   for (var y = 0; y < 2 * maze.height + 1; y++) {
     for (var x = 0; x < 2 * maze.width + 1; x++) {
       if (grid[y][x]) {
@@ -180,6 +171,7 @@ function onWindowResize() {
   );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
+  mMap.updateFullScreenSizes();
 }
 
 function render() {
