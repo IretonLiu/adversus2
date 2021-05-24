@@ -6,8 +6,11 @@ import WallGenerator from "./WallGenerator.js"
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
+import WorldManager from "./WorldManager.js";
 
-let playerController, scene, renderer, physicsWorld, mMap, maze, grid;
+
+
+let playerController, scene, renderer, physicsWorld, mMap, maze, grid, worldManager;
 const blockiness = 1;
 const mapSize = 7;
 
@@ -86,6 +89,8 @@ function animate() {
   mMap.mapControls();
   mMap.placePos();
   mMap.drawMaze(maze, grid);
+  worldManager.updateObjs();//this needs to be just update for both battery and key
+
   render();
 }
 
@@ -94,6 +99,10 @@ function renderMaze() {
   grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
   const wallGenerator = new WallGenerator();
+  worldManager = new WorldManager(scene, grid);
+  worldManager.loadBattery();
+  worldManager.loadKey();
+
 
   const wallSize = 20;
   const wallHeight = 0.2 * wallSize;
