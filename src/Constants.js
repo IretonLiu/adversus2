@@ -17,13 +17,16 @@ let Constants = {
   MINIMAP_FULLSCREEN_PERC: 0.9,
 
   // map size
-  MAP_SIZE: 20,
+  MAP_SIZE: 5,
 
   // percentage of walls removed
   PERCENTAGE_WALLS_REMOVED: 0.1,
 
   // blockiness of visuals
-  BLOCKINESS: 6,
+  BLOCKINESS: 5,
+  WALL_SEGMENTS: 1,
+
+  PLAYER_MOVE_SPEED: 25,
 
   // monster controls
   MONSTER_SPEED_INVERSE: 50,
