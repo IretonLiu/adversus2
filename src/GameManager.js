@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import Skybox from "./Skybox"
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
@@ -70,7 +71,12 @@ function animate() {
   render();
 }
 
+
+
 function initWorld() {
+  const skybox = new Skybox("nightsky");
+  scene.add(skybox.createSkybox());
+
   renderMaze(); // adds the maze in to the scene graph
 
   // set up the floor of the game

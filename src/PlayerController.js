@@ -25,7 +25,7 @@ class PlayerController {
       70,
       window.innerWidth / window.innerHeight,
       1,
-      3000
+      10100
     );
     this.camera.position.set(x, y, z);
     this.camera.lookAt(x + 1, y, z);
