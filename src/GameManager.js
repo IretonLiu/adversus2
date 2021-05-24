@@ -8,8 +8,6 @@ import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtil
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator"
-// import GraphNode from "./pathfinder/PathGraph";
-import Physics from "./Physics.js";
 import Constants from "./Constants";
 
 let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
