@@ -6,6 +6,7 @@ import {
   Object3D,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
+import Constants from "./Constants";
 
 class PlayerController {
   constructor(x, y, z, domElement) {
@@ -132,8 +133,9 @@ class PlayerController {
   }
 
   initTorch() {
+    const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
-    torch.shadow.bias = - 0.0001
+    torch.shadow.bias = -0.0001;
     torch.castShadow = true;
     torch.intensity = 1.2;
     torch.shadow.mapSize.width = 1024;
@@ -154,7 +156,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = 40;
+    const speed = 60;
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
@@ -183,8 +185,6 @@ class PlayerController {
 
     this.prevTime = time;
   }
-
-
 }
 
 export default PlayerController;

@@ -2,6 +2,7 @@ import GameManager from "./GameManager";
 import { Vector3 } from "three";
 import { randInt } from "three/src/math/MathUtils";
 import { rand } from "three/examples/jsm/renderers/nodes/functions/MathFunctions";
+import Constants from "./Constants";
 const overlay = document.getElementById("overlay");
 const ctx = document.getElementById("mmOnScreen").getContext("2d");
 
@@ -33,16 +34,21 @@ class minimap {
   drawMaze(maze, grid) {
     ctx.fillStyle = "yellow";
 
-    var wallSize = 10;
+    // var wallSize = 10;
 
     var playerX = -this.x / 2 + 140;
     var playerY = this.z / 2 + 140;
     ctx.save();
-    ctx.translate(105,120);
+    ctx.translate(105, 120);
     for (var y = 0; y < 2 * maze.height + 1; y++) {
       for (var x = 0; x < 2 * maze.width + 1; x++) {
         if (grid[maze.getThickIndex(x, y)]) {
-          ctx.fillRect(y * wallSize, -x * wallSize, wallSize, wallSize);
+          ctx.fillRect(
+            y * Constants.WALL_SIZE_MINIMAP,
+            -x * Constants.WALL_SIZE_MINIMAP,
+            Constants.WALL_SIZE_MINIMAP,
+            Constants.WALL_SIZE_MINIMAP
+          );
         }
       }
     }
