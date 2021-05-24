@@ -7,7 +7,11 @@ let Constants = {
 
   // Wall sizes
   WALL_SIZE: 20,
-  WALL_SIZE_MINIMAP: 10,
+  WALL_SIZE_MINIMAP: 15,
+
+  PLAYER_SIZE_MINIMAP: 10,
+
+  MINIMAP_SIDE_LENGTH: 256,
 
   // map size
   MAP_SIZE: 20,

@@ -56,7 +56,6 @@ class PlayerController {
 
   setUpControls(self) {
     const onKeyDown = (event) => {
-      console.log("keyDown");
       switch (event.code) {
         case "KeyW":
           self.moveForward = true;
@@ -156,7 +155,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = 60;
+    const speed = 50;
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
