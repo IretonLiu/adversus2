@@ -83,7 +83,7 @@ function initWorld() {
   scene.add(floor);
 
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xbbbbbb); // 0x080808
+  const light = new THREE.AmbientLight(0x121212); // 0x080808
   scene.add(light);
 
   playerController = new PlayerController(-30, 0, 20, renderer.domElement);
@@ -172,6 +172,7 @@ function onWindowResize() {
   );
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
+  mMap.updateFullScreenSizes();
 }
 
 function render() {

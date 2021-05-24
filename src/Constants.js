@@ -13,6 +13,9 @@ let Constants = {
 
   MINIMAP_SIDE_LENGTH: 256,
 
+  //The percentage to take up of the shortest side of the viewport
+  MINIMAP_FULLSCREEN_PERC: 0.9,
+
   // map size
   MAP_SIZE: 20,
 

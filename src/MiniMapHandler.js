@@ -11,20 +11,46 @@ class MiniMap {
 
     this.maze = maze;
 
-    this.width = Constants.MINIMAP_SIDE_LENGTH;
-    this.height = Constants.MINIMAP_SIDE_LENGTH;
+    this.visited = this.initializeVisited();
 
-    ctx.canvas.width = this.width;
-    ctx.canvas.height = this.height;
-    ctx.canvas.style.fill = "#000";
-    ctx.canvas.style.background = "#22222250";
-    ctx.canvas.style.position = "absolute";
-    ctx.canvas.style.top = 10;
-    ctx.canvas.style.right = 10;
-    ctx.canvas.style.zIndex = 3000;
-    // ctx.canvas.style.opacity = 0.9;
-    ctx.canvas.style.filter = "blur(0.4px)";
-    // ctx.canvas.style.boxShadow = "0 0 5px 5px #000000";
+    this.isFullScreen = false;
+
+    this.mapInnerSize =
+      Math.min(window.innerWidth, window.innerHeight) *
+      Constants.MINIMAP_FULLSCREEN_PERC;
+    this.verticalGap = (window.innerHeight - this.mapInnerSize) / 2;
+    this.horizontalGap = (window.innerWidth - this.mapInnerSize) / 2;
+    this.blockSize = this.mapInnerSize / this.maze.length;
+
+    this.minimize();
+    this.setUpControls();
+  }
+
+  setUpControls() {
+    const onKeyDown = (event) => {
+      switch (event.code) {
+        case "KeyM":
+          this.isFullScreen = !this.isFullScreen;
+          if (this.isFullScreen) {
+            this.fullScreen();
+          } else {
+            this.minimize();
+          }
+        //
+        // case "KeyK":
+        //     ctx.clearRect(0, 0, 500, 500);
+        //     ctx.fillStyle = "red";
+        //     ctx.fillRect(randInt(100, 250), randInt(0, 250), 3, 3);
+        //     break;
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+  }
+
+  initializeVisited() {
+    return Array.from({ length: this.maze.length }, () =>
+      Array.from({ length: this.maze[0].length }, () => false)
+    );
   }
 
   worldUpdate() {
@@ -34,7 +60,7 @@ class MiniMap {
     this.drawPlayer();
   }
 
-  drawMaze() {
+  drawCenterdMaze() {
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
@@ -43,13 +69,28 @@ class MiniMap {
       for (var col = 0; col < this.maze[0].length; col++) {
         if (this.maze[row][col]) continue;
 
-        var x = this.x / Constants.WALL_SIZE - col;
-        var y = this.y / Constants.WALL_SIZE - row;
+        var x = this.x / Constants.WALL_SIZE;
+        var y = this.y / Constants.WALL_SIZE;
+
+        var playerCellX = x;
+        var playerCellY = y;
+
+        if (
+          Math.abs(playerCellX - col) < 0.5 &&
+          Math.abs(playerCellY - row) < 0.5
+        ) {
+          this.visited[row][col] = true;
+        }
+
+        if (!this.visited[row][col]) continue;
+
+        var dx = x - col;
+        var dy = y - row;
 
         ctx.save();
         ctx.translate(
-          -y * Constants.WALL_SIZE_MINIMAP,
-          x * Constants.WALL_SIZE_MINIMAP
+          -Math.floor(dy * Constants.WALL_SIZE_MINIMAP),
+          Math.floor(dx * Constants.WALL_SIZE_MINIMAP)
         );
         ctx.fillRect(
           0,
@@ -63,7 +104,113 @@ class MiniMap {
     ctx.restore();
   }
 
+  updateFullScreenSizes() {
+    this.mapInnerSize =
+      Math.min(window.innerWidth, window.innerHeight) *
+      Constants.MINIMAP_FULLSCREEN_PERC;
+    this.verticalGap = (window.innerHeight - this.mapInnerSize) / 2;
+    this.horizontalGap = (window.innerWidth - this.mapInnerSize) / 2;
+    this.blockSize = Math.floor(this.mapInnerSize / this.maze.length);
+  }
+
+  drawWorldMaze() {
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = ctx.fillStyle;
+
+    this.updateFullScreenSizes();
+
+    for (var row = 0; row < this.maze.length; row++) {
+      for (var col = 0; col < this.maze[0].length; col++) {
+        if (this.maze[row][col]) continue;
+
+        var x = this.x / Constants.WALL_SIZE;
+        var y = this.y / Constants.WALL_SIZE;
+
+        var playerCellX = x;
+        var playerCellY = y;
+
+        if (
+          Math.abs(playerCellX - col) < 0.5 &&
+          Math.abs(playerCellY - row) < 0.5
+        ) {
+          this.visited[row][col] = true;
+        }
+
+        if (!this.visited[row][col]) continue;
+
+        var dx = x - col;
+        var dy = y - row;
+
+        ctx.save();
+        ctx.translate(
+          Math.floor(col * this.blockSize + this.horizontalGap),
+          Math.floor(row * this.blockSize + this.verticalGap)
+        );
+        ctx.fillRect(0, 0, this.blockSize, this.blockSize);
+        ctx.restore();
+      }
+    }
+    ctx.restore();
+  }
+
+  drawMaze() {
+    if (this.isFullScreen) {
+      this.drawWorldMaze();
+    } else {
+      this.drawCenterdMaze();
+    }
+  }
+
+  fullScreen() {
+    this.width = window.innerWidth;
+    this.height = window.innerHeight;
+
+    ctx.canvas.width = this.width;
+    ctx.canvas.height = this.height;
+
+    ctx.canvas.style.background = "#222222aa";
+  }
+
+  minimize() {
+    this.width = Constants.MINIMAP_SIDE_LENGTH;
+    this.height = Constants.MINIMAP_SIDE_LENGTH;
+
+    ctx.canvas.width = this.width;
+    ctx.canvas.height = this.height;
+    ctx.canvas.style.fill = "#000";
+    ctx.canvas.style.background = "#22222250";
+    ctx.canvas.style.position = "absolute";
+    ctx.canvas.style.top = 10;
+    ctx.canvas.style.right = 10;
+    ctx.canvas.style.zIndex = 3000;
+    ctx.canvas.style.filter = "blur(0.4px)";
+  }
+
   drawPlayer() {
+    if (this.isFullScreen) {
+      this.drawWorldPlayer();
+    } else {
+      this.drawCenterPlayer();
+    }
+  }
+
+  drawWorldPlayer() {
+    ctx.save();
+    var x = this.x / Constants.WALL_SIZE;
+    var y = this.y / Constants.WALL_SIZE;
+    ctx.fillStyle = "#FF0000";
+    ctx.fillRect(
+      x * this.blockSize + this.horizontalGap,
+      y * this.blockSize + this.verticalGap,
+
+      Constants.PLAYER_SIZE_MINIMAP,
+      Constants.PLAYER_SIZE_MINIMAP
+    );
+    ctx.restore();
+  }
+
+  drawCenterPlayer() {
     ctx.save();
     ctx.translate(this.width / 2, this.height / 2);
     ctx.fillStyle = "#FF0000";
