@@ -28,7 +28,6 @@ class Monster {
     update(scene) {
 
         var dirRep = this.path.charAt(this.path.length - 1); // the char representation of the path
-        console.log(dirRep);
         var dir;
         switch (dirRep) {
             case constants.NORTH:
@@ -45,7 +44,6 @@ class Monster {
                 break;
         }
 
-        //console.log(dir);
         this.position.x += this.velocity * dir.x;
         this.position.z += this.velocity * dir.z;
         this.monsterObject.position.x = this.position.x;

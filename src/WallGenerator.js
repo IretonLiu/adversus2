@@ -1,20 +1,20 @@
 import * as THREE from "three";
+import NoiseGenerator from "./lib/NoiseGenerator";
 
 class WallGenerator {
-  constructor(type, width, height) {
-    this.type = type;
-    this.width = width;
-    this.height = height;
+  constructor() {
+
+    this.noiseGenerator = new NoiseGenerator();
   }
 
   createWall(type, width, height) {
-    var segments = 20;
+    var segments = 5;
     var tiltAngle = 0; //Math.PI / 12;
 
     const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
     var sideWallGeometry = new THREE.PlaneBufferGeometry(
       width,
-      height / Math.cos(tiltAngle),
+      height,
       segments,
       segments
     );
@@ -42,10 +42,12 @@ class WallGenerator {
 
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
       width,
-      height - height * Math.tan(tiltAngle),
+      width,
       segments,
       segments
     );
+    this.applyNoise(segments, topPlaneGeometry);
+
     var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     topPlane.receiveShadow = true;
     topPlane.castShadow = true;
@@ -59,20 +61,7 @@ class WallGenerator {
         wallGroup.add(wallTwo);
         break;
       case 1: // side walls side facing
-        // var frontWallShape = new THREE.Shape();
-        // frontWallShape.lineTo(0.5 * (width - width * Math.tan(tiltAngle)), height / 2);
-        // frontWallShape.lineTo(-0.5 * (width - width * Math.tan(tiltAngle)), height / 2);
-        // frontWallShape.lineTo(-0.5 * (width + width * Math.tan(tiltAngle)), -height / 2);
-        // frontWallShape.lineTo(0.5 * (width + width * Math.tan(tiltAngle)), -height / 2);
-        // frontWallShape.lineTo(0.5 * (width - width * Math.tan(tiltAngle)), height / 2);
-        // var frontWallGeo = new THREE.ShapeBufferGeometry(frontWallShape, 20);
-        // var frontWall = new THREE.Mesh(frontWallGeo, wallMaterial);
-        // frontWall.rotateY(Math.PI / 2);
-        // frontWall.position.x = -width / 2;
 
-        // var geo = new THREE.EdgesGeometry(frontWall.geometry); // or WireframeGeometry
-        // var mat = new THREE.LineBasicMaterial({ color: 0xffffff, });
-        // var wireframe = new THREE.LineSegments(geo, mat);
         //frontWall.add(wireframe);
         wallGroup.add(topPlane);
         wallGroup.add(wallOne);
@@ -155,6 +144,20 @@ class WallGenerator {
     wallGroup.castShadow = true;
     return wallGroup;
   }
+
+  applyNoise(segments, geometry, seed) {
+    var noise = this.noiseGenerator.generateNoiseMap(segments, segments, seed);
+
+    var vertices = geometry.attributes.position.array;
+
+    for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
+
+      vertices[j + 2] += noise[i];
+
+    }
+  }
+
+
   genBinaryString(x, y, grid, maze) {
     // a binary string specifying the neighbours of cell in thick grid
     // the string in order is: up down left right
@@ -185,7 +188,6 @@ class WallGenerator {
       case "0001":
         return 5; // protruding facing left
       case "0010":
-        console.log("here");
         return 4; // protruding facing right
       case "0100":
         return 3; // protruding facing up/backward

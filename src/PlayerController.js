@@ -55,7 +55,6 @@ class PlayerController {
 
   setUpControls(self) {
     const onKeyDown = (event) => {
-      console.log("keyDown");
       switch (event.code) {
         case "KeyW":
           self.moveForward = true;

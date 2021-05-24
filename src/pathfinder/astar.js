@@ -80,7 +80,6 @@ export class Astar {
       }
       grid.push(temp);
     }
-    console.log(grid);
     return grid;
     // now have grid representation
   }
