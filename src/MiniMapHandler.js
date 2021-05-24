@@ -1,4 +1,5 @@
 import Constants from "./Constants";
+import * as THREE from "three";
 
 const ctx = document.createElement("canvas").getContext("2d");
 document.body.appendChild(ctx.canvas);
@@ -53,18 +54,36 @@ class MiniMap {
     );
   }
 
+  drawTriangle() {
+    ctx.fillStyle = "#ff0000";
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(0, 1);
+    ctx.lineTo(0.5, -0.5);
+    ctx.lineTo(0, 0);
+    ctx.lineTo(-0.5, -0.5);
+    ctx.fill();
+    ctx.closePath();
+    ctx.restore();
+  }
+
   worldUpdate() {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     this.updatePosition();
     this.drawMaze();
     this.drawPlayer();
+    // console.log(this.playerController.camera.rotation.y);
   }
 
   drawCenterdMaze() {
     ctx.save();
+    var angle = -(this.getYAngle(this.playerController.camera)-Math.PI/2);
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
     ctx.translate(this.width / 2, this.height / 2);
+    ctx.translate(Math.floor(Constants.WALL_SIZE_MINIMAP/2),Math.floor(Constants.WALL_SIZE_MINIMAP/2));
+    ctx.rotate(angle);
+    ctx.translate(Math.floor(-Constants.WALL_SIZE_MINIMAP/2),Math.floor(-Constants.WALL_SIZE_MINIMAP/2));
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
         if (this.maze[row][col]) continue;
@@ -200,26 +219,42 @@ class MiniMap {
     var x = this.x / Constants.WALL_SIZE;
     var y = this.y / Constants.WALL_SIZE;
     ctx.fillStyle = "#FF0000";
-    ctx.fillRect(
+    ctx.translate(
       x * this.blockSize + this.horizontalGap,
-      y * this.blockSize + this.verticalGap,
-
-      Constants.PLAYER_SIZE_MINIMAP,
-      Constants.PLAYER_SIZE_MINIMAP
+      y * this.blockSize + this.verticalGap
     );
+    ctx.translate(this.blockSize / 2, this.blockSize / 2);
+    ctx.rotate(this.getYAngle(this.playerController.camera));
+    ctx.scale(Constants.PLAYER_SIZE_MINIMAP, -Constants.PLAYER_SIZE_MINIMAP);
+    this.drawTriangle();
     ctx.restore();
+  }
+
+  getYAngle(obj) {
+    var direction = obj
+      .getWorldDirection(new THREE.Vector3(0, 0, 0))
+      .normalize();
+    direction.y = 0;
+    var z = new THREE.Vector3(0, 0, -1);
+    var angle = z.angleTo(direction);
+    if (direction.x < 0) {
+      return 2 * Math.PI - angle;
+    }
+
+    return angle;
   }
 
   drawCenterPlayer() {
     ctx.save();
     ctx.translate(this.width / 2, this.height / 2);
     ctx.fillStyle = "#FF0000";
-    ctx.fillRect(
-      0,
-      0,
-      Constants.PLAYER_SIZE_MINIMAP,
-      Constants.PLAYER_SIZE_MINIMAP
+    ctx.translate(
+      Constants.WALL_SIZE_MINIMAP / 2,
+      Constants.WALL_SIZE_MINIMAP / 2
     );
+    // ctx.rotate(this.getYAngle(this.playerController.camera) - Math.PI / 2);
+    ctx.scale(Constants.PLAYER_SIZE_MINIMAP, -Constants.PLAYER_SIZE_MINIMAP);
+    this.drawTriangle();
     ctx.restore();
   }
 
