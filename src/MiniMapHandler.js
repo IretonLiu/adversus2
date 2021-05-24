@@ -198,7 +198,7 @@ class MiniMap {
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
     ctx.canvas.style.fill = "#000";
-    ctx.canvas.style.background = "#22222250";
+    ctx.canvas.style.background = "#ffffff0d";
     ctx.canvas.style.position = "absolute";
     ctx.canvas.style.top = 10;
     ctx.canvas.style.right = 10;
@@ -225,7 +225,7 @@ class MiniMap {
     );
     ctx.translate(this.blockSize / 2, this.blockSize / 2);
     ctx.rotate(this.getYAngle(this.playerController.camera));
-    ctx.scale(Constants.PLAYER_SIZE_MINIMAP, -Constants.PLAYER_SIZE_MINIMAP);
+    ctx.scale(this.blockSize/2.5 , -this.blockSize/2.5 );
     this.drawTriangle();
     ctx.restore();
   }

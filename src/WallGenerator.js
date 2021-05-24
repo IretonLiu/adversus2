@@ -1,18 +1,30 @@
 import * as THREE from "three";
 import NoiseGenerator from "./lib/NoiseGenerator";
+import Constants from "./Constants";
 
 class WallGenerator {
   constructor(width, height) {
     this.width = width;
     this.height = height;
-    // this.noiseGenerator = new NoiseGenerator();
+    this.noiseGenerator = new NoiseGenerator();
+    this.normalMap = new THREE.TextureLoader().load(
+      "../assets/normal_maps/snow_normal.jpg"
+    );
+    this.wallTexture = new THREE.TextureLoader().load(
+      "../assets/textures/snow_wall.jpg"
+    );
+    console.log(this.normalMap);
   }
 
   createWall(type) {
-    var segments = 10;
+    var segments = Constants.WALL_SEGMENTS;
     var tiltAngle = 0; //Math.PI / 12;
 
-    const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const wallMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      map: this.wallTexture,
+    });
+    wallMaterial.normalMap = this.normalMap;
     var sideWallGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.height,

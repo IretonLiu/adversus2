@@ -68,12 +68,12 @@ class Monster {
     this.monsterObject.position.z = this.position.z;
 
     if ((this.timeCount * this.inverseSpeed) % 1 === 0) {
-      const breadCrumb = new CylinderGeometry(2, 2, 5);
-      const bcMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
-      var bc = new Mesh(breadCrumb, bcMaterial);
-      bc.position.x = this.position.x;
-      bc.position.z = this.position.z;
-      scene.add(bc);
+      // const breadCrumb = new CylinderGeometry(2, 2, 5);
+      // const bcMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
+      // var bc = new Mesh(breadCrumb, bcMaterial);
+      // bc.position.x = this.position.x;
+      // bc.position.z = this.position.z;
+      // scene.add(bc);
 
       // remove the current direction from the path
       this.path = this.path.slice(0, this.path.length - 1);

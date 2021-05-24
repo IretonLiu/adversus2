@@ -111,16 +111,23 @@ class PlayerController {
     };
 
     const onClick = (event) => {
+      console.log(event);
       switch (event.button) {
         case 0:
           self.controls.lock();
           break;
         case 2:
+
           self.torch.visible = !self.torch.visible;
           break;
       }
     };
 
+    const onRightClick = (event) => {
+      console.log("right click");
+      self.torch.visible = !self.torch.visible;
+    };
+    document.addEventListener("contextmenu", onRightClick);
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
     document.addEventListener("click", onClick);
@@ -155,7 +162,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = 50;
+    const speed = Constants.PLAYER_MOVE_SPEED;
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
