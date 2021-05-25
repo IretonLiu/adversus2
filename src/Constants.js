@@ -19,7 +19,7 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.65,
 
   // map size
-  MAP_SIZE: 15,
+  MAP_SIZE: 10,
 
   // percentage of walls removed
   PROBABILITY_WALLS_REMOVED: 0.075,
@@ -37,7 +37,7 @@ let Constants = {
   FOG_FAR: 100,
   FOG_NEAR: 1,
 
-  ANTIALIAS: true,
+  ANTIALIAS: false
 };
 
 export default Constants;
