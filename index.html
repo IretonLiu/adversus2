@@ -1,22 +1,51 @@
 <html lang="en">
   <head>
     <title>Adversus 2</title>
-    <link rel="stylesheet" href="main.css" />
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/minimap.css" />
+    <link rel="stylesheet" href="/css/menu.css" />
+    <link rel="stylesheet" href="/css/pause.css" />
     <meta charset="utf-8" />
     <meta
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/favicons/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/favicons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/favicons/favicon-16x16.png"
+    />
     <link rel="manifest" href="/favicons/site.webmanifest" />
   </head>
   <body>
     <section id="loading-screen">
-      <h1>Adversus 2</h1>
       <div id="loader"></div>
+      <h2>Loading...</h2>
     </section>
+
+    <section id="menu">
+      <h1>Adversus 2</h1>
+      <div id="play-button" class="button">Play</div>
+    </section>
+
+    <section id="pause" class="hidden">
+      <h1>Adversus 2</h1>
+      <div id="resume-button" class="button">Resume</div>
+    </section>
+
+    <canvas id="minimap"></canvas>
 
     <script src="/src/lib/ammo.wasm.js"></script>
     <script defer type="module" src="/src/main.js"></script>

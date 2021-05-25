@@ -4,8 +4,6 @@ import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
 import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
-import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
@@ -20,6 +18,7 @@ let playerController,
   grid,
   monster,
   stats;
+import state from "./State";
 let pathGraph = [];
 
 let rigidBodies = [],
@@ -67,9 +66,9 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  scene.fog = new THREE.Fog(0x101010, 1, 150);
+  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
-  renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(
     innerWidth / Constants.BLOCKINESS,
@@ -83,8 +82,13 @@ function initGraphics() {
 }
 
 function animate() {
+  
   let deltaTime = clock.getDelta();
+
   requestAnimationFrame(animate);
+
+  if (!state.isPlaying) return;
+
   playerController.update();
   if (monster.path != "") monster.update(scene);
 
@@ -130,13 +134,12 @@ function initWorld() {
     y: 0,
     z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE);
+  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE,scene);
   monster.getAstarPath(grid, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
-  scene.add(monster.monsterObject);
 
   mMap = new MiniMap(playerController, grid);
 }

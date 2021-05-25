@@ -7,7 +7,7 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
-
+import state from './State';
 class PlayerController {
   constructor(x, y, z, domElement) {
     // initializing all the variables
@@ -37,24 +37,38 @@ class PlayerController {
 
     //this.position = new Vector3(x, y, z);
     // set up the player controller to use the pointer lock controls
-    this.controls = this.initControls(domElement);
+    this.controls = this.initControls(domElement,this);
     this.setUpControls(this);
   }
 
-  initControls(domElement) {
-    // var controls = new PointerLockControls(this.camera, domElement);
+  initControls(domElement,self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.addEventListener("lock", function () {
-      //   menu.style.display = "none";
-    });
 
     controls.addEventListener("unlock", function () {
-      //   menu.style.display = "block";
+      self.openPauseMenu();
     });
     return controls;
   }
 
+  openPauseMenu() {
+    var pauseMenu = document.getElementById("pause");
+    pauseMenu.classList.remove("hidden");
+    state.isPlaying = false;
+  }
+
+  setUpPauseScreen() {
+    var pause = document.getElementById("pause");
+
+    document.getElementById("resume-button").onclick = () => {
+      this.controls.lock();
+      pause.classList.add("hidden");
+      state.isPlaying = true;
+    };
+  }
+
   setUpControls(self) {
+    self.controls.lock();
+    this.setUpPauseScreen();
     const onKeyDown = (event) => {
       switch (event.code) {
         case "KeyW":
@@ -115,11 +129,10 @@ class PlayerController {
 
     const onClick = (event) => {
       switch (event.button) {
-        case 0:
-          self.controls.lock();
-          break;
+        // case 0:
+        //   self.controls.lock();
+        //   break;
         case 2:
-
           this.turnTorchOff();
           break;
       }
@@ -134,7 +147,7 @@ class PlayerController {
     document.addEventListener("click", onClick);
   }
 
-  turnTorchOff(){
+  turnTorchOff() {
     this.torch.visible = !this.torch.visible;
   }
 

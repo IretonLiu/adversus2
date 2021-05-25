@@ -1,6 +1,6 @@
 @font-face {
   font-family: ThinkNothing;
-  src: url("./assets/fonts/ThinkNothing.otf") format("opentype");
+  src: url("/assets/fonts/ThinkNothing.otf") format("opentype");
 }
 
 body {
@@ -10,6 +10,7 @@ body {
   height: 100vh;
   width: 100vh;
   overflow: hidden;
+  font-family: "ThinkNothing";
 }
 
 #loading-screen {
@@ -24,16 +25,12 @@ body {
   transition: 1s opacity;
 }
 
-#loading-screen h1 {
+#loading-screen h2{
   position: absolute;
+  bottom: 10%;
   left: 50%;
-  top: 15%;
-  color: white;
-  font-family: 'ThinkNothing';
-  font-size: 110px;
-  letter-spacing: 0.01em;
-  transform: translate(-50%, -50%);
-  /* text-transform: uppercase; */
+  transform: translate(-50%,-50%);
+  color: #ffffff;
 }
 
 #loading-screen.fade-out {

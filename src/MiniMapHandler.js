@@ -1,7 +1,7 @@
 import Constants from "./Constants";
 import * as THREE from "three";
 
-const ctx = document.createElement("canvas").getContext("2d");
+const ctx = document.getElementById("minimap").getContext("2d");
 document.body.appendChild(ctx.canvas);
 
 class MiniMap {
@@ -187,28 +187,22 @@ class MiniMap {
   }
 
   fullScreen() {
+    ctx.canvas.classList.add("fullscreen");
     this.width = window.innerWidth;
     this.height = window.innerHeight;
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
-
-    ctx.canvas.style.background = "#222222aa";
   }
 
   minimize() {
+    ctx.canvas.classList.remove("fullscreen");
     this.width = Constants.MINIMAP_SIDE_LENGTH;
     this.height = Constants.MINIMAP_SIDE_LENGTH;
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
-    ctx.canvas.style.fill = "#000";
-    ctx.canvas.style.background = "#ffffff0d";
-    ctx.canvas.style.position = "absolute";
-    ctx.canvas.style.top = 10;
-    ctx.canvas.style.right = 10;
-    ctx.canvas.style.zIndex = 1;
-    ctx.canvas.style.filter = "blur(0.4px)";
+
   }
 
   drawPlayer() {
@@ -270,7 +264,6 @@ class MiniMap {
   updatePosition() {
     this.x = this.playerController.camera.position.x;
     this.y = this.playerController.camera.position.z;
-
   }
 }
 
