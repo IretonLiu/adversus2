@@ -82,7 +82,6 @@ function initGraphics() {
 }
 
 function animate() {
-  
   let deltaTime = clock.getDelta();
 
   requestAnimationFrame(animate);
@@ -134,7 +133,11 @@ function initWorld() {
     y: 0,
     z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE,scene);
+  monster = new Monster(
+    monsterPosition,
+    Constants.MONSTER_SPEED_INVERSE,
+    scene
+  );
   monster.getAstarPath(grid, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
