@@ -17,7 +17,7 @@ let Constants = {
   MINIMAP_FULLSCREEN_PERC: 0.9,
 
   // map size
-  MAP_SIZE: 5,
+  MAP_SIZE: 10,
 
   // percentage of walls removed
   PROBABILITY_WALLS_REMOVED: 0.5,

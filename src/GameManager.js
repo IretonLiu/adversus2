@@ -9,9 +9,17 @@ import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHel
 import Physics from "./Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
-import Stats from 'three/examples/jsm/libs/stats.module';
+import Stats from "three/examples/jsm/libs/stats.module";
 
-let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster,stats;
+let playerController,
+  scene,
+  renderer,
+  physicsWorld,
+  mMap,
+  maze,
+  grid,
+  monster,
+  stats;
 let pathGraph = [];
 
 let rigidBodies = [],

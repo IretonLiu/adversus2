@@ -161,57 +161,27 @@ class Maze {
     this.removeWalls();
   }
 
-  checkEastWestWalls(cell, bound, checkWest) {
-    // check that the two cells above and below all have a west/east wall
-
-    if (checkWest) {
-      // if on the west side of maze return
-      if (cell.x === 0) return false;
-    } else {
-      // if on the east side of maze return
-      if (cell.x === this.width - 1) return false;
-    }
-
-    // check walls
+  checkEastWall(cell, bound) {
+    // test walls on either side and make sure they're actually there
     for (let y = cell.y - bound; y <= cell.y + bound; y++) {
-      // no wall
-      if (this.inBounds(cell.x, y)) {
-        if (checkWest) {
-          if (!this.getCellAt(cell.x, y).west) return false;
-        } else {
-          if (!this.getCellAt(cell.x, y).east) return false;
-        }
+      // check the cell actually exists
+      if (this.inBounds(cell.x, y) && y !== cell.y) {
+        if (!this.getCellAt(cell.x, y).east) return false;
       }
     }
 
-    // all relevant walls are present
     return true;
   }
 
-  checkNorthSouthWalls(cell, bound, checkNorth) {
-    // check that the two cells above and below all have a west/east wall
-
-    if (checkNorth) {
-      // if on the north side of maze return
-      if (cell.y === 0) return false;
-    } else {
-      // if on the south side of maze return
-      if (cell.y === this.height - 1) return false;
-    }
-
-    // check walls
+  checkSouthWall(cell, bound) {
+    // test walls on either side and make sure they're actually there
     for (let x = cell.x - bound; x <= cell.x + bound; x++) {
-      // no wall
-      if (this.inBounds(x, cell.y)) {
-        if (this.checkNorth) {
-          if (!this.getCellAt(x, cell.y).north) return false;
-        } else {
-          if (!this.getCellAt(x, cell.y).south) return false;
-        }
+      // check the cell actually exists
+      if (this.inBounds(x, cell.y) && x !== cell.x) {
+        if (!this.getCellAt(x, cell.y).south) return false;
       }
     }
 
-    // all relevant walls are present
     return true;
   }
 
@@ -224,7 +194,7 @@ class Maze {
         const cell = this.getCellAt(x, y);
         if (
           cell.east &&
-          this.checkEastWestWalls(cell, 1, false) &&
+          this.checkEastWall(cell, 1) &&
           Math.random() < this.probabilityWallsRemoved
         ) {
           this.carvePassage(cell, this.getCellAt(cell.x + 1, cell.y));
@@ -232,7 +202,7 @@ class Maze {
         }
         if (
           cell.south &&
-          this.checkNorthSouthWalls(cell, 1, false) &&
+          this.checkSouthWall(cell, 1) &&
           Math.random() < this.probabilityWallsRemoved
         ) {
           this.carvePassage(cell, this.getCellAt(cell.x, cell.y + 1));
@@ -240,40 +210,7 @@ class Maze {
         }
       }
     }
-    console.log(count);
-
-    // check last col
-
-    // check last row
-
-    // choose random row and column (except the beginning/last ones)
-    // let iter = 0, // number of times tried to remove wall
-    //   iterWalls = 0; // number of walls removed
-    // console.log(numWalls);
-    // while (iterWalls < numWalls && iter <= 100 * numWalls) {
-    //   // choose random row
-    //   const rowIndex = Math.floor(Math.random() * (this.height - 2)) + 1; // -2 so don't include first and last rows
-    //   // const colIndex = Math.floor(Math.random() * (this.width - 2)) + 1;
-    //   // get row
-    //   let row = this.grid.slice(
-    //     rowIndex * this.width,
-    //     (rowIndex + 1) * this.width
-    //   );
-    //   // clone row
-    //   row = JSON.parse(JSON.stringify(row));
-    //   // shuffle row
-    //   this.shuffleArray(row);
-    //   // try and remove a wall
-    //   for (let i = 0; i < row.length; i++) {
-    //     if (this.removeWall(this.getCellAt(row[i].x, row[i].y))) {
-    //       console.log(row[i].x, row[i].y);
-    //       iterWalls++;
-    //       break;
-    //     }
-    //   }
-    //   iter++;
-    // }
-    // console.log(iterWalls);
+    console.log("Number of walls removed:", count);
   }
 
   drawRect(ctx, x, y, size) {
