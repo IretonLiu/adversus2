@@ -5,7 +5,7 @@ import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
 import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
-import Physics from "./Physics.js";
+import Physics from "./lib/Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
 import Stats from "three/examples/jsm/libs/stats.module";
@@ -127,7 +127,7 @@ function initWorld() {
 
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.07;
+  light.intensity = 0.02;
   scene.add(light);
 
   playerController = new PlayerController(-30, 3, 20, renderer.domElement);

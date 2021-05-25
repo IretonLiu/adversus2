@@ -37,7 +37,7 @@ let Constants = {
   FOG_FAR: 100,
   FOG_NEAR: 1,
 
-  ANTIALIAS: false
+  ANTIALIAS: true
 };
 
 export default Constants;

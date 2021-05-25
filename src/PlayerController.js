@@ -37,13 +37,14 @@ class PlayerController {
 
     //this.position = new Vector3(x, y, z);
     // set up the player controller to use the pointer lock controls
-    this.controls = this.initControls(domElement,this);
+    this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
   }
 
-  initControls(domElement,self) {
+  initControls(domElement, self) {
     const controls = new PointerLockControls(this.camera, domElement);
-
+    controls.maxPolarAngle = 5 * Math.PI / 6;
+    controls.minPolarAngle = 1 * Math.PI / 8;
     controls.addEventListener("unlock", function () {
       self.openPauseMenu();
     });

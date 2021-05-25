@@ -23,12 +23,12 @@ class WallGenerator {
       color: 0xffffff,
       map: this.wallTexture,
     });
+
     wallMaterial.normalMap = this.normalMap;
     var sideWallGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.height,
-      segments,
-      segments
+      1, 1
     );
     var wallGroup = new THREE.Group();
 
@@ -55,10 +55,10 @@ class WallGenerator {
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.width,
-      segments,
-      segments
+      10,
+      10
     );
-    // this.applyNoise(segments, topPlaneGeometry);
+    //this.applyNoise(10, topPlaneGeometry);
 
     // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     // topPlane.receiveShadow = true;
