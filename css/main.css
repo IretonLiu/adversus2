@@ -1,3 +1,8 @@
+@font-face {
+  font-family: ThinkNothing;
+  src: url("/assets/fonts/ThinkNothing.otf") format("opentype");
+}
+
 body {
   z-index: 10;
   margin: 0;
@@ -5,6 +10,7 @@ body {
   height: 100vh;
   width: 100vh;
   overflow: hidden;
+  font-family: "ThinkNothing";
 }
 
 #loading-screen {
@@ -17,6 +23,14 @@ body {
   background-color: #0a0a0a;
   opacity: 1;
   transition: 1s opacity;
+}
+
+#loading-screen h2{
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  color: #ffffff;
 }
 
 #loading-screen.fade-out {
@@ -46,7 +60,7 @@ body {
   bottom: 5px;
   border-radius: 50%;
   border: 3px solid transparent;
-  border-top-color: #555555;
+  border-top-color: #808080;
   -webkit-animation: spin 3s linear infinite;
   animation: spin 3s linear infinite;
 }
