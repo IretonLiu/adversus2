@@ -16,13 +16,13 @@ let Constants = {
   //The percentage to take up of the shortest side of the viewport
   MINIMAP_FULLSCREEN_PERC: 0.9,
   PLAYER_MIN_SIZE_MINIMAP_FULLSCREEN: 12,
-  MINIMAP_DISCOVER_THRESHOLD: 0.65,
+  MINIMAP_DISCOVER_THRESHOLD: 0.80,
 
   // map size
-  MAP_SIZE: 10,
+  MAP_SIZE: 15,
 
   // percentage of walls removed
-  PROBABILITY_WALLS_REMOVED: 0.5,
+  PROBABILITY_WALLS_REMOVED: 0.075,
 
   // blockiness of visuals
   BLOCKINESS: 6,

@@ -161,30 +161,6 @@ class Maze {
     this.removeWalls();
   }
 
-  checkEastWall(cell, bound) {
-    // test walls on either side and make sure they're actually there
-    for (let y = cell.y - bound; y <= cell.y + bound; y++) {
-      // check the cell actually exists
-      if (this.inBounds(cell.x, y) && y !== cell.y) {
-        if (!this.getCellAt(cell.x, y).east) return false;
-      }
-    }
-
-    return true;
-  }
-
-  checkSouthWall(cell, bound) {
-    // test walls on either side and make sure they're actually there
-    for (let x = cell.x - bound; x <= cell.x + bound; x++) {
-      // check the cell actually exists
-      if (this.inBounds(x, cell.y) && x !== cell.x) {
-        if (!this.getCellAt(x, cell.y).south) return false;
-      }
-    }
-
-    return true;
-  }
-
   removeWalls() {
     let count = 0;
     for (let y = 0; y < this.height - 1; y++) {
@@ -192,19 +168,11 @@ class Maze {
         // loop over all walls
         // only check if can remove east/south walls
         const cell = this.getCellAt(x, y);
-        if (
-          cell.east &&
-          this.checkEastWall(cell, 1) &&
-          Math.random() < this.probabilityWallsRemoved
-        ) {
+        if (cell.east && Math.random() < this.probabilityWallsRemoved) {
           this.carvePassage(cell, this.getCellAt(cell.x + 1, cell.y));
           count++;
         }
-        if (
-          cell.south &&
-          this.checkSouthWall(cell, 1) &&
-          Math.random() < this.probabilityWallsRemoved
-        ) {
+        if (cell.south && Math.random() < this.probabilityWallsRemoved) {
           this.carvePassage(cell, this.getCellAt(cell.x, cell.y + 1));
           count++;
         }
