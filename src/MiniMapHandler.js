@@ -81,13 +81,13 @@ class MiniMap {
     ctx.strokeStyle = ctx.fillStyle;
     ctx.translate(this.width / 2, this.height / 2);
     ctx.translate(
-      Math.floor(Constants.WALL_SIZE_MINIMAP / 2),
-      Math.floor(Constants.WALL_SIZE_MINIMAP / 2)
+      Constants.WALL_SIZE_MINIMAP / 2,
+      Constants.WALL_SIZE_MINIMAP / 2
     );
     ctx.rotate(angle);
     ctx.translate(
-      Math.floor(-Constants.WALL_SIZE_MINIMAP / 2),
-      Math.floor(-Constants.WALL_SIZE_MINIMAP / 2)
+      -Constants.WALL_SIZE_MINIMAP / 2,
+      -Constants.WALL_SIZE_MINIMAP / 2
     );
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
@@ -113,8 +113,8 @@ class MiniMap {
 
         ctx.save();
         ctx.translate(
-          -Math.floor(dy * Constants.WALL_SIZE_MINIMAP),
-          Math.floor(dx * Constants.WALL_SIZE_MINIMAP)
+          -dy * Constants.WALL_SIZE_MINIMAP,
+          dx * Constants.WALL_SIZE_MINIMAP
         );
         ctx.fillRect(
           0,
@@ -142,7 +142,7 @@ class MiniMap {
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
 
-    this.updateFullScreenSizes();
+    
 
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
@@ -193,6 +193,8 @@ class MiniMap {
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
+
+    this.updateFullScreenSizes();
   }
 
   minimize() {
