@@ -7,7 +7,7 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
-
+import state from './State';
 class PlayerController {
   constructor(x, y, z, domElement) {
     // initializing all the variables
@@ -37,24 +37,38 @@ class PlayerController {
 
     //this.position = new Vector3(x, y, z);
     // set up the player controller to use the pointer lock controls
-    this.controls = this.initControls(domElement);
+    this.controls = this.initControls(domElement,this);
     this.setUpControls(this);
   }
 
-  initControls(domElement) {
-    // var controls = new PointerLockControls(this.camera, domElement);
+  initControls(domElement,self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.addEventListener("lock", function () {
-      //   menu.style.display = "none";
-    });
 
     controls.addEventListener("unlock", function () {
-      //   menu.style.display = "block";
+      self.openPauseMenu();
     });
     return controls;
   }
 
+  openPauseMenu() {
+    var pauseMenu = document.getElementById("pause");
+    pauseMenu.classList.remove("hidden");
+    state.isPlaying = false;
+  }
+
+  setUpPauseScreen() {
+    var pause = document.getElementById("pause");
+
+    document.getElementById("resume-button").onclick = () => {
+      this.controls.lock();
+      pause.classList.add("hidden");
+      state.isPlaying = true;
+    };
+  }
+
   setUpControls(self) {
+    self.controls.lock();
+    this.setUpPauseScreen();
     const onKeyDown = (event) => {
       switch (event.code) {
         case "KeyW":
@@ -107,23 +121,34 @@ class PlayerController {
         case "KeyZ":
           self.velocity.y = 0;
           break;
+        case "KeyE":
+          this.turnTorchOff();
+          break;
       }
     };
 
     const onClick = (event) => {
       switch (event.button) {
-        case 0:
-          self.controls.lock();
-          break;
+        // case 0:
+        //   self.controls.lock();
+        //   break;
         case 2:
-          self.torch.visible = !self.torch.visible;
+          this.turnTorchOff();
           break;
       }
     };
 
+    const onRightClick = (event) => {
+      this.turnTorchOff();
+    };
+    document.addEventListener("contextmenu", onRightClick);
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
     document.addEventListener("click", onClick);
+  }
+
+  turnTorchOff() {
+    this.torch.visible = !this.torch.visible;
   }
 
   update() {
@@ -136,11 +161,11 @@ class PlayerController {
     var torch = new SpotLight(0xffffff);
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
-    torch.intensity = 1.2;
+    torch.intensity = 1.5;
     torch.shadow.mapSize.width = 1024;
     torch.shadow.mapSize.height = 1024;
-    torch.penumbra = 0.6;
-    torch.decay = 50;
+    torch.penumbra = 1;
+    torch.decay = 5;
     torch.distance = 2000;
     torch.shadow.mapSize.width = 2048;
     torch.shadow.mapSize.height = 2048;
@@ -155,7 +180,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = 50;
+    const speed = Constants.PLAYER_MOVE_SPEED;
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 

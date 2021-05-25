@@ -1,0 +1,40 @@
+#menu {
+  position: absolute;
+  z-index: 10;
+  background-color: #000;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#menu h1{
+  color: #fff;
+  font-size: 100px;
+
+}
+
+
+.button{
+  background-color: #fff;
+  padding: 0.6em;
+  display: inline-block;
+  font-size: 2em;
+  border-radius: 10px;
+  width: min-content;
+  letter-spacing: 3px;
+
+  transition: 0.05s transform ease-in-out;
+  transition: 0.1s color ease-in-out;
+  transition: 0.1s background ease-in-out;
+}
+
+.button:hover{
+  cursor: pointer;
+  transform: scale(1.02) translateY(-3px);
+  color: #ffffff;
+  background-color: #121212;
+  outline: 2px solid white;
+}

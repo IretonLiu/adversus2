@@ -5,13 +5,21 @@ import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
 import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
-import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./Physics.js";
-import NoiseGenerator from "./lib/NoiseGenerator"
+import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
+import Stats from "three/examples/jsm/libs/stats.module";
 
-let playerController, scene, renderer, physicsWorld, mMap, maze, grid, monster;
+let playerController,
+  scene,
+  renderer,
+  physicsWorld,
+  mMap,
+  maze,
+  grid,
+  monster,
+  stats;
+import state from "./State";
 let pathGraph = [];
 
 let rigidBodies = [],
@@ -22,11 +30,11 @@ const clock = new THREE.Clock();
 class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
-    noiseGen.generateNoiseMap();
+    // noiseGen.generateNoiseMap();
     maze = new Maze(
       Constants.MAP_SIZE,
       Constants.MAP_SIZE,
-      Constants.PERCENTAGE_WALLS_REMOVED
+      Constants.PROBABILITY_WALLS_REMOVED
     );
     maze.growingTree();
     grid = maze.getThickGrid();
@@ -40,15 +48,28 @@ class GameManager {
     initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
+    removeLoadingScreen();
 
     animate();
   }
 }
 
+function removeLoadingScreen() {
+  const loadingScreen = document.getElementById("loading-screen");
+  loadingScreen.classList.add("fade-out");
+
+  // optional: remove loader from DOM via event listener
+  loadingScreen.addEventListener("transitionend", () => {
+    loadingScreen.remove();
+  });
+}
+
 function initGraphics() {
   scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0a0a);
+  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
-  renderer = new THREE.WebGLRenderer({ antialias: false });
+  renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(
     innerWidth / Constants.BLOCKINESS,
@@ -63,12 +84,17 @@ function initGraphics() {
 
 function animate() {
   let deltaTime = clock.getDelta();
+
   requestAnimationFrame(animate);
+
+  if (!state.isPlaying) return;
+
   playerController.update();
   if (monster.path != "") monster.update(scene);
 
   mMap.worldUpdate();
   render();
+  stats.update();
 }
 
 
@@ -77,12 +103,21 @@ function initWorld() {
   const skybox = new Skybox("nightsky");
   scene.add(skybox.createSkybox());
 
+  stats = new Stats(); // <-- remove me
+  document.body.appendChild(stats.dom); // <-- remove me
   renderMaze(); // adds the maze in to the scene graph
 
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
+  var groundTexture = new THREE.TextureLoader().load(
+    "../assets/textures/snow_ground.jpg"
+  );
+  groundTexture.repeat.set(225, 225);
+  groundTexture.wrapS = THREE.RepeatWrapping;
+  groundTexture.wrapT = THREE.RepeatWrapping;
   const floorMaterial = new THREE.MeshStandardMaterial({
-    color: 0x505050,
+    color: 0xffffff,
+    map: groundTexture,
   });
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   floor.rotateX(-Math.PI / 2);
@@ -91,7 +126,8 @@ function initWorld() {
   scene.add(floor);
 
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0x121212); // 0x080808
+  const light = new THREE.AmbientLight(0xffffff); // 0x080808
+  light.intensity = 0.07;
   scene.add(light);
 
   playerController = new PlayerController(-30, 3, 20, renderer.domElement);
@@ -103,14 +139,16 @@ function initWorld() {
     y: 0,
     z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(monsterPosition, Constants.MONSTER_SPEED_INVERSE);
+  monster = new Monster(
+    monsterPosition,
+    Constants.MONSTER_SPEED_INVERSE,
+    scene
+  );
   monster.getAstarPath(grid, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
-  // console.log(monster.path);
-  scene.add(monster.monsterObject);
 
   mMap = new MiniMap(playerController, grid);
 }
@@ -121,7 +159,7 @@ function renderMaze() {
 
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
-  const wallHeight = 15;
+  const wallHeight = 30;
   const wallWidth = 20;
 
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
@@ -141,7 +179,12 @@ function renderMaze() {
 
         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
         let config = wallGenerator.getWallConfig(binString);
-        wallMesh = wallGenerator.createWall(config, wallWidth, wallHeight, x + y);
+        wallMesh = wallGenerator.createWall(
+          config,
+          wallWidth,
+          wallHeight,
+          x + y
+        );
         wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
         mazeGroup.add(wallMesh);
         continue;
@@ -155,7 +198,6 @@ function renderMaze() {
       }
     }
   }
-  console.log(mazeGroup);
   mazeGroup.position.y -= wallHeight / 4;
   scene.add(mazeGroup);
 }
