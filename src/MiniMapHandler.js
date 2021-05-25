@@ -72,7 +72,6 @@ class MiniMap {
     this.updatePosition();
     this.drawMaze();
     this.drawPlayer();
-    // console.log(this.playerController.camera.rotation.y);
   }
 
   drawCenterdMaze() {
@@ -271,7 +270,7 @@ class MiniMap {
   updatePosition() {
     this.x = this.playerController.camera.position.x;
     this.y = this.playerController.camera.position.z;
-    // console.log(this.y);
+
   }
 }
 

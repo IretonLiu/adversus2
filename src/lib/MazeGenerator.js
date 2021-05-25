@@ -240,7 +240,6 @@ class Maze {
         }
       }
     }
-    console.log(count);
 
     // check last col
 

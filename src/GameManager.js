@@ -118,7 +118,7 @@ function initWorld() {
 
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.05;
+  light.intensity = 0.07;
   scene.add(light);
 
   playerController = new PlayerController(-30, 3, 20, renderer.domElement);
@@ -136,7 +136,6 @@ function initWorld() {
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
-  // console.log(monster.path);
   scene.add(monster.monsterObject);
 
   mMap = new MiniMap(playerController, grid);
@@ -187,7 +186,6 @@ function renderMaze() {
       }
     }
   }
-  console.log(mazeGroup);
   mazeGroup.position.y -= wallHeight / 4;
   scene.add(mazeGroup);
 }

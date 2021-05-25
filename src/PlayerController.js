@@ -107,30 +107,35 @@ class PlayerController {
         case "KeyZ":
           self.velocity.y = 0;
           break;
+        case "KeyE":
+          this.turnTorchOff();
+          break;
       }
     };
 
     const onClick = (event) => {
-      console.log(event);
       switch (event.button) {
         case 0:
           self.controls.lock();
           break;
         case 2:
 
-          self.torch.visible = !self.torch.visible;
+          this.turnTorchOff();
           break;
       }
     };
 
     const onRightClick = (event) => {
-      console.log("right click");
-      self.torch.visible = !self.torch.visible;
+      this.turnTorchOff();
     };
     document.addEventListener("contextmenu", onRightClick);
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
     document.addEventListener("click", onClick);
+  }
+
+  turnTorchOff(){
+    this.torch.visible = !this.torch.visible;
   }
 
   update() {
@@ -143,11 +148,11 @@ class PlayerController {
     var torch = new SpotLight(0xffffff);
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
-    torch.intensity = 1.2;
+    torch.intensity = 1.5;
     torch.shadow.mapSize.width = 1024;
     torch.shadow.mapSize.height = 1024;
-    torch.penumbra = 0.6;
-    torch.decay = 50;
+    torch.penumbra = 1;
+    torch.decay = 5;
     torch.distance = 2000;
     torch.shadow.mapSize.width = 2048;
     torch.shadow.mapSize.height = 2048;

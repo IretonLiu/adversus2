@@ -13,7 +13,6 @@ class WallGenerator {
     this.wallTexture = new THREE.TextureLoader().load(
       "../assets/textures/snow_wall.jpg"
     );
-    console.log(this.normalMap);
   }
 
   createWall(type) {
