@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Skybox from "./Skybox"
+import Skybox from "./Skybox";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
@@ -13,7 +13,7 @@ import Stats from "three/examples/jsm/libs/stats.module";
 let playerController,
   scene,
   renderer,
-  physicsWorld,
+  physics,
   mMap,
   maze,
   grid,
@@ -40,9 +40,11 @@ class GameManager {
     grid = maze.getThickGrid();
 
     // initializing physics
-    await Ammo();
-
-    tmpTrans = new Ammo.btTransform();
+    Ammo().then(() => {
+      physics = new Physics();
+      physics.initPhysics();
+      physicsTest();
+    });
 
     initGraphics();
     initWorld();
@@ -83,21 +85,20 @@ function initGraphics() {
 }
 
 function animate() {
-  let deltaTime = clock.getDelta();
+  if (state.isPlaying) {
+    let deltaTime = clock.getDelta();
 
+    physics?.updatePhysics(deltaTime);
+
+    playerController.update();
+    if (monster.path != "") monster.update(scene);
+
+    mMap.worldUpdate();
+    render();
+    stats.update();
+  }
   requestAnimationFrame(animate);
-
-  if (!state.isPlaying) return;
-
-  playerController.update();
-  if (monster.path != "") monster.update(scene);
-
-  mMap.worldUpdate();
-  render();
-  stats.update();
 }
-
-
 
 function initWorld() {
   const skybox = new Skybox("nightsky");
@@ -105,8 +106,60 @@ function initWorld() {
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
-  renderMaze(); // adds the maze in to the scene graph
+  // renderMaze(); // adds the maze in to the scene graph
 
+  // setUpGround();
+
+  setUpAmbientLight();
+
+  playerController = new PlayerController(-30, 3, 20, renderer.domElement);
+  scene.add(playerController.controls.getObject());
+
+  setUpMonster();
+
+  mMap = new MiniMap(playerController, grid);
+}
+
+function physicsTest() {
+  makePlane();
+  makeBall();
+}
+
+function makeBall() {
+  let pos = { x: 0, y: 20, z: 0 };
+  let radius = 2;
+  let quat = { x: 0, y: 0, z: 0, w: 1 };
+  let mass = 1;
+  physics.genBallRB(pos, radius, quat, mass, scene);
+}
+
+function makePlane() {
+  let pos = { x: 0, y: 0, z: 0 };
+  let scale = { x: 50, y: 2, z: 50 };
+  let quat = { x: 0, y: 0, z: 0.05, w: 1 };
+  let mass = 0;
+  physics.genBoxRB(pos, scale, quat, mass, scene);
+}
+
+function setUpMonster() {
+  let monsterPosition = {
+    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+    y: 0,
+    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+  };
+  monster = new Monster(
+    monsterPosition,
+    Constants.MONSTER_SPEED_INVERSE,
+    scene
+  );
+  monster.getAstarPath(grid, {
+    x: 1 * Constants.WALL_SIZE,
+    y: 0,
+    z: 1 * Constants.WALL_SIZE,
+  });
+}
+
+function setUpGround() {
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
   var groundTexture = new THREE.TextureLoader().load(
@@ -124,33 +177,13 @@ function initWorld() {
   floor.position.y = -20 / 2;
   floor.receiveShadow = true;
   scene.add(floor);
+}
 
+function setUpAmbientLight() {
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02;
+  const light = new THREE.AmbientLight(0xffffff);
+  light.intensity = Constants.AMBIENT_INTENSITY;
   scene.add(light);
-
-  playerController = new PlayerController(-30, 3, 20, renderer.domElement);
-  scene.add(playerController.controls.getObject());
-
-  let wallWidth = 20;
-  let monsterPosition = {
-    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
-    y: 0,
-    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
-  };
-  monster = new Monster(
-    monsterPosition,
-    Constants.MONSTER_SPEED_INVERSE,
-    scene
-  );
-  monster.getAstarPath(grid, {
-    x: 1 * Constants.WALL_SIZE,
-    y: 0,
-    z: 1 * Constants.WALL_SIZE,
-  });
-
-  mMap = new MiniMap(playerController, grid);
 }
 
 function renderMaze() {

@@ -1,14 +1,14 @@
-import * as THREE from "three";
+import { BoxBufferGeometry, SphereBufferGeometry } from "three";
 
 class Physics {
   constructor() {
     this.physicsWorld = null;
-    this.rigidBodies = [];
-    this.tmpTrans = new Ammo.btTransform();
+    this.rigidBody = [];
   }
 
   initPhysics() {
     // Ammojs initialisation
+    console.log("Physics world initialized");
     let collisionConfiguration = new Ammo.btDefaultCollisionConfiguration(),
       dispatcher = new Ammo.btCollisionDispatcher(collisionConfiguration),
       overlappingPairCache = new Ammo.btDbvtBroadphase(),
@@ -20,18 +20,16 @@ class Physics {
       solver,
       collisionConfiguration
     );
-    this.physicsWorld.setGravity(new Ammo.btVector3(0, -10, 0));
-    console.log("Initialized physics");
+    this.physicsWorld.setGravity(new Ammo.btVector3(0, -100, 0));
   }
 
-  genBoxRB(pos, scale, quat, mass, scene) {
+  genBoxRB(pos, scale, quat, mass) {
     // initialize the box mesh this part will probably be removed after models are loaded in
-    let box = new THREE.Mesh(
-      new THREE.BoxBufferGeometry(scale.x, scale.y, scale.z),
-      new THREE.MeshStandardMaterial({ color: 0x111111 })
+    let box = new Mesh(
+      new BoxBufferGeometry(scale.x, scale.y, scale.z),
+      new MeshBasicMaterial({ color: 0x111111 })
     );
     box.position.set(pos.x, pos.y, pos.z);
-    box.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
     // add mesh to scene
     scene.add(box);
@@ -64,16 +62,15 @@ class Physics {
       localInertia
     );
     let rb = new Ammo.btRigidBody(rbInfo);
-    rb.setRestitution(0.8);
 
-    this.physicsWorld.addRigidBody(rb);
+    physicsWorld.addRigidBody(rb);
   }
 
-  genBallRB(pos, radius, quat, mass, scene) {
+  genBoxRB(pos, radius, quat, mass) {
     // initialize the box mesh this part will probably be removed after models are loaded in
-    let ball = new THREE.Mesh(
-      new THREE.SphereBufferGeometry(radius, 64, 64),
-      new THREE.MeshStandardMaterial({ color: 0xee0000 })
+    let ball = new Mesh(
+      new SphereBufferGeometry(radius, 64, 64),
+      new MeshBasicMaterial({ color: 0x111111 })
     );
     ball.position.set(pos.x, pos.y, pos.z);
 
@@ -106,26 +103,23 @@ class Physics {
       localInertia
     );
     let rb = new Ammo.btRigidBody(rbInfo);
-    rb.setRestitution(1);
-    this.physicsWorld.addRigidBody(rb);
 
-    ball.userData.physicsBody = rb;
-    this.rigidBodies.push(ball);
+    physicsWorld.addRigidBody(rb);
   }
 
   updatePhysics(deltaTime) {
     // Step world, next time stamp
-    this.physicsWorld.stepSimulation(deltaTime, 10);
+    physicsWorld.stepSimulation(deltaTime, 10);
     // Update rigid bodies
-    for (let i = 0; i < this.rigidBodies.length; i++) {
-      let objThree = this.rigidBodies[i];
+    for (let i = 0; i < rigidBodies.length; i++) {
+      let objThree = rigidBodies[i];
       let objAmmo = objThree.userData.physicsBody;
       let ms = objAmmo.getMotionState();
       if (ms) {
-        ms.getWorldTransform(this.tmpTrans);
+        ms.getWorldTransform(tmpTrans);
 
-        let p = this.tmpTrans.getOrigin();
-        let q = this.tmpTrans.getRotation();
+        let p = tmpTrans.getOrigin();
+        let q = tmpTrans.getRotation();
         objThree.position.set(p.x(), p.y(), p.z());
         objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
       }

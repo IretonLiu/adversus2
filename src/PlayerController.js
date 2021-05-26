@@ -7,7 +7,7 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
-import state from './State';
+import state from "./State";
 class PlayerController {
   constructor(x, y, z, domElement) {
     // initializing all the variables
@@ -43,8 +43,8 @@ class PlayerController {
 
   initControls(domElement, self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.maxPolarAngle = 5 * Math.PI / 6;
-    controls.minPolarAngle = 1 * Math.PI / 8;
+    controls.maxPolarAngle = (5 * Math.PI) / 6;
+    controls.minPolarAngle = (1 * Math.PI) / 8;
     controls.addEventListener("unlock", function () {
       self.openPauseMenu();
     });
@@ -71,6 +71,7 @@ class PlayerController {
     self.controls.lock();
     this.setUpPauseScreen();
     const onKeyDown = (event) => {
+      if (!state.isPlaying) return;
       switch (event.code) {
         case "KeyW":
           self.moveForward = true;
@@ -99,6 +100,7 @@ class PlayerController {
     };
 
     const onKeyUp = (event) => {
+      if (!state.isPlaying) return;
       switch (event.code) {
         case "KeyW":
           self.moveForward = false;
@@ -129,6 +131,7 @@ class PlayerController {
     };
 
     const onClick = (event) => {
+      if (!state.isPlaying) return;
       switch (event.button) {
         // case 0:
         //   self.controls.lock();
@@ -140,6 +143,7 @@ class PlayerController {
     };
 
     const onRightClick = (event) => {
+      if (!state.isPlaying) return;
       this.turnTorchOff();
     };
     document.addEventListener("contextmenu", onRightClick);
