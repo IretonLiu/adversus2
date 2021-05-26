@@ -29,6 +29,7 @@ let Constants = {
   WALL_SEGMENTS: 1,
 
   PLAYER_MOVE_SPEED: 25,
+  PLAYER_MOVE_SPEED_DEV: 100,
 
   // monster controls
   MONSTER_SPEED_INVERSE: 50,
