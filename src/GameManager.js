@@ -18,8 +18,11 @@ let playerController,
   maze,
   grid,
   monster,
-  stats;
+  stats,
+  saferoom1;
+
 import state from "./State";
+import SafeRoom from "./SafeRoom";
 let pathGraph = [];
 
 let rigidBodies = [],
@@ -45,7 +48,7 @@ class GameManager {
     tmpTrans = new Ammo.btTransform();
 
     initGraphics();
-    initWorld();
+    await initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
@@ -67,7 +70,7 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
+  //scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
   renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -78,6 +81,7 @@ function initGraphics() {
   renderer.domElement.style.width = innerWidth;
   renderer.domElement.style.height = innerHeight;
   renderer.shadowMap.enabled = true;
+
 
   document.body.appendChild(renderer.domElement);
 }
@@ -91,7 +95,7 @@ function animate() {
 
   playerController.update();
   if (monster.path != "") monster.update(scene);
-
+  saferoom1.update(deltaTime);
   mMap.worldUpdate();
   render();
   stats.update();
@@ -99,7 +103,7 @@ function animate() {
 
 
 
-function initWorld() {
+async function initWorld() {
   const skybox = new Skybox("nightsky");
   scene.add(skybox.createSkybox());
 
@@ -127,10 +131,19 @@ function initWorld() {
 
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02;
+  light.intensity = 0.02; // change intensity for brightness, who would have thunk
   scene.add(light);
 
-  playerController = new PlayerController(-30, 3, 20, renderer.domElement);
+  // adding the saferoom into the game;
+  saferoom1 = new SafeRoom();
+
+  await saferoom1.loadModel("SafeRoom1");
+  // saferoom1.model.position.x = (Constants.MAP_SIZE + 1.75) * Constants.WALL_SIZE * 2;
+  // saferoom1.model.position.z = (Constants.MAP_SIZE + 0.75) * Constants.WALL_SIZE * 2;
+  scene.add(saferoom1.model);
+
+
+  playerController = new PlayerController(-30, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
 
   let wallWidth = 20;
@@ -198,7 +211,7 @@ function renderMaze() {
       }
     }
   }
-  mazeGroup.position.y -= wallHeight / 4;
+  //mazeGroup.position.y -= wallHeight / 4;
   scene.add(mazeGroup);
 }
 
