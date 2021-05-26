@@ -7,7 +7,7 @@ import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
 import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
-import Physics from "./Physics.js";
+import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
 import NoiseGenerator from "./lib/NoiseGenerator"
@@ -128,7 +128,7 @@ function initWorld() {
 
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02;
+  light.intensity = 1;
   scene.add(light);
 
   playerController = new PlayerController(-30, 3, 20, renderer.domElement);
