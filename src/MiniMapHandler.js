@@ -1,7 +1,7 @@
 import Constants from "./Constants";
 import * as THREE from "three";
 
-const ctx = document.createElement("canvas").getContext("2d");
+const ctx = document.getElementById("minimap").getContext("2d");
 document.body.appendChild(ctx.canvas);
 
 class MiniMap {
@@ -72,18 +72,23 @@ class MiniMap {
     this.updatePosition();
     this.drawMaze();
     this.drawPlayer();
-    // console.log(this.playerController.camera.rotation.y);
   }
 
   drawCenterdMaze() {
     ctx.save();
-    var angle = -(this.getYAngle(this.playerController.camera)-Math.PI/2);
+    var angle = -(this.getYAngle(this.playerController.camera) - Math.PI / 2);
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
     ctx.translate(this.width / 2, this.height / 2);
-    ctx.translate(Math.floor(Constants.WALL_SIZE_MINIMAP/2),Math.floor(Constants.WALL_SIZE_MINIMAP/2));
+    ctx.translate(
+      Constants.WALL_SIZE_MINIMAP / 2,
+      Constants.WALL_SIZE_MINIMAP / 2
+    );
     ctx.rotate(angle);
-    ctx.translate(Math.floor(-Constants.WALL_SIZE_MINIMAP/2),Math.floor(-Constants.WALL_SIZE_MINIMAP/2));
+    ctx.translate(
+      -Constants.WALL_SIZE_MINIMAP / 2,
+      -Constants.WALL_SIZE_MINIMAP / 2
+    );
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
         if (this.maze[row][col]) continue;
@@ -95,8 +100,8 @@ class MiniMap {
         var playerCellY = y;
 
         if (
-          Math.abs(playerCellX - col) < 0.5 &&
-          Math.abs(playerCellY - row) < 0.5
+          Math.abs(playerCellX - col) < Constants.MINIMAP_DISCOVER_THRESHOLD &&
+          Math.abs(playerCellY - row) < Constants.MINIMAP_DISCOVER_THRESHOLD
         ) {
           this.visited[row][col] = true;
         }
@@ -108,8 +113,8 @@ class MiniMap {
 
         ctx.save();
         ctx.translate(
-          -Math.floor(dy * Constants.WALL_SIZE_MINIMAP),
-          Math.floor(dx * Constants.WALL_SIZE_MINIMAP)
+          -dy * Constants.WALL_SIZE_MINIMAP,
+          dx * Constants.WALL_SIZE_MINIMAP
         );
         ctx.fillRect(
           0,
@@ -137,7 +142,7 @@ class MiniMap {
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
 
-    this.updateFullScreenSizes();
+    
 
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
@@ -150,8 +155,8 @@ class MiniMap {
         var playerCellY = y;
 
         if (
-          Math.abs(playerCellX - col) < 0.5 &&
-          Math.abs(playerCellY - row) < 0.5
+          Math.abs(playerCellX - col) < Constants.MINIMAP_DISCOVER_THRESHOLD &&
+          Math.abs(playerCellY - row) < Constants.MINIMAP_DISCOVER_THRESHOLD
         ) {
           this.visited[row][col] = true;
         }
@@ -182,28 +187,24 @@ class MiniMap {
   }
 
   fullScreen() {
+    ctx.canvas.classList.add("fullscreen");
     this.width = window.innerWidth;
     this.height = window.innerHeight;
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
 
-    ctx.canvas.style.background = "#222222aa";
+    this.updateFullScreenSizes();
   }
 
   minimize() {
+    ctx.canvas.classList.remove("fullscreen");
     this.width = Constants.MINIMAP_SIDE_LENGTH;
     this.height = Constants.MINIMAP_SIDE_LENGTH;
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
-    ctx.canvas.style.fill = "#000";
-    ctx.canvas.style.background = "#22222250";
-    ctx.canvas.style.position = "absolute";
-    ctx.canvas.style.top = 10;
-    ctx.canvas.style.right = 10;
-    ctx.canvas.style.zIndex = 3000;
-    ctx.canvas.style.filter = "blur(0.4px)";
+
   }
 
   drawPlayer() {
@@ -216,6 +217,10 @@ class MiniMap {
 
   drawWorldPlayer() {
     ctx.save();
+    var playerSize = Math.max(
+      Constants.PLAYER_MIN_SIZE_MINIMAP_FULLSCREEN,
+      this.blockSize / 2.5
+    );
     var x = this.x / Constants.WALL_SIZE;
     var y = this.y / Constants.WALL_SIZE;
     ctx.fillStyle = "#FF0000";
@@ -225,7 +230,7 @@ class MiniMap {
     );
     ctx.translate(this.blockSize / 2, this.blockSize / 2);
     ctx.rotate(this.getYAngle(this.playerController.camera));
-    ctx.scale(Constants.PLAYER_SIZE_MINIMAP, -Constants.PLAYER_SIZE_MINIMAP);
+    ctx.scale(playerSize, -playerSize);
     this.drawTriangle();
     ctx.restore();
   }
@@ -261,7 +266,6 @@ class MiniMap {
   updatePosition() {
     this.x = this.playerController.camera.position.x;
     this.y = this.playerController.camera.position.z;
-    // console.log(this.y);
   }
 }
 
