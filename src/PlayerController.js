@@ -43,8 +43,8 @@ class PlayerController {
 
   initControls(domElement, self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.maxPolarAngle = (5 * Math.PI) / 6;
-    controls.minPolarAngle = (1 * Math.PI) / 8;
+    controls.maxPolarAngle = 29 * Math.PI / 30;
+    controls.minPolarAngle = 1 * Math.PI / 30;
     controls.addEventListener("unlock", function () {
       self.openPauseMenu();
     });
@@ -185,7 +185,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = Constants.PLAYER_MOVE_SPEED;
+    const speed = Constants.PLAYER_MOVE_SPEED_DEV; // TODO: change to normal 
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
