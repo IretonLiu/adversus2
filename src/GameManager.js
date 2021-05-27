@@ -15,12 +15,15 @@ let playerController,
   renderer,
   physicsWorld,
   mMap,
-  maze,
-  grid,
   monster,
   snowParticles,
-  stats;
+  stats,
+  saferoom1;
+
+let maze1, grid1, maze2, grid2, maze3, grid3;
+
 import state from "./State";
+import SafeRoom from "./SafeRoom";
 let pathGraph = [];
 
 let rigidBodies = [],
@@ -32,13 +35,6 @@ class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
     // noiseGen.generateNoiseMap();
-    maze = new Maze(
-      Constants.MAP_SIZE,
-      Constants.MAP_SIZE,
-      Constants.PROBABILITY_WALLS_REMOVED
-    );
-    maze.growingTree();
-    grid = maze.getThickGrid();
 
     // initializing physics
     await Ammo();
@@ -46,7 +42,7 @@ class GameManager {
     tmpTrans = new Ammo.btTransform();
 
     initGraphics();
-    initWorld();
+    await initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
@@ -68,7 +64,7 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
+  //scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
   renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -95,18 +91,18 @@ function animate() {
 
   updateSnow(deltaTime);
 
+  saferoom1.update(deltaTime);
   mMap.worldUpdate();
   render();
   stats.update();
 }
 
-function initWorld() {
+async function initWorld() {
   const skybox = new Skybox("nightsky");
   scene.add(skybox.createSkybox());
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
-  renderMaze(); // adds the maze in to the scene graph
 
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
@@ -126,37 +122,81 @@ function initWorld() {
   floor.receiveShadow = true;
   scene.add(floor);
 
+  maze1 = new Maze(
+    Constants.MAP1_SIZE,
+    Constants.MAP1_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze1.growingTree();
+  grid1 = maze1.getThickGrid();
+  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+
+  maze2 = new Maze(
+    Constants.MAP2_SIZE,
+    Constants.MAP2_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze2.growingTree();
+  grid2 = maze2.getThickGrid();
+  const maze2Group = renderMaze(maze2, grid2);
+  maze2Group.position.x = (2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE;
+  maze2Group.position.z = (2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE;
+  scene.add(maze2Group);
+
+  maze3 = new Maze(
+    Constants.MAP3_SIZE,
+    Constants.MAP3_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze3.growingTree();
+  grid3 = maze3.getThickGrid();
+  const maze3Group = renderMaze(maze3, grid3);
+  maze3Group.position.x =
+    2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1) * Constants.WALL_SIZE;
+  maze3Group.position.z =
+    2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2) * Constants.WALL_SIZE;
+  // scene.add(maze3Group);
+
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02;
+  light.intensity = 0.02; // change intensity for brightness, who would have thunk
   scene.add(light);
 
-  playerController = new PlayerController(-30, 3, 20, renderer.domElement);
+  // adding the saferoom into the game;
+  saferoom1 = new SafeRoom();
+
+  await saferoom1.loadModel("SafeRoom1");
+  saferoom1.model.position.x =
+    (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
+  saferoom1.model.position.z =
+    (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
+  scene.add(saferoom1.model);
+
+  playerController = new PlayerController(-30, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
 
-  let wallWidth = 20;
   let monsterPosition = {
-    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
-    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
   };
   monster = new Monster(
     monsterPosition,
     Constants.MONSTER_SPEED_INVERSE,
     scene
   );
-  monster.getAstarPath(grid, {
+  monster.getAstarPath(grid1, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
 
-  mMap = new MiniMap(playerController, grid);
+  mMap = new MiniMap(playerController, grid1);
 
   makeSnow(scene);
 }
 
-function renderMaze() {
+function renderMaze(maze, grid) {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
@@ -201,14 +241,14 @@ function renderMaze() {
       }
     }
   }
-  mazeGroup.position.y -= wallHeight / 4;
-  scene.add(mazeGroup);
+  //mazeGroup.position.y -= wallHeight / 4;
+
+  return mazeGroup;
 }
 
-
-
-function randomIntFromInterval(min, max) { // min and max included 
-  return Math.floor(Math.random() * (max - min + 1) + min)
+function randomIntFromInterval(min, max) {
+  // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
 function makeSnow(scene) {
   const particleNum = 100000;
@@ -261,9 +301,9 @@ function makeSnow(scene) {
   var vertices = [];
   var sizes = [];
   for (let i = 0; i < particleNum; i++) {
-    vertices.push(randomIntFromInterval(min,max));
-    vertices.push(randomIntFromInterval(50,-10));
-    vertices.push(randomIntFromInterval(min,max));
+    vertices.push(randomIntFromInterval(min, max));
+    vertices.push(randomIntFromInterval(50, -10));
+    vertices.push(randomIntFromInterval(min, max));
     sizes.push(8);
   }
   pointGeometry.setAttribute(
@@ -302,19 +342,18 @@ function makeSnow(scene) {
 }
 
 function updateSnow(delta) {
-
   // snowParticles.position.set(playerController.camera.position.x,playerController.camera.position.y,playerController.camera.position.z);
 
   const posArr = snowParticles.geometry.getAttribute("position").array;
 
   for (let i = 0; i < posArr.length; i += 3) {
     var x = i;
-    var y = i+1;
-    var z = i+2;
+    var y = i + 1;
+    var z = i + 2;
 
-    posArr[y] += -15*delta;
+    posArr[y] += -15 * delta;
     if (posArr[y] < -30) {
-      posArr[y] = randomIntFromInterval(-10,50);
+      posArr[y] = randomIntFromInterval(-10, 50);
     }
 
     //  posArr[z] += Math.floor(Math.random() * 6 - 3) * 0.01;
