@@ -15,11 +15,11 @@ let playerController,
   renderer,
   physicsWorld,
   mMap,
-  maze,
-  grid,
   monster,
   stats,
   saferoom1;
+
+let maze1, grid1, maze2, grid2, maze3, grid3;
 
 import state from "./State";
 import SafeRoom from "./SafeRoom";
@@ -34,13 +34,7 @@ class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
     // noiseGen.generateNoiseMap();
-    maze = new Maze(
-      Constants.MAP_SIZE,
-      Constants.MAP_SIZE,
-      Constants.PROBABILITY_WALLS_REMOVED
-    );
-    maze.growingTree();
-    grid = maze.getThickGrid();
+
 
     // initializing physics
     await Ammo();
@@ -109,7 +103,6 @@ async function initWorld() {
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
-  renderMaze(); // adds the maze in to the scene graph
 
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
@@ -129,46 +122,79 @@ async function initWorld() {
   floor.receiveShadow = true;
   scene.add(floor);
 
+  maze1 = new Maze(
+    Constants.MAP1_SIZE,
+    Constants.MAP1_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze1.growingTree();
+  grid1 = maze1.getThickGrid();
+  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+
+  maze2 = new Maze(
+    Constants.MAP2_SIZE,
+    Constants.MAP2_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze2.growingTree();
+  grid2 = maze2.getThickGrid();
+  const maze2Group = renderMaze(maze2, grid2);
+  maze2Group.position.x = ((2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE);
+  maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
+  scene.add(maze2Group);
+
+  maze3 = new Maze(
+    Constants.MAP3_SIZE,
+    Constants.MAP3_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze3.growingTree();
+  grid3 = maze3.getThickGrid();
+  const maze3Group = renderMaze(maze3, grid3);
+  maze3Group.position.x = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1)) * Constants.WALL_SIZE);
+  maze3Group.position.z = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2)) * Constants.WALL_SIZE);
+  // scene.add(maze3Group);
+
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02; // change intensity for brightness, who would have thunk
+  light.intensity = 1.02; // change intensity for brightness, who would have thunk
   scene.add(light);
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
 
   await saferoom1.loadModel("SafeRoom1");
-  // saferoom1.model.position.x = (Constants.MAP_SIZE + 1.75) * Constants.WALL_SIZE * 2;
-  // saferoom1.model.position.z = (Constants.MAP_SIZE + 0.75) * Constants.WALL_SIZE * 2;
+  saferoom1.model.position.x = (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
+  saferoom1.model.position.z = (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
   scene.add(saferoom1.model);
 
 
   playerController = new PlayerController(-30, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
 
-  let wallWidth = 20;
   let monsterPosition = {
-    x: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
-    z: (2 * Constants.MAP_SIZE - 1) * Constants.WALL_SIZE,
+    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
   };
   monster = new Monster(
     monsterPosition,
     Constants.MONSTER_SPEED_INVERSE,
     scene
   );
-  monster.getAstarPath(grid, {
+  monster.getAstarPath(grid1, {
     x: 1 * Constants.WALL_SIZE,
     y: 0,
     z: 1 * Constants.WALL_SIZE,
   });
 
-  mMap = new MiniMap(playerController, grid);
+  mMap = new MiniMap(playerController, grid1);
 }
 
-function renderMaze() {
+function renderMaze(maze, grid) {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+
 
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
@@ -212,7 +238,8 @@ function renderMaze() {
     }
   }
   //mazeGroup.position.y -= wallHeight / 4;
-  scene.add(mazeGroup);
+
+  return mazeGroup;
 }
 
 // var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);
