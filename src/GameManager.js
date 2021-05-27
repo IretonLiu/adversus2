@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Skybox from "./Skybox"
+import Skybox from "./Skybox";
 import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
@@ -18,6 +18,7 @@ let playerController,
   maze,
   grid,
   monster,
+  snowParticles,
   stats;
 import state from "./State";
 let pathGraph = [];
@@ -92,12 +93,12 @@ function animate() {
   playerController.update();
   if (monster.path != "") monster.update(scene);
 
+  updateSnow(deltaTime);
+
   mMap.worldUpdate();
   render();
   stats.update();
 }
-
-
 
 function initWorld() {
   const skybox = new Skybox("nightsky");
@@ -151,6 +152,8 @@ function initWorld() {
   });
 
   mMap = new MiniMap(playerController, grid);
+
+  makeSnow(scene);
 }
 
 function renderMaze() {
@@ -200,6 +203,124 @@ function renderMaze() {
   }
   mazeGroup.position.y -= wallHeight / 4;
   scene.add(mazeGroup);
+}
+
+
+
+function randomIntFromInterval(min, max) { // min and max included 
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+function makeSnow(scene) {
+  const particleNum = 100000;
+  const max = 1000;
+  const min = -500;
+  const textureSize = 64.0;
+
+  const drawRadialGradation = (ctx, canvasRadius, canvasW, canvasH) => {
+    ctx.save();
+    const gradient = ctx.createRadialGradient(
+      canvasRadius,
+      canvasRadius,
+      0,
+      canvasRadius,
+      canvasRadius,
+      canvasRadius
+    );
+    gradient.addColorStop(0, "rgba(255,255,255,1.0)");
+    gradient.addColorStop(0.5, "rgba(255,255,255,0.5)");
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvasW, canvasH);
+    ctx.restore();
+  };
+
+  const getTexture = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    const diameter = textureSize;
+    canvas.width = diameter;
+    canvas.height = diameter;
+    const canvasRadius = diameter / 2;
+
+    /* gradation circle
+    ------------------------ */
+    drawRadialGradation(ctx, canvasRadius, canvas.width, canvas.height);
+
+    /* snow crystal
+    ------------------------ */
+    // drawSnowCrystal(ctx, canvasRadius);
+
+    const texture = new THREE.Texture(canvas);
+    //texture.minFilter = THREE.NearestFilter;
+    texture.type = THREE.FloatType;
+    texture.needsUpdate = true;
+    return texture;
+  };
+  const pointGeometry = new THREE.BufferGeometry();
+  var vertices = [];
+  var sizes = [];
+  for (let i = 0; i < particleNum; i++) {
+    vertices.push(randomIntFromInterval(min,max));
+    vertices.push(randomIntFromInterval(50,-10));
+    vertices.push(randomIntFromInterval(min,max));
+    sizes.push(8);
+  }
+  pointGeometry.setAttribute(
+    "position",
+    new THREE.Float32BufferAttribute(vertices, 3)
+  );
+  pointGeometry.setAttribute(
+    "size",
+    new THREE.Float32BufferAttribute(sizes, 1).setUsage(THREE.DynamicDrawUsage)
+  );
+
+  const pointMaterial = new THREE.PointsMaterial({
+    // size: 8,
+    color: 0xffffff,
+    vertexColors: false,
+    map: getTexture(),
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    // opacity: 0.8,
+    fog: true,
+    depthWrite: false,
+  });
+
+  const velocities = [];
+  for (let i = 0; i < particleNum; i++) {
+    const x = Math.floor(Math.random() * 6 - 3) * 0.5;
+    const y = Math.floor(Math.random() * 10 + 3) * -0.1;
+    const z = Math.floor(Math.random() * 6 - 3) * 0.5;
+    const particle = new THREE.Vector3(x, y, z);
+    velocities.push(particle);
+  }
+
+  snowParticles = new THREE.Points(pointGeometry, pointMaterial);
+  // snowParticles.geometry.velocities = velocities;
+  scene.add(snowParticles);
+}
+
+function updateSnow(delta) {
+
+  // snowParticles.position.set(playerController.camera.position.x,playerController.camera.position.y,playerController.camera.position.z);
+
+  const posArr = snowParticles.geometry.getAttribute("position").array;
+
+  for (let i = 0; i < posArr.length; i += 3) {
+    var x = i;
+    var y = i+1;
+    var z = i+2;
+
+    posArr[y] += -15*delta;
+    if (posArr[y] < -30) {
+      posArr[y] = randomIntFromInterval(-10,50);
+    }
+
+    //  posArr[z] += Math.floor(Math.random() * 6 - 3) * 0.01;
+  }
+
+  snowParticles.geometry.attributes.position.needsUpdate = true;
 }
 
 // var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);

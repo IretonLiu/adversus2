@@ -25,7 +25,7 @@ let Constants = {
   PROBABILITY_WALLS_REMOVED: 0.075,
 
   // blockiness of visuals
-  BLOCKINESS: 6,
+  BLOCKINESS: 4,
   WALL_SEGMENTS: 1,
 
   PLAYER_MOVE_SPEED: 25,
@@ -36,6 +36,8 @@ let Constants = {
   //Fog
   FOG_FAR: 100,
   FOG_NEAR: 1,
+
+  CAMERA_FAR: 110,
 
   ANTIALIAS: true
 };

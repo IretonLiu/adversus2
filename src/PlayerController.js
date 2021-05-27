@@ -24,8 +24,8 @@ class PlayerController {
     this.camera = new PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
-      1,
-      10100
+      0.1,
+      Constants.CAMERA_FAR
     );
     this.camera.position.set(x, y, z);
     this.camera.lookAt(x + 1, y, z);
