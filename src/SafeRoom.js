@@ -98,8 +98,9 @@ class SafeRoom {
     // create the flame shader, credits to prisoner849
     update(time) {
         this.time += time;
-        this.flameMaterials[0].uniforms.time.value += this.time;
-        //this.flameMaterials[1].uniforms.time.value = time;
+        this.time = this.time % 1000;
+        this.flameMaterials[0].uniforms.time.value = this.time;
+        this.flameMaterials[1].uniforms.time.value = this.time;
         for (var i = 0; i < this.candleLights.length; i++) {
             this.candleLights[i].position.x += Math.sin(this.time * Math.PI) * 0.0001;
             // this.candleLights[i].position.z += Math.cos(this.time * Math.PI * 0.75) * 0.0001;

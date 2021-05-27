@@ -17,6 +17,7 @@ let playerController,
   mMap,
   monster,
   stats,
+  ball,
   saferoom1;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
@@ -37,14 +38,14 @@ class GameManager {
 
 
     // initializing physics
-    Ammo().then(() => {
-      physics = new Physics();
-      physics.initPhysics();
-      physicsTest();
-    });
+    await Ammo();
+    physics = new Physics();
+    physics.initPhysics();
+
 
     initGraphics();
     await initWorld();
+    physicsTest();
 
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
@@ -86,7 +87,8 @@ function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
 
-    physics?.updatePhysics(deltaTime);
+    physics.updatePhysics(deltaTime);
+    moveBall();
 
     playerController.update();
     if (monster.path != "") monster.update(scene);
@@ -119,28 +121,28 @@ async function initWorld() {
   grid1 = maze1.getThickGrid();
   scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
-  maze2 = new Maze(
-    Constants.MAP2_SIZE,
-    Constants.MAP2_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
-  );
-  maze2.growingTree();
-  grid2 = maze2.getThickGrid();
-  const maze2Group = renderMaze(maze2, grid2);
-  maze2Group.position.x = ((2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE);
-  maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
-  scene.add(maze2Group);
+  // maze2 = new Maze(
+  //   Constants.MAP2_SIZE,
+  //   Constants.MAP2_SIZE,
+  //   Constants.PROBABILITY_WALLS_REMOVED
+  // );
+  // maze2.growingTree();
+  // grid2 = maze2.getThickGrid();
+  // const maze2Group = renderMaze(maze2, grid2);
+  // maze2Group.position.x = ((2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE);
+  // maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
+  // scene.add(maze2Group);
 
-  maze3 = new Maze(
-    Constants.MAP3_SIZE,
-    Constants.MAP3_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
-  );
-  maze3.growingTree();
-  grid3 = maze3.getThickGrid();
-  const maze3Group = renderMaze(maze3, grid3);
-  maze3Group.position.x = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1)) * Constants.WALL_SIZE);
-  maze3Group.position.z = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2)) * Constants.WALL_SIZE);
+  // maze3 = new Maze(
+  //   Constants.MAP3_SIZE,
+  //   Constants.MAP3_SIZE,
+  //   Constants.PROBABILITY_WALLS_REMOVED
+  // );
+  // maze3.growingTree();
+  // grid3 = maze3.getThickGrid();
+  // const maze3Group = renderMaze(maze3, grid3);
+  // maze3Group.position.x = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1)) * Constants.WALL_SIZE);
+  // maze3Group.position.z = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2)) * Constants.WALL_SIZE);
   // scene.add(maze3Group);
 
   // adds the ambient light into scene graph
@@ -162,20 +164,38 @@ async function initWorld() {
 
   setUpMonster();
 
-  mMap = new MiniMap(playerController, grid);
+  mMap = new MiniMap(playerController, grid1);
 }
 
 function physicsTest() {
-  makePlane();
-  makeBall();
+  // makePlane();
+  ball = makeBall();
+  scene.add(ball);
+}
+
+function moveBall() {
+  let scalingFactor = 20;
+
+  let moveX = 1;
+  let moveZ = 0;
+  let moveY = 0;
+
+  if (moveX == 0 && moveY == 0 && moveZ == 0) return;
+
+  let resultantImpulse = new Ammo.btVector3(moveX, moveY, moveZ)
+  resultantImpulse.op_mul(scalingFactor);
+
+  let physicsBody = ball.userData.physicsBody;
+  physicsBody.setLinearVelocity(resultantImpulse);
+  console.log(ball.userData);
 }
 
 function makeBall() {
-  let pos = { x: 0, y: 20, z: 0 };
+  let pos = { x: 20, y: 0, z: 20 };
   let radius = 2;
   let quat = { x: 0, y: 0, z: 0, w: 1 };
   let mass = 1;
-  physics.genBallRB(pos, radius, quat, mass, scene);
+  return (physics.genBallRB(pos, radius, quat, mass));
 }
 
 function makePlane() {
@@ -266,6 +286,7 @@ function renderMaze(maze, grid) {
         );
         wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
         mazeGroup.add(wallMesh);
+        physics.createWallRB(wallMesh, wallWidth, wallHeight);
         continue;
         // check if its the
 
