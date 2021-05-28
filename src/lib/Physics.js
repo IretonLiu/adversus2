@@ -61,6 +61,47 @@ class Physics {
     this.rigidBodies.push(wall);
   }
 
+  createPlayerRB(playerObject) {
+
+    const STATE = { DISABLE_DEACTIVATION: 4 }
+
+    const pos = playerObject.position;
+    const quat = playerObject.quaternion;
+    // setup ammo.js tranform object
+    const mass = 1;
+    let transform = new Ammo.btTransform();
+    transform.setIdentity();
+    transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+    transform.setRotation(
+      new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w)
+    );
+    let motionState = new Ammo.btDefaultMotionState(transform);
+
+    // setup the shape of the collider that matches the shape of the mesh
+    // let colliderShape = new Ammo.btBoxShape(new Ammo.btVector3(boxBreadth, boxHeight, boxWidth));
+    let colliderShape = new Ammo.btSphereShape(3);
+    colliderShape.setMargin(0.05);
+
+    // setup inertia of the object
+    let localInertia = new Ammo.btVector3(0, 0, 0);
+    colliderShape.calculateLocalInertia(mass, localInertia);
+
+    // generate the rigidbody
+    let rbInfo = new Ammo.btRigidBodyConstructionInfo(
+      mass,
+      motionState,
+      colliderShape,
+      localInertia
+    );
+    let rb = new Ammo.btRigidBody(rbInfo);
+    rb.setFriction(4);
+    rb.setActivationState(STATE.DISABLE_DEACTIVATION)
+    this.physicsWorld.addRigidBody(rb);
+
+    playerObject.userData.physicsBody = rb;
+    this.rigidBodies.push(playerObject);
+
+  }
   genBoxRB(pos, scale, quat, mass, scene) {
     // initialize the box mesh this part will probably be removed after models are loaded in
     let box = new THREE.Mesh(
@@ -163,18 +204,19 @@ class Physics {
     // Update rigid bodies
 
     for (let i = 0; i < this.rigidBodies.length; i++) {
+
       let objThree = this.rigidBodies[i];
       let objAmmo = objThree.userData.physicsBody;
       // console.log(objAmmo);
       let ms = objAmmo.getMotionState();
       if (ms) {
-
         ms.getWorldTransform(this.tmpTrans);
 
         let p = this.tmpTrans.getOrigin();
         let q = this.tmpTrans.getRotation();
         objThree.position.set(p.x(), p.y(), p.z());
         objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+
       }
     }
   }

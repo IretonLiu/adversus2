@@ -86,11 +86,11 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-
-    physics.updatePhysics(deltaTime);
-    moveBall();
-
     playerController.update();
+    physics.updatePhysics(deltaTime);
+    //moveBall();
+    playerController.updatePosition();
+
     if (monster.path != "") monster.update(scene);
     saferoom1.update(deltaTime);
     mMap.worldUpdate();
@@ -133,18 +133,6 @@ async function initWorld() {
   // maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
   // scene.add(maze2Group);
 
-  // maze3 = new Maze(
-  //   Constants.MAP3_SIZE,
-  //   Constants.MAP3_SIZE,
-  //   Constants.PROBABILITY_WALLS_REMOVED
-  // );
-  // maze3.growingTree();
-  // grid3 = maze3.getThickGrid();
-  // const maze3Group = renderMaze(maze3, grid3);
-  // maze3Group.position.x = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1)) * Constants.WALL_SIZE);
-  // maze3Group.position.z = ((2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2)) * Constants.WALL_SIZE);
-  // scene.add(maze3Group);
-
   // adds the ambient light into scene graph
   // const light = new THREE.AmbientLight(0xffffff); // 0x080808
   // light.intensity = 1.02; // change intensity for brightness, who would have thunk
@@ -159,9 +147,9 @@ async function initWorld() {
   scene.add(saferoom1.model);
 
 
-  playerController = new PlayerController(-30, 10, 20, renderer.domElement);
+  playerController = new PlayerController(20, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
-
+  physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster();
 
   mMap = new MiniMap(playerController, grid1);
@@ -169,8 +157,8 @@ async function initWorld() {
 
 function physicsTest() {
   // makePlane();
-  ball = makeBall();
-  scene.add(ball);
+  //ball = makeBall();
+  //scene.add(ball);
 }
 
 function moveBall() {
@@ -187,7 +175,7 @@ function moveBall() {
 
   let physicsBody = ball.userData.physicsBody;
   physicsBody.setLinearVelocity(resultantImpulse);
-  console.log(ball.userData);
+  // console.log(ball.userData);
 }
 
 function makeBall() {

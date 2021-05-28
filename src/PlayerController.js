@@ -10,6 +10,9 @@ import Constants from "./Constants";
 import state from "./State";
 class PlayerController {
   constructor(x, y, z, domElement) {
+    // setup player object for ammo
+    this.playerObject = new Object3D();
+    this.playerObject.position.set(x, y, z);
     // initializing all the variables
     this.velocity = new Vector3();
     this.direction = new Vector3();
@@ -24,7 +27,7 @@ class PlayerController {
     this.camera = new PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
-      1,
+      0.1,
       10100
     );
     this.camera.position.set(x, y, z);
@@ -49,6 +52,42 @@ class PlayerController {
       self.openPauseMenu();
     });
     return controls;
+  }
+
+  initPlayerRB() {
+    const pos = this.camera.position;
+    const quat = this.camera.quaternion;
+    // setup ammo.js tranform object
+    const mass = 1;
+    let transform = new Ammo.btTransform();
+    transform.setIdentity();
+    transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+    transform.setRotation(
+      new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w)
+    );
+    let motionState = new Ammo.btDefaultMotionState(transform);
+
+    // setup the shape of the collider that matches the shape of the mesh
+    let colliderShape = new Ammo.btBoxShape(5, 5, 5);
+    colliderShape.setMargin(0.05);
+
+    // setup inertia of the object
+    let localInertia = new Ammo.btVector3(0, 0, 0);
+    colliderShape.calculateLocalInertia(mass, localInertia);
+
+    // generate the rigidbody
+    let rbInfo = new Ammo.btRigidBodyConstructionInfo(
+      mass,
+      motionState,
+      colliderShape,
+      localInertia
+    );
+    let rb = new Ammo.btRigidBody(rbInfo);
+    rb.setFriction(4);
+
+
+    //this.rigidbody = threeObj;
+
   }
 
   openPauseMenu() {
@@ -158,7 +197,14 @@ class PlayerController {
 
   update() {
     this.handleMovement();
+
     this.handleTorch();
+  }
+
+  updatePosition() {
+    const pos = this.playerObject.position;
+    //console.log(pos);
+    this.camera.position.set(pos.x, pos.y, pos.z);
   }
 
   initTorch() {
@@ -191,29 +237,56 @@ class PlayerController {
 
     // get the direction by subtracting booleans
     // since only one of the 2 can be true at any instance
-    this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
-    this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
-    this.direction.normalize(); // this ensures consistent movements in all directions
+    this.direction.x = Number(this.moveForward) - Number(this.moveBackward);
+    this.direction.z = Number(this.moveRight) - Number(this.moveLeft);
+    //this.direction.normalize(); // this ensures consistent movements in all directions
 
     // example code with acceleration
     // if ( this.moveForward || this.moveBackward ) this.velocity.z -= this.direction.z * 400.0 * delta;
     // if ( this.moveLeft || this.moveRight ) this.velocity.x -= this.direction.x * 400.0 * delta;
 
-    // constant velocity
-    if (this.moveForward || this.moveBackward)
-      this.velocity.z = -1 * this.direction.z * speed;
-    else this.velocity.z = 0;
-    if (this.moveLeft || this.moveRight)
-      this.velocity.x = -1 * this.direction.x * speed;
-    else this.velocity.x = 0;
 
-    this.controls.moveRight(-this.velocity.x * delta);
-    this.controls.moveForward(-this.velocity.z * delta);
+    // constant velocity
+
+    // the direction of the impulse;
+    let moveDirection = new Vector3(0, 0, 0);
+
+    const lookDirection = this.controls.getDirection(new Vector3(0, 0, 0));
+
+    if (this.moveForward || this.moveBackward) {
+      moveDirection.addVectors(moveDirection, lookDirection.multiplyScalar(this.direction.x));
+    }
+
+    const rightDirection = new Vector3(lookDirection.x, lookDirection.y, lookDirection.z).applyAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2);
+    if (this.moveLeft || this.moveRight) {
+      let d = 1;
+      if (this.moveBackward) d = -1
+      moveDirection.addVectors(moveDirection, rightDirection.multiplyScalar(d * this.direction.z));
+
+    }
+    moveDirection.y = 0;
+
+    moveDirection.normalize();
+
+    // set up the impulse for movement
+    if (moveDirection.x == 0 && moveDirection.y == 0 && moveDirection == 0) return;
+
+    let resultantImpulse = new Ammo.btVector3(moveDirection.x, moveDirection.y, moveDirection.z)
+    resultantImpulse.op_mul(Constants.PLAYER_MOVE_SPEED_DEV);
+    // let resultantImpulse = new Ammo.btVector3(1, 0, 0)
+    // resultantImpulse.op_mul(20);
+
+    let physicsBody = this.playerObject.userData.physicsBody;
+    physicsBody.setLinearVelocity(resultantImpulse);
+
+    // this.controls.moveRight(-this.velocity.x * delta);
+    // this.controls.moveForward(-this.velocity.z * delta);
 
     this.camera.position.y += this.velocity.y;
-
+    // this.camera.position.x += 1;
     this.prevTime = time;
   }
+
 }
 
 export default PlayerController;
