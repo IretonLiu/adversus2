@@ -40,7 +40,7 @@ let Constants = {
   FOG_FAR: 100,
   FOG_NEAR: 1,
 
-  CAMERA_FAR: 200,
+  CAMERA_FAR: 1000,
 
   ANTIALIAS: true
 };
