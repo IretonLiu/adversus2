@@ -13,11 +13,12 @@ import Stats from "three/examples/jsm/libs/stats.module";
 let playerController,
   scene,
   renderer,
-  physicsWorld,
+  physics,
   mMap,
   monster,
   snowParticles,
   stats,
+  ball,
   saferoom1;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
@@ -38,11 +39,13 @@ class GameManager {
 
     // initializing physics
     await Ammo();
+    physics = new Physics();
+    physics.initPhysics();
 
-    tmpTrans = new Ammo.btTransform();
 
     initGraphics();
     await initWorld();
+    physicsTest();
 
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
@@ -80,21 +83,25 @@ function initGraphics() {
 }
 
 function animate() {
-  let deltaTime = clock.getDelta();
+  if (state.isPlaying) {
+    let deltaTime = clock.getDelta();
+    playerController.update();
+    physics.updatePhysics(deltaTime);
+    //moveBall();
+    playerController.updatePosition();
 
-  requestAnimationFrame(animate);
+    if (monster.path != "") monster.update(scene);
 
-  if (!state.isPlaying) return;
+    updateSnow(deltaTime);
 
-  playerController.update();
-  if (monster.path != "") monster.update(scene);
+    saferoom1.update(deltaTime);
+    mMap.worldUpdate();
+    render();
+    stats.update();
+    requestAnimationFrame(animate);
 
-  updateSnow(deltaTime);
+  }
 
-  saferoom1.update(deltaTime);
-  mMap.worldUpdate();
-  render();
-  stats.update();
 }
 
 async function initWorld() {
@@ -104,6 +111,115 @@ async function initWorld() {
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
 
+  // setUpGround();
+
+  setUpAmbientLight();
+  maze1 = new Maze(
+    Constants.MAP1_SIZE,
+    Constants.MAP1_SIZE,
+    Constants.PROBABILITY_WALLS_REMOVED
+  );
+  maze1.growingTree();
+  grid1 = maze1.getThickGrid();
+  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+
+  // maze2 = new Maze(
+  //   Constants.MAP2_SIZE,
+  //   Constants.MAP2_SIZE,
+  //   Constants.PROBABILITY_WALLS_REMOVED
+  // );
+  // maze2.growingTree();
+  // grid2 = maze2.getThickGrid();
+  // const maze2Group = renderMaze(maze2, grid2);
+  // maze2Group.position.x = ((2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE);
+  // maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
+  // scene.add(maze2Group);
+
+  // adds the ambient light into scene graph
+  // const light = new THREE.AmbientLight(0xffffff); // 0x080808
+  // light.intensity = 1.02; // change intensity for brightness, who would have thunk
+  // scene.add(light);
+
+  // adding the saferoom into the game;
+  saferoom1 = new SafeRoom();
+
+  await saferoom1.loadModel("SafeRoom1");
+  saferoom1.model.position.x =
+    (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
+  saferoom1.model.position.z =
+    (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
+  scene.add(saferoom1.model);
+
+
+  playerController = new PlayerController(20, 10, 20, renderer.domElement);
+  scene.add(playerController.controls.getObject());
+  physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
+  setUpMonster();
+
+  mMap = new MiniMap(playerController, grid1);
+}
+
+function physicsTest() {
+  // makePlane();
+  //ball = makeBall();
+  //scene.add(ball);
+}
+
+function moveBall() {
+  let scalingFactor = 20;
+
+  let moveX = 1;
+  let moveZ = 0;
+  let moveY = 0;
+
+  if (moveX == 0 && moveY == 0 && moveZ == 0) return;
+
+  let resultantImpulse = new Ammo.btVector3(moveX, moveY, moveZ)
+  resultantImpulse.op_mul(scalingFactor);
+
+  let physicsBody = ball.userData.physicsBody;
+  physicsBody.setLinearVelocity(resultantImpulse);
+  // console.log(ball.userData);
+}
+
+function makeBall() {
+  let pos = { x: 20, y: 0, z: 20 };
+  let radius = 2;
+  let quat = { x: 0, y: 0, z: 0, w: 1 };
+  let mass = 1;
+  return (physics.genBallRB(pos, radius, quat, mass));
+}
+
+function makePlane() {
+  let pos = { x: 0, y: 0, z: 0 };
+  let scale = { x: 50, y: 2, z: 50 };
+  let quat = { x: 0, y: 0, z: 0.05, w: 1 };
+  let mass = 0;
+  physics.genBoxRB(pos, scale, quat, mass, scene);
+}
+
+function setUpMonster() {
+  let monsterPosition = {
+    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
+    y: 0,
+    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
+  };
+  monster = new Monster(
+    monsterPosition,
+    Constants.MONSTER_SPEED_INVERSE,
+    scene
+  );
+  monster.getAstarPath(grid1, {
+    x: 1 * Constants.WALL_SIZE,
+    y: 0,
+    z: 1 * Constants.WALL_SIZE,
+  });
+}
+
+mMap = new MiniMap(playerController, grid1);
+
+makeSnow(scene);
+function setUpGround() {
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
   var groundTexture = new THREE.TextureLoader().load(
@@ -121,79 +237,13 @@ async function initWorld() {
   floor.position.y = -20 / 2;
   floor.receiveShadow = true;
   scene.add(floor);
+}
 
-  maze1 = new Maze(
-    Constants.MAP1_SIZE,
-    Constants.MAP1_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
-  );
-  maze1.growingTree();
-  grid1 = maze1.getThickGrid();
-  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
-
-  maze2 = new Maze(
-    Constants.MAP2_SIZE,
-    Constants.MAP2_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
-  );
-  maze2.growingTree();
-  grid2 = maze2.getThickGrid();
-  const maze2Group = renderMaze(maze2, grid2);
-  maze2Group.position.x = (2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE;
-  maze2Group.position.z = (2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE;
-  scene.add(maze2Group);
-
-  maze3 = new Maze(
-    Constants.MAP3_SIZE,
-    Constants.MAP3_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
-  );
-  maze3.growingTree();
-  grid3 = maze3.getThickGrid();
-  const maze3Group = renderMaze(maze3, grid3);
-  maze3Group.position.x =
-    2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE + 1) * Constants.WALL_SIZE;
-  maze3Group.position.z =
-    2 * (Constants.MAP1_SIZE + Constants.MAP2_SIZE - 2) * Constants.WALL_SIZE;
-  // scene.add(maze3Group);
-
+function setUpAmbientLight() {
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02; // change intensity for brightness, who would have thunk
+  const light = new THREE.AmbientLight(0xffffff);
+  light.intensity = Constants.AMBIENT_INTENSITY;
   scene.add(light);
-
-  // adding the saferoom into the game;
-  saferoom1 = new SafeRoom();
-
-  await saferoom1.loadModel("SafeRoom1");
-  saferoom1.model.position.x =
-    (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
-  saferoom1.model.position.z =
-    (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
-  scene.add(saferoom1.model);
-
-  playerController = new PlayerController(-30, 10, 20, renderer.domElement);
-  scene.add(playerController.controls.getObject());
-
-  let monsterPosition = {
-    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-    y: 0,
-    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-  };
-  monster = new Monster(
-    monsterPosition,
-    Constants.MONSTER_SPEED_INVERSE,
-    scene
-  );
-  monster.getAstarPath(grid1, {
-    x: 1 * Constants.WALL_SIZE,
-    y: 0,
-    z: 1 * Constants.WALL_SIZE,
-  });
-
-  mMap = new MiniMap(playerController, grid1);
-
-  makeSnow(scene);
 }
 
 function renderMaze(maze, grid) {
@@ -230,6 +280,7 @@ function renderMaze(maze, grid) {
         );
         wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
         mazeGroup.add(wallMesh);
+        physics.createWallRB(wallMesh, wallWidth, wallHeight);
         continue;
         // check if its the
 

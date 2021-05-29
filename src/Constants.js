@@ -37,10 +37,12 @@ let Constants = {
   MONSTER_SPEED_INVERSE: 50,
 
   //Fog
-  FOG_FAR: 100,
+  FOG_FAR: 1000,
   FOG_NEAR: 1,
 
   CAMERA_FAR: 200,
+  AMBIENT_INTENSITY: 0.02,
+  //AMBIENT_INTENSITY: 2,
 
   ANTIALIAS: true
 };
