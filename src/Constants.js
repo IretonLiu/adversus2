@@ -16,7 +16,7 @@ let Constants = {
   //The percentage to take up of the shortest side of the viewport
   MINIMAP_FULLSCREEN_PERC: 0.9,
   PLAYER_MIN_SIZE_MINIMAP_FULLSCREEN: 12,
-  MINIMAP_DISCOVER_THRESHOLD: 0.80,
+  MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
   MAP1_SIZE: 5,
@@ -42,7 +42,7 @@ let Constants = {
 
   CAMERA_FAR: 200,
 
-  ANTIALIAS: true
+  ANTIALIAS: true,
 };
 
 export default Constants;

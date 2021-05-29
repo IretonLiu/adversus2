@@ -7,7 +7,7 @@ import {
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
-import state from './State';
+import state from "./State";
 class PlayerController {
   constructor(x, y, z, domElement) {
     // initializing all the variables
@@ -43,8 +43,8 @@ class PlayerController {
 
   initControls(domElement, self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.maxPolarAngle = 29 * Math.PI / 30;
-    controls.minPolarAngle = 1 * Math.PI / 30;
+    controls.maxPolarAngle = (29 * Math.PI) / 30;
+    controls.minPolarAngle = (1 * Math.PI) / 30;
     controls.addEventListener("unlock", function () {
       self.openPauseMenu();
     });
@@ -158,13 +158,13 @@ class PlayerController {
   }
 
   initTorch() {
-    const mapSize = Constants.MAP_SIZE;
+    // const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
     torch.intensity = 1.5;
-    torch.shadow.mapSize.width = 1024;
-    torch.shadow.mapSize.height = 1024;
+    // torch.shadow.mapSize.width = 1024;
+    // torch.shadow.mapSize.height = 1024;
     torch.penumbra = 1;
     torch.decay = 5;
     torch.distance = 2000;
@@ -181,7 +181,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = Constants.PLAYER_MOVE_SPEED_DEV; // TODO: change to normal 
+    const speed = Constants.PLAYER_MOVE_SPEED_DEV; // TODO: change to normal
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 

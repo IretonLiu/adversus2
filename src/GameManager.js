@@ -24,6 +24,7 @@ let maze1, grid1, maze2, grid2, maze3, grid3;
 
 import state from "./State";
 import SafeRoom from "./SafeRoom";
+
 let pathGraph = [];
 
 let rigidBodies = [],
@@ -87,7 +88,13 @@ function animate() {
   if (!state.isPlaying) return;
 
   playerController.update();
-  if (monster.path != "") monster.update(scene);
+  if (monster.path != "") {
+    monster.update();
+  } else {
+    monster.getAstarPath(grid1, playerController.camera.position);
+  }
+
+  console.log(monster.isVisible(playerController));
 
   updateSnow(deltaTime);
 
@@ -175,11 +182,12 @@ async function initWorld() {
   playerController = new PlayerController(-30, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
 
-  let monsterPosition = {
-    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-    y: 0,
-    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-  };
+  let monsterPosition = new THREE.Vector3(
+    (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
+    0,
+    (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE
+  );
+
   monster = new Monster(
     monsterPosition,
     Constants.MONSTER_SPEED_INVERSE,
