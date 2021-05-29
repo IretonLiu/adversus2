@@ -18,17 +18,12 @@ let playerController,
   monster,
   snowParticles,
   stats,
-  ball,
   saferoom1;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
 import state from "./State";
 import SafeRoom from "./SafeRoom";
-let pathGraph = [];
-
-let rigidBodies = [],
-  tmpTrans;
 
 const clock = new THREE.Clock();
 
@@ -97,9 +92,8 @@ function animate() {
     mMap.worldUpdate();
     render();
     stats.update();
-    requestAnimationFrame(animate);
-
   }
+  requestAnimationFrame(animate);
 
 }
 
@@ -131,7 +125,7 @@ async function initWorld() {
     (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
   saferoom1.model.position.z =
     (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
-  scene.add(saferoom1.model);
+  // scene.add(saferoom1.model);
 
 
   playerController = new PlayerController(20, 10, 20, renderer.domElement);
@@ -144,45 +138,6 @@ async function initWorld() {
   mMap = new MiniMap(playerController, grid1);
   makeSnow(scene);
 }
-
-// function physicsTest() {
-//   // makePlane();
-//   //ball = makeBall();
-//   //scene.add(ball);
-// }
-
-// function moveBall() {
-//   let scalingFactor = 20;
-
-//   let moveX = 1;
-//   let moveZ = 0;
-//   let moveY = 0;
-
-//   if (moveX == 0 && moveY == 0 && moveZ == 0) return;
-
-//   let resultantImpulse = new Ammo.btVector3(moveX, moveY, moveZ)
-//   resultantImpulse.op_mul(scalingFactor);
-
-//   let physicsBody = ball.userData.physicsBody;
-//   physicsBody.setLinearVelocity(resultantImpulse);
-//   // console.log(ball.userData);
-// }
-
-// function makeBall() {
-//   let pos = { x: 20, y: 0, z: 20 };
-//   let radius = 2;
-//   let quat = { x: 0, y: 0, z: 0, w: 1 };
-//   let mass = 1;
-//   return (physics.genBallRB(pos, radius, quat, mass));
-// }
-
-// function makePlane() {
-//   let pos = { x: 0, y: 0, z: 0 };
-//   let scale = { x: 50, y: 2, z: 50 };
-//   let quat = { x: 0, y: 0, z: 0.05, w: 1 };
-//   let mass = 0;
-//   physics.genBoxRB(pos, scale, quat, mass, scene);
-// }
 
 function setUpMonster() {
   let monsterPosition = {
@@ -236,7 +191,7 @@ function renderMaze(maze, grid) {
 
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
-  const wallHeight = 20;
+  const wallHeight = 25;
   const wallWidth = 30;
 
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
@@ -286,7 +241,7 @@ function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 function makeSnow(scene) {
-  const particleNum = 100000;
+  const particleNum = 1000;
   const max = 1000;
   const min = -500;
   const textureSize = 64.0;
