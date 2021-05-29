@@ -34,6 +34,10 @@ class Monster {
 
     this.monsterObject = null;
 
+    // record the monster's size - Vector3
+    // have a buffer
+    this.size = new Vector3(2, 2, 2);
+
     // create the monster visuals
     this.initThreeObject();
   }
@@ -57,13 +61,13 @@ class Monster {
 
       // determine the size of the model
       let bbox = new Box3().setFromObject(model);
-      let size = bbox.getSize(new Vector3()); // HERE you get the size
+      this.size.add(bbox.getSize(new Vector3())); // get and update the size
 
       // create an invisible bounding box for the model
       const boundingBoxGeometry = new BoxGeometry(
-        size.x + 2,
-        size.y + 2,
-        size.z + 2
+        this.size.x,
+        this.size.y,
+        this.size.z
       );
       const boundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
       boundingBoxMaterial.visible = false;
@@ -86,6 +90,95 @@ class Monster {
     });
   }
 
+  getLeftmostPoint(camera) {
+    // check the leftmost point from the two horizontal planes
+    const leftX = new Vector3(
+      this.monsterObject.position.x - this.size.x / 2,
+      this.monsterObject.position.y,
+      this.monsterObject.position.z
+    );
+
+    const leftZ = new Vector3(
+      this.monsterObject.position.x,
+      this.monsterObject.position.y,
+      this.monsterObject.position.z - this.size.z / 2
+    );
+
+    camera.updateMatrixWorld();
+
+    // whichever projection puts the monster further left, return the corresponding point
+    if (leftX.clone().project(camera).x < leftZ.clone().project(camera).x) {
+      return leftX;
+    } else {
+      return leftZ;
+    }
+  }
+
+  getRightmostPoint(camera) {
+    // check the rightmost point from the two horizontal planes
+    const leftX = new Vector3(
+      this.monsterObject.position.x + this.size.x / 2,
+      this.monsterObject.position.y,
+      this.monsterObject.position.z
+    );
+
+    const leftZ = new Vector3(
+      this.monsterObject.position.x,
+      this.monsterObject.position.y,
+      this.monsterObject.position.z + this.size.z / 2
+    );
+
+    camera.updateMatrixWorld();
+
+    // whichever projection puts the monster further right, return the corresponding point
+    if (leftX.clone().project(camera).x > leftZ.clone().project(camera).x) {
+      return leftX;
+    } else {
+      return leftZ;
+    }
+  }
+
+  getTopmostPoint() {
+    // get the topmost point in the vertical plane
+    return new Vector3(
+      this.monsterObject.position.x,
+      this.monsterObject.position.y + this.size.y / 2,
+      this.monsterObject.position.z
+    );
+  }
+
+  getBottommostPoint() {
+    // get the bottommost point in the vertical plane
+    return new Vector3(
+      this.monsterObject.position.x,
+      this.monsterObject.position.y - this.size.y / 2,
+      this.monsterObject.position.z
+    );
+  }
+
+  getBufferAngle(camera) {
+    camera.updateMatrixWorld();
+
+    // determine the biggest side - will correspond to the biggest buffer angle (approx.)
+    const left = this.getLeftmostPoint(camera);
+    const right = this.getRightmostPoint(camera);
+    const top = this.getTopmostPoint(camera);
+    const bottom = this.getBottommostPoint(camera);
+
+    // get the corresponding direction vectors to the monster's extremeties
+    const vectLeft = left.sub(camera.position);
+    const vectRight = right.sub(camera.position);
+    const vectTop = top.sub(camera.position);
+    const vectBottom = bottom.sub(camera.position);
+
+    // determine the horizontal and vertical angles
+    const horizontal = vectLeft.angleTo(vectRight);
+    const vertical = vectBottom.angleTo(vectTop);
+
+    // return the biggest angle
+    return Math.max(horizontal, vertical);
+  }
+
   // target in world coords
   getAstarPath(grid, target) {
     const astar = new Astar(
@@ -102,47 +195,36 @@ class Monster {
   }
 
   detLookAtVector(camera) {
-    var lookAtVector = new Vector3(0, 0, -1);
+    let lookAtVector = new Vector3(0, 0, -1);
     lookAtVector.applyQuaternion(camera.quaternion);
-    lookAtVector.x += camera.position.x;
-    lookAtVector.y += camera.position.y;
-    lookAtVector.z += camera.position.z;
+    // lookAtVector.x += camera.position.x;
+    // lookAtVector.y += camera.position.y;
+    // lookAtVector.z += camera.position.z;
 
     return lookAtVector;
   }
 
   isInTorchBeam(playerController) {
-    let camera = new PerspectiveCamera(
-      (180 * playerController.torch.angle) / Math.PI + 10,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      Constants.CAMERA_FAR
-    );
-    camera.position.set(
-      playerController.camera.position.x,
-      playerController.camera.position.y,
-      playerController.camera.position.z
-    );
+    // create a copy so don't alter real values
+    let monsterPosition = this.monsterObject.position.clone();
 
-    const lookAtVector = this.detLookAtVector(playerController.camera);
-    camera.lookAt(lookAtVector.x, lookAtVector.y, lookAtVector.z);
+    // get direction of monster from current point
+    const monsterDirection = monsterPosition
+      .sub(playerController.camera.position)
+      .normalize();
 
-    var frustum = new Frustum();
-    var cameraViewProjectionMatrix = new Matrix4();
+    // get direction camera is pointing
+    const cameraDirection = this.detLookAtVector(
+      playerController.camera
+    ).normalize();
 
-    // every time the camera or objects change position (or every frame)
+    // check the angle between the directions - needs to be less than torch angle
+    const angle = monsterDirection.angleTo(cameraDirection);
 
-    camera.updateMatrixWorld(); // make sure the camera matrix is updated
-    camera.matrixWorldInverse.copy(camera.matrixWorld).invert();
-    cameraViewProjectionMatrix.multiplyMatrices(
-      camera.projectionMatrix,
-      camera.matrixWorldInverse
-    );
-    frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
+    // get the angle corresponding to the monster's width
+    const bufferAngle = this.getBufferAngle(playerController.camera);
 
-    // frustum is now ready to check all the objects you need
-
-    return frustum.intersectsObject(this.monsterObject);
+    return angle <= playerController.torch.angle + bufferAngle / 2;
   }
 
   isVisible(playerController) {
@@ -152,29 +234,41 @@ class Monster {
     // need to get the updated matrix representation
     playerController.camera.updateMatrixWorld();
 
+    // cast a ray to the monster's extremeties
+    let targets = [
+      this.getLeftmostPoint(playerController.camera),
+      this.getRightmostPoint(playerController.camera),
+      this.getTopmostPoint(playerController.camera),
+      this.getBottommostPoint(playerController.camera),
+    ];
+
+    // check of the monster is even in the torch
     if (this.isInTorchBeam(playerController)) {
-      let vector = new Vector3(
-        this.monsterObject.position.x,
-        this.monsterObject.position.y,
-        this.monsterObject.position.z
-      );
+      let raycaster = new Raycaster();
 
-      let raycaster = new Raycaster(
-        playerController.camera.position,
-        vector.sub(playerController.camera.position).normalize()
-      );
+      for (let vector of targets) {
+        // cast a ray to this vector
+        raycaster.set(
+          playerController.camera.position,
+          vector.sub(playerController.camera.position).normalize()
+        );
 
-      var intersects = raycaster.intersectObjects(this.scene.children, true);
-
-      if (intersects.length) {
-        const intersect = intersects[0];
-        if (intersect.object.geometry.uuid === this.checkVisibleId) return true;
-        else return false;
+        // check if we intersect the monster FIRST (if not first, monster is behind something)
+        let intersects = raycaster.intersectObjects(this.scene.children, true);
+        if (intersects.length) {
+          const intersect = intersects[0];
+          // check the mesh id's match
+          if (intersect.object.geometry.uuid === this.checkVisibleId)
+            return true;
+        }
       }
-      return false;
-    } else {
+
+      // if get here, then have tried all the target vectors and none match, so object is obscured
       return false;
     }
+
+    // if get here, monster is obscured, or not in torch
+    return false;
   }
 
   update() {

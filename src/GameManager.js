@@ -95,7 +95,7 @@ function animate() {
     // monster.update();
   }
 
-  console.log(monster.isVisible(playerController));
+  // console.log(monster.isVisible(playerController));
 
   updateSnow(deltaTime);
 
