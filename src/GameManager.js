@@ -91,7 +91,8 @@ function animate() {
   if (monster.path != "") {
     monster.update();
   } else {
-    monster.getAstarPath(grid1, playerController.camera.position);
+    // monster.getAstarPath(grid1, playerController.camera.position);
+    // monster.update();
   }
 
   console.log(monster.isVisible(playerController));
