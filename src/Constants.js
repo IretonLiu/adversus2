@@ -6,7 +6,7 @@ let Constants = {
   EAST: "3",
 
   // Wall sizes
-  WALL_SIZE: 20,
+  WALL_SIZE: 30,
   WALL_SIZE_MINIMAP: 15,
 
   PLAYER_SIZE_MINIMAP: 10,

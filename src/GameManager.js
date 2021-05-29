@@ -45,7 +45,6 @@ class GameManager {
 
     initGraphics();
     await initWorld();
-    physicsTest();
 
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
@@ -111,9 +110,9 @@ async function initWorld() {
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
 
-  // setUpGround();
-
+  setUpGround();
   setUpAmbientLight();
+
   maze1 = new Maze(
     Constants.MAP1_SIZE,
     Constants.MAP1_SIZE,
@@ -123,22 +122,6 @@ async function initWorld() {
   grid1 = maze1.getThickGrid();
   scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
-  // maze2 = new Maze(
-  //   Constants.MAP2_SIZE,
-  //   Constants.MAP2_SIZE,
-  //   Constants.PROBABILITY_WALLS_REMOVED
-  // );
-  // maze2.growingTree();
-  // grid2 = maze2.getThickGrid();
-  // const maze2Group = renderMaze(maze2, grid2);
-  // maze2Group.position.x = ((2 * Constants.MAP1_SIZE + 7) * Constants.WALL_SIZE);
-  // maze2Group.position.z = ((2 * Constants.MAP1_SIZE + 4) * Constants.WALL_SIZE);
-  // scene.add(maze2Group);
-
-  // adds the ambient light into scene graph
-  // const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  // light.intensity = 1.02; // change intensity for brightness, who would have thunk
-  // scene.add(light);
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
@@ -155,48 +138,51 @@ async function initWorld() {
   scene.add(playerController.controls.getObject());
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster();
+  //mMap = new MiniMap(playerController, grid1);
+
 
   mMap = new MiniMap(playerController, grid1);
+  makeSnow(scene);
 }
 
-function physicsTest() {
-  // makePlane();
-  //ball = makeBall();
-  //scene.add(ball);
-}
+// function physicsTest() {
+//   // makePlane();
+//   //ball = makeBall();
+//   //scene.add(ball);
+// }
 
-function moveBall() {
-  let scalingFactor = 20;
+// function moveBall() {
+//   let scalingFactor = 20;
 
-  let moveX = 1;
-  let moveZ = 0;
-  let moveY = 0;
+//   let moveX = 1;
+//   let moveZ = 0;
+//   let moveY = 0;
 
-  if (moveX == 0 && moveY == 0 && moveZ == 0) return;
+//   if (moveX == 0 && moveY == 0 && moveZ == 0) return;
 
-  let resultantImpulse = new Ammo.btVector3(moveX, moveY, moveZ)
-  resultantImpulse.op_mul(scalingFactor);
+//   let resultantImpulse = new Ammo.btVector3(moveX, moveY, moveZ)
+//   resultantImpulse.op_mul(scalingFactor);
 
-  let physicsBody = ball.userData.physicsBody;
-  physicsBody.setLinearVelocity(resultantImpulse);
-  // console.log(ball.userData);
-}
+//   let physicsBody = ball.userData.physicsBody;
+//   physicsBody.setLinearVelocity(resultantImpulse);
+//   // console.log(ball.userData);
+// }
 
-function makeBall() {
-  let pos = { x: 20, y: 0, z: 20 };
-  let radius = 2;
-  let quat = { x: 0, y: 0, z: 0, w: 1 };
-  let mass = 1;
-  return (physics.genBallRB(pos, radius, quat, mass));
-}
+// function makeBall() {
+//   let pos = { x: 20, y: 0, z: 20 };
+//   let radius = 2;
+//   let quat = { x: 0, y: 0, z: 0, w: 1 };
+//   let mass = 1;
+//   return (physics.genBallRB(pos, radius, quat, mass));
+// }
 
-function makePlane() {
-  let pos = { x: 0, y: 0, z: 0 };
-  let scale = { x: 50, y: 2, z: 50 };
-  let quat = { x: 0, y: 0, z: 0.05, w: 1 };
-  let mass = 0;
-  physics.genBoxRB(pos, scale, quat, mass, scene);
-}
+// function makePlane() {
+//   let pos = { x: 0, y: 0, z: 0 };
+//   let scale = { x: 50, y: 2, z: 50 };
+//   let quat = { x: 0, y: 0, z: 0.05, w: 1 };
+//   let mass = 0;
+//   physics.genBoxRB(pos, scale, quat, mass, scene);
+// }
 
 function setUpMonster() {
   let monsterPosition = {
@@ -216,9 +202,7 @@ function setUpMonster() {
   });
 }
 
-mMap = new MiniMap(playerController, grid1);
 
-makeSnow(scene);
 function setUpGround() {
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
@@ -252,8 +236,8 @@ function renderMaze(maze, grid) {
 
   grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
-  const wallHeight = 30;
-  const wallWidth = 20;
+  const wallHeight = 20;
+  const wallWidth = 30;
 
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
@@ -274,13 +258,13 @@ function renderMaze(maze, grid) {
         let config = wallGenerator.getWallConfig(binString);
         wallMesh = wallGenerator.createWall(
           config,
-          wallWidth,
+          Constants.WALL_SIZE,
           wallHeight,
           x + y
         );
-        wallMesh.position.set(x * wallWidth, 0, y * wallWidth);
+        wallMesh.position.set(x * Constants.WALL_SIZE, 0, y * Constants.WALL_SIZE);
         mazeGroup.add(wallMesh);
-        physics.createWallRB(wallMesh, wallWidth, wallHeight);
+        physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
         continue;
         // check if its the
 

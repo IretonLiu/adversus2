@@ -58,7 +58,7 @@ class WallGenerator {
       10,
       10
     );
-    //this.applyNoise(10, topPlaneGeometry);
+    this.applyNoise(10, topPlaneGeometry);
 
     // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     // topPlane.receiveShadow = true;
