@@ -136,7 +136,7 @@ class WorldManager {
         img.src = "./assets/itemPics/torch2.png";
 
         ctx.save();
-        ctx.scale(0.1, 0.1);
+        ctx.scale(0.2, 0.2);
         // ctx.translate(-10, 0)
         ctx.drawImage(img, -60, 50);
         this.lifeBar();
@@ -151,9 +151,9 @@ class WorldManager {
         img.src = "./assets/itemPics/key2.png";
 
         ctx.save();
-        ctx.scale(0.04, 0.04);
-        ctx.translate(50, 650)
-        ctx.drawImage(img, 100, 100);
+        ctx.scale(0.1, 0.1);
+        ctx.translate(10, 600)
+        ctx.drawImage(img, 100, 0);
         ctx.restore();
 
     }
@@ -172,7 +172,7 @@ class WorldManager {
     }
     displayItems() {
         this.torchDisplay();
-        //this.keyDisplay();
+        this.keyDisplay();
         //this.batteryDisplay();
 
     }
