@@ -75,8 +75,8 @@ class WorldManager {
         let numBats = 0;
         let iter = 0;
         while (numBats < 7 && iter < 100) {
-            let randX = Math.floor(Math.random() * (this.grid.length / 2)) * 2 + 1;
-            let randZ = Math.floor(Math.random() * (this.grid.length / 2)) * 2 + 1;
+            let randX = Math.floor(Math.random() * (this.grid.length / 2)) * 2;
+            let randZ = Math.floor(Math.random() * (this.grid.length / 2)) * 2;
             if (this.grid[randX][randZ] === false) {
                 this.loadBattery(randX, randZ);
                 numBats++
@@ -119,15 +119,6 @@ class WorldManager {
 
     }
 
-    // batteryLifeOnPickUp(life) {
-    //     if (this.battery.life > 90) {
-    //         this.battery.life += 100 - this.battery.life;
-    //     }
-    //     else {
-    //         this.battery.life += 10;
-    //     }
-
-    // }
 
     torchDisplay() {
 
@@ -172,7 +163,7 @@ class WorldManager {
     }
     displayItems() {
         this.torchDisplay();
-        this.keyDisplay();
+        //this.keyDisplay();
         //this.batteryDisplay();
 
     }
