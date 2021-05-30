@@ -114,7 +114,7 @@ async function initWorld() {
   );
   maze1.growingTree();
   grid1 = maze1.getThickGrid();
-  //scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
 
   // adding the saferoom into the game;
@@ -359,13 +359,6 @@ function updateSnow(delta) {
 
   snowParticles.geometry.attributes.position.needsUpdate = true;
 }
-
-// var mazeGeo = BufferGeometryUtils.mergeBufferGeometries(geometryArr);
-// mazeGeo.computeVertexNormals();
-// var mazeMesh = new THREE.Mesh(mazeGeo, wallMaterial);
-// mazeMesh.castShadow = true;
-// mazeMesh.receiveShadow = true;
-// scene.add(mazeMesh);
 
 function onWindowResize() {
   playerController.camera.aspect = window.innerWidth / window.innerHeight;
