@@ -322,9 +322,11 @@ function makeSnow(scene) {
     map: getTexture(),
     transparent: true,
     // opacity: 0.8,
+    // blending: THREE.AdditiveBlending,
     fog: true,
-    depthWrite: false,
+    depthTest: true,
   });
+
 
   const velocities = [];
   for (let i = 0; i < particleNum; i++) {
