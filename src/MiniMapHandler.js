@@ -2,7 +2,7 @@ import Constants from "./Constants";
 import * as THREE from "three";
 
 const ctx = document.getElementById("minimap").getContext("2d");
-document.body.appendChild(ctx.canvas);
+// document.body.appendChild(ctx.canvas);
 
 class MiniMap {
   constructor(playerController, maze) {
