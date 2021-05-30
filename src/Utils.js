@@ -8,8 +8,8 @@ export default Utils = {
     // returns a 2-dimensional vector
 
     return new Vector2(
-      worldVector3.x / Constants.WALL_SIZE,
-      worldVector3.z / Constants.WALL_SIZE
+      Math.floor(worldVector3.x / Constants.WALL_SIZE),
+      Math.floor(worldVector3.z / Constants.WALL_SIZE)
     );
   },
 
