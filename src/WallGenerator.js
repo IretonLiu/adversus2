@@ -58,7 +58,7 @@ class WallGenerator {
       10,
       10
     );
-    //this.applyNoise(10, topPlaneGeometry);
+    this.applyNoise(10, topPlaneGeometry);
 
     // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
     // topPlane.receiveShadow = true;
@@ -193,14 +193,24 @@ class WallGenerator {
   }
 
   genBinaryString(x, y, grid, maze) {
+    // y is x, x is z
     // a binary string specifying the neighbours of cell in thick grid
     // the string in order is: up down left right
+    if (x == 0 && y == 2) {
+      return "0001";
+    }
+    if (x == 2 * maze.height && y == 2 * maze.width - 2) {
+      return "0010";
+    }
+
     if (y == 0 || y == 2 * maze.height) {
       return "1100"; // wall type 0
     }
     if (x == 0 || x == 2 * maze.width) {
       return "0011"; // wall type 0 rotated
     }
+
+
 
     //TODO: potentially change the orientation of the maze
     let up = grid[y][x + 1]; //grid[maze.getThickIndex(x + 1, y)];

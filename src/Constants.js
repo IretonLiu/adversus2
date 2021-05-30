@@ -6,7 +6,7 @@ let Constants = {
   EAST: "3",
 
   // Wall sizes
-  WALL_SIZE: 20,
+  WALL_SIZE: 30,
   WALL_SIZE_MINIMAP: 15,
 
   PLAYER_SIZE_MINIMAP: 10,
@@ -19,13 +19,15 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.80,
 
   // map size
-  MAP_SIZE: 15,
+  MAP1_SIZE: 5,
+  MAP2_SIZE: 10,
+  MAP3_SIZE: 15,
 
   // percentage of walls removed
   PROBABILITY_WALLS_REMOVED: 0.075,
 
   // blockiness of visuals
-  BLOCKINESS: 6,
+  BLOCKINESS: 4,
   WALL_SEGMENTS: 1,
 
   PLAYER_MOVE_SPEED: 25,
@@ -35,8 +37,12 @@ let Constants = {
   MONSTER_SPEED_INVERSE: 50,
 
   //Fog
-  FOG_FAR: 100,
+  FOG_FAR: 1000,
   FOG_NEAR: 1,
+
+  CAMERA_FAR: 200,
+  AMBIENT_INTENSITY: 0.02,
+  //AMBIENT_INTENSITY: 2,
 
   ANTIALIAS: true
 };
