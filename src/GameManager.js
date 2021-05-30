@@ -92,7 +92,19 @@ function animate() {
   playerController.update();
   if (monster.path != "") monster.update(scene);
 
+
   worldManager.updateObjs();//this needs to be just update for both battery and key
+  worldManager.pickUpBattery(playerController.camera.position.x, playerController.camera.position.z);
+  worldManager.pickUpKey(playerController.camera.position.x, playerController.camera.position.z);
+  worldManager.displayItems();
+  worldManager.lifeBar(playerController.torch.visible);
+  //console.log("asdasdasd", worldManager.torchLife)
+  if (worldManager.torchLife <= 500) {
+    playerController.torch.visible = false;
+  }
+  // worldManager.torchDisplay();
+  // worldManager.keyDisplay();
+  // worldManager.batteryDisplay();
 
 
   saferoom1.update(deltaTime);
@@ -131,7 +143,7 @@ async function initWorld() {
 
   // adds the ambient light into scene graph
   const light = new THREE.AmbientLight(0xffffff); // 0x080808
-  light.intensity = 0.02; // change intensity for brightness, who would have thunk
+  light.intensity = 1; // change intensity for brightness, who would have thunk
   scene.add(light);
 
   // adding the saferoom into the game;
@@ -177,7 +189,7 @@ function renderMaze() {
 
 
   worldManager = new WorldManager(scene, grid);
-  //worldManager.loadBattery();
+
   worldManager.setKey();
   worldManager.setBatteries();
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);

@@ -142,7 +142,7 @@ class MiniMap {
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
 
-    
+
 
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
