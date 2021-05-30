@@ -114,18 +114,18 @@ async function initWorld() {
   );
   maze1.growingTree();
   grid1 = maze1.getThickGrid();
-  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+  //scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
 
-  await saferoom1.loadModel("SafeRoom1");
+  await saferoom1.loadModel("SafeRoomWDoors");
   saferoom1.model.position.x =
     (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
   saferoom1.model.position.z =
     (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
-  // scene.add(saferoom1.model);
+  scene.add(saferoom1.model);
 
 
   playerController = new PlayerController(20, 10, 20, renderer.domElement);
