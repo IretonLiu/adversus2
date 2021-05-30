@@ -37,7 +37,6 @@ class GameManager {
     physics = new Physics();
     physics.initPhysics();
 
-
     initGraphics();
     await initWorld();
 
@@ -84,7 +83,7 @@ function animate() {
     //moveBall();
     playerController.updatePosition();
 
-    if (monster.path != "") monster.update(scene);
+    if (monster.path != "") monster.update();
 
     updateSnow(deltaTime);
 
@@ -94,7 +93,6 @@ function animate() {
     stats.update();
   }
   requestAnimationFrame(animate);
-
 }
 
 async function initWorld() {
@@ -116,7 +114,6 @@ async function initWorld() {
   grid1 = maze1.getThickGrid();
   scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
-
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
 
@@ -127,13 +124,11 @@ async function initWorld() {
     (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
   scene.add(saferoom1.model);
 
-
   playerController = new PlayerController(20, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster();
   //mMap = new MiniMap(playerController, grid1);
-
 
   mMap = new MiniMap(playerController, grid1);
   makeSnow(scene);
@@ -145,18 +140,12 @@ function setUpMonster() {
     y: 0,
     z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(
-    monsterPosition,
-    Constants.MONSTER_SPEED_INVERSE,
-    scene
+  monster = new Monster(monsterPosition, scene, clock);
+  monster.getAstarPath(
+    grid1,
+    new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
   );
-  monster.getAstarPath(grid1, {
-    x: 1 * Constants.WALL_SIZE,
-    y: 0,
-    z: 1 * Constants.WALL_SIZE,
-  });
 }
-
 
 function setUpGround() {
   // set up the floor of the game
@@ -217,7 +206,11 @@ function renderMaze(maze, grid) {
           wallHeight,
           x + y
         );
-        wallMesh.position.set(x * Constants.WALL_SIZE, 0, y * Constants.WALL_SIZE);
+        wallMesh.position.set(
+          x * Constants.WALL_SIZE,
+          0,
+          y * Constants.WALL_SIZE
+        );
         mazeGroup.add(wallMesh);
         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
         continue;
@@ -316,7 +309,6 @@ function makeSnow(scene) {
     fog: true,
     depthTest: true,
   });
-
 
   const velocities = [];
   for (let i = 0; i < particleNum; i++) {

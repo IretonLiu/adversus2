@@ -2,7 +2,7 @@ import { Vector2, Vector3 } from "three";
 
 import Constants from "./Constants";
 
-export default Utils = {
+const Utils = {
   convertWorldToThickGrid(worldVector3) {
     // takes in a 3-dimensional vector
     // returns a 2-dimensional vector
@@ -23,4 +23,11 @@ export default Utils = {
       gridVector2.y * Constants.WALL_SIZE
     );
   },
+
+  isInRadiusOfPoint(currentPoint, nextPoint, radius) {
+    console.log(currentPoint, nextPoint, currentPoint.distanceTo(nextPoint));
+    return currentPoint.distanceTo(nextPoint) < radius;
+  },
 };
+
+export default Utils;
