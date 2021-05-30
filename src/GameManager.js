@@ -189,7 +189,7 @@ function renderMaze(maze, grid) {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
-  grid[1][0] = false;
+  // grid[1][0] = false;
   grid[2 * maze.width - 1][2 * maze.height] = false;
   const wallHeight = 25;
   const wallWidth = 30;
@@ -241,9 +241,9 @@ function randomIntFromInterval(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 function makeSnow(scene) {
-  const particleNum = 1000;
-  const max = 1000;
-  const min = -500;
+  const particleNum = 10000;
+  const max = 100;
+  const min = -100;
   const textureSize = 64.0;
 
   const drawRadialGradation = (ctx, canvasRadius, canvasW, canvasH) => {
@@ -282,7 +282,7 @@ function makeSnow(scene) {
     // drawSnowCrystal(ctx, canvasRadius);
 
     const texture = new THREE.Texture(canvas);
-    //texture.minFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
     texture.type = THREE.FloatType;
     texture.needsUpdate = true;
     return texture;
@@ -310,12 +310,13 @@ function makeSnow(scene) {
     color: 0xffffff,
     vertexColors: false,
     map: getTexture(),
-    blending: THREE.AdditiveBlending,
     transparent: true,
     // opacity: 0.8,
+    // blending: THREE.AdditiveBlending,
     fog: true,
-    depthWrite: false,
+    depthTest: true,
   });
+
 
   const velocities = [];
   for (let i = 0; i < particleNum; i++) {
@@ -326,15 +327,22 @@ function makeSnow(scene) {
     velocities.push(particle);
   }
 
+  let m = new THREE.Matrix4();
+  m.makeRotationX(THREE.MathUtils.degToRad(90));
+  m.scale(new THREE.Vector3(300, 300, 300));
+
   snowParticles = new THREE.Points(pointGeometry, pointMaterial);
+  snowParticles.geometry.applyMatrix4(m);
   // snowParticles.geometry.velocities = velocities;
   scene.add(snowParticles);
 }
 
 function updateSnow(delta) {
-  // snowParticles.position.set(playerController.camera.position.x,playerController.camera.position.y,playerController.camera.position.z);
-
+  var playerX = playerController.camera.position.x;
+  var playerZ = playerController.camera.position.z;
   const posArr = snowParticles.geometry.getAttribute("position").array;
+
+  var offset = 100;
 
   for (let i = 0; i < posArr.length; i += 3) {
     var x = i;
@@ -342,11 +350,11 @@ function updateSnow(delta) {
     var z = i + 2;
 
     posArr[y] += -15 * delta;
-    if (posArr[y] < -30) {
+    if (posArr[y] < 0) {
       posArr[y] = randomIntFromInterval(-10, 50);
+      posArr[x] = randomIntFromInterval(playerX - offset, playerX + offset);
+      posArr[z] = randomIntFromInterval(playerZ - offset, playerZ + offset);
     }
-
-    //  posArr[z] += Math.floor(Math.random() * 6 - 3) * 0.01;
   }
 
   snowParticles.geometry.attributes.position.needsUpdate = true;
