@@ -1,3 +1,4 @@
+import SoundManager from "./SoundManager";
 import {
   Mesh,
   Vector3,
@@ -14,14 +15,17 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Astar } from "./pathfinder/astar";
 import Constants from "./Constants";
 import Utils from "./Utils";
+import playerController from "./PlayerController";
 
 class Monster {
-  constructor(position, scene, clock) {
+  constructor(position, scene, clock, playerController) {
     // position is the monster's current position in world coordinates
     this.position = new Vector3(position.x, position.y, position.z);
 
     // local refernce to the scene
     this.scene = scene;
+
+    this.playerController = playerController;
 
     // keep track of the game clock
     this.clock = clock;
@@ -32,6 +36,8 @@ class Monster {
     // path is the list of points monster must go through to get to target
     // NB - last element is the next point
     this.path = [];
+
+    this.Mesh = new Mesh();
 
     this.monsterObject = null;
 
@@ -82,6 +88,10 @@ class Monster {
       // add the monster to the scene
       this.scene.add(this.monsterObject);
     });
+  }
+
+  remove() {
+    this.scene.remove(this.monsterObject);
   }
 
   getLeftmostPoint(camera) {
@@ -236,36 +246,6 @@ class Monster {
     );
   }
 
-  // isInTorch(playerController) {
-  //   // check if the monster is in the torch
-
-  //   // need to get the updated matrix representation
-  //   playerController.camera.updateMatrixWorld();
-
-  //   // check if monster actually exists
-  //   if (this.monsterObject === null) return false;
-
-  //   // check if the monster is hidden in the fog
-  //   if (this.isHiddenByFog(playerController)) return false;
-
-  //   // if get here, then the monster is not hidden by fog
-
-  //   // check of the monster is even in the frustum
-  //   if (
-  //     this.isInViewAngle(
-  //       playerController,
-  //       ((playerController.camera.fov / 180) * Math.PI) / 2 // convert to radians and divide by two (relative to normal)
-  //     )
-  //   ) {
-  //     // monster is not hidden by fog, and is in the viewing angle
-  //     // check if it is hidden by other objects
-  //     return this.isInFront(playerController);
-  //   }
-
-  //   // if get here, monster is obscured, or not in view
-  //   return false;
-  // }
-
   isInFront(playerController) {
     // do raycasting to the monster's extremities to see if it is hidden by anything
 
@@ -273,6 +253,7 @@ class Monster {
     let targets = [
       this.getLeftmostPoint(playerController.camera),
       this.getRightmostPoint(playerController.camera),
+      this.monsterObject.position,
       // this.getTopmostPoint(playerController.camera),
       // this.getBottommostPoint(playerController.camera),
     ];
