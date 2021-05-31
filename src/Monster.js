@@ -44,13 +44,6 @@ class Monster {
   }
 
   initThreeObject() {
-    // const monsterGeometry = new CylinderGeometry(5, 5, 10, 20);
-    // const monsterMaterial = new MeshStandardMaterial({ color: 0xff0000 });
-
-    // this.monsterObject = new Mesh(monsterGeometry, monsterMaterial);
-
-    // this.monsterObject.add(new Mesh(monsterGeometry, monsterMaterial));
-
     const loader = new GLTFLoader();
     loader.load("../assets/models/monster/scene.gltf", (gltf) => {
       // load custom model
@@ -195,17 +188,10 @@ class Monster {
     this.path = astar.getCurrentPath();
   }
 
-  detLookAtVector(camera) {
-    let lookAtVector = new Vector3(0, 0, -1);
-    lookAtVector.applyQuaternion(camera.quaternion);
-    // lookAtVector.x += camera.position.x;
-    // lookAtVector.y += camera.position.y;
-    // lookAtVector.z += camera.position.z;
+  isInViewAngle(playerController, viewAngle) {
+    // this function will determine if the monster is within the angle to the normal (defined by looking direction)
+    // viewAngle is in radians
 
-    return lookAtVector;
-  }
-
-  isInTorchBeam(playerController) {
     // create a copy so don't alter real values
     let monsterPosition = this.monsterObject.position.clone();
 
@@ -215,7 +201,7 @@ class Monster {
       .normalize();
 
     // get direction camera is pointing
-    const cameraDirection = this.detLookAtVector(
+    const cameraDirection = Utils.detLookingDirection(
       playerController.camera
     ).normalize();
 
@@ -223,9 +209,17 @@ class Monster {
     const angle = monsterDirection.angleTo(cameraDirection);
 
     // get the angle corresponding to the monster's width
-    const bufferAngle = this.getBufferAngle(playerController.camera);
+    let bufferAngle = this.getBufferAngle(playerController.camera);
+    if (viewAngle < ((playerController.camera.fov / 180) * Math.PI) / 2) {
+      // torch
+      bufferAngle = 0;
+    } else {
+      // viewport
+      bufferAngle /= 2;
+    }
 
-    return angle <= playerController.torch.angle + bufferAngle / 2;
+    // console.log(angle, viewAngle + bufferAngle);
+    return angle <= viewAngle + bufferAngle;
   }
 
   isVisible(playerController) {
@@ -239,12 +233,14 @@ class Monster {
     let targets = [
       this.getLeftmostPoint(playerController.camera),
       this.getRightmostPoint(playerController.camera),
-      this.getTopmostPoint(playerController.camera),
-      this.getBottommostPoint(playerController.camera),
+      // this.getTopmostPoint(playerController.camera),
+      // this.getBottommostPoint(playerController.camera),
     ];
 
     // check of the monster is even in the torch
-    if (this.isInTorchBeam(playerController)) {
+    if (this.isInViewAngle(playerController, ((70 / 180) * Math.PI) / 2)) {
+      //((70 / 180) * Math.PI) / 2
+      // console.log("in angle");
       let raycaster = new Raycaster();
 
       for (let vector of targets) {
@@ -301,7 +297,7 @@ class Monster {
     this.monsterObject.position.x = this.position.x;
     this.monsterObject.position.z = this.position.z;
     this.monsterObject.lookAt(
-      new Vector3(worldDirection.x, -10, worldDirection.z).add(this.position)
+      new Vector3(worldDirection.x, 0, worldDirection.z).add(this.position)
     );
 
     if (

@@ -85,6 +85,8 @@ function animate() {
 
     if (monster.path != "") monster.update();
 
+    monster.isVisible(playerController);
+
     updateSnow(deltaTime);
 
     saferoom1.update(deltaTime);
@@ -124,7 +126,7 @@ async function initWorld() {
     (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
   scene.add(saferoom1.model);
 
-  playerController = new PlayerController(20, 10, 20, renderer.domElement);
+  playerController = new PlayerController(30, 10, 30, renderer.domElement);
   scene.add(playerController.controls.getObject());
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster();

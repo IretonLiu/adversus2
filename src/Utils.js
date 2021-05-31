@@ -8,8 +8,12 @@ const Utils = {
     // returns a 2-dimensional vector
 
     return new Vector2(
-      Math.floor(worldVector3.x / Constants.WALL_SIZE),
-      Math.floor(worldVector3.z / Constants.WALL_SIZE)
+      Math.floor(
+        (worldVector3.x + Constants.WALL_SIZE / 2) / Constants.WALL_SIZE
+      ),
+      Math.floor(
+        (worldVector3.z + Constants.WALL_SIZE / 2) / Constants.WALL_SIZE
+      )
     );
   },
 
@@ -25,8 +29,14 @@ const Utils = {
   },
 
   isInRadiusOfPoint(currentPoint, nextPoint, radius) {
-    console.log(currentPoint, nextPoint, currentPoint.distanceTo(nextPoint));
     return currentPoint.distanceTo(nextPoint) < radius;
+  },
+
+  detLookingDirection(camera) {
+    let lookAtVector = new Vector3(0, 0, -1);
+    lookAtVector.applyQuaternion(camera.quaternion);
+
+    return lookAtVector;
   },
 };
 
