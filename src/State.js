@@ -1,6 +1,7 @@
 const state = {
   isPlaying: false,
-  won: false,
+  gameover: false,
+
 }
 
 export default state;

@@ -454,9 +454,9 @@ function onInteractCB() {
         var winScreen = document.getElementById("win-screen");
         winScreen.classList.remove("hidden");
         state.isPlaying = false;
-        state.won = true;
+        state.gameover = true;
         this.controls.unlock();
-        document.getElementById("restart-button").onclick = () => {
+        document.getElementById("restart-button-1").onclick = () => {
           location.reload();
         };
         break;

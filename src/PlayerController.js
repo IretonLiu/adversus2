@@ -75,7 +75,7 @@ class PlayerController {
     controls.maxPolarAngle = (29 * Math.PI) / 30;
     controls.minPolarAngle = (1 * Math.PI) / 30;
     controls.addEventListener("unlock", () => {
-      if (!state.won)
+      if (!state.gameover)
         this.openPauseMenu();
     });
     return controls;

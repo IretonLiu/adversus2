@@ -3,6 +3,8 @@ import Constants from "./Constants";
 import Monster from "./Monster";
 
 import * as THREE from "three";
+import { StaticReadUsage } from "three";
+import state from "./State";
 
 class MonsterManager {
   constructor(scene, player, grid, clock) {
@@ -63,6 +65,19 @@ class MonsterManager {
 
   update() {
     if (this.monster) {
+      console.log(this.monster.speed);
+      //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
+      if (Utils.convertWorldToThickGrid(this.monster.position).equals(Utils.convertWorldToThickGrid(this.player.playerController.camera.position))) {
+        state.isPlaying = false;
+        var loseScreen = document.getElementById("lose-screen");
+        loseScreen.classList.remove("hidden");
+        state.gameover = true;
+        this.player.playerController.controls.unlock();
+        document.getElementById("restart-button-2").onclick = () => {
+          location.reload();
+        };
+        return;
+      }
       if (this.monster.path == "") {
         this.despawnMonster();
         this.fear -= 15;
