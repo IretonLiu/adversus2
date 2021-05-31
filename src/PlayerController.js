@@ -4,15 +4,21 @@ import {
   SpotLight,
   PointLight,
   Object3D,
+  Raycaster,
+  Vector2,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
 import state from "./State";
+import SceneLoader from "./SceneLoader";
+import Candle from "./Candle";
+
 class PlayerController {
-  constructor(x, y, z, domElement) {
+  constructor(domElement, scene, onInteractCB) {
     // setup player object for ammo
+    const playerPos = Constants.PLAYER_INITIAL_POS;
     this.playerObject = new Object3D();
-    this.playerObject.position.set(x, y, z);
+    this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();
     this.direction = new Vector3();
@@ -30,11 +36,15 @@ class PlayerController {
       0.1,
       Constants.CAMERA_FAR
     );
-    this.camera.position.set(x, y, z);
-    this.camera.lookAt(x + 1, y, z);
+    this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
 
+    // the torch that is used by the player
     this.torch = this.initTorch();
     this.camera.add(this.torch);
+
+    // the candle that is used by the player
+    this.candle = null;
 
     this.target = new Object3D();
 
@@ -42,12 +52,28 @@ class PlayerController {
     // set up the player controller to use the pointer lock controls
     this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
+
+    // setting up object interaction raycaster
+    this.raycaster = new Raycaster();
+    this.raycaster.near = 0.1;
+    this.raycaster.far = 20;
+    this.intersect = null;
+    this.scene = scene;
+    this.onInteractCB = onInteractCB;
+  }
+
+  reset() {
+    const playerPos = Constants.PLAYER_INITIAL_POS;
+
+    this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
   }
 
   initControls(domElement, self) {
     const controls = new PointerLockControls(this.camera, domElement);
-    controls.maxPolarAngle = 29 * Math.PI / 30;
-    controls.minPolarAngle = 1 * Math.PI / 30;
+    controls.maxPolarAngle = (29 * Math.PI) / 30;
+    controls.minPolarAngle = (1 * Math.PI) / 30;
     controls.addEventListener("unlock", function () {
       self.openPauseMenu();
     });
@@ -85,9 +111,7 @@ class PlayerController {
     let rb = new Ammo.btRigidBody(rbInfo);
     rb.setFriction(4);
 
-
     //this.rigidbody = threeObj;
-
   }
 
   openPauseMenu() {
@@ -164,7 +188,7 @@ class PlayerController {
           self.velocity.y = 0;
           break;
         case "KeyE":
-          this.turnTorchOff();
+          this.onInteractCB();
           break;
       }
     };
@@ -195,26 +219,39 @@ class PlayerController {
     this.torch.visible = !this.torch.visible;
   }
 
-  update() {
+  update(time) {
     this.handleMovement();
-
+    this.raycasterForward();
     this.handleTorch();
+    this.candle.update(time);
   }
 
+  isMoving() {
+    if (
+      this.moveForward ||
+      this.moveLeft ||
+      this.moveRight ||
+      this.moveBackward
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   updatePosition() {
     const pos = this.playerObject.position;
-    //console.log(pos);
-    this.camera.position.set(pos.x, pos.y, pos.z);
+    this.camera.position.set(pos.x, this.camera.position.y, pos.z);
   }
 
   initTorch() {
-    const mapSize = Constants.MAP_SIZE;
+    // const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
+    torch.visible = false;
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
     torch.intensity = 1.5;
-    torch.shadow.mapSize.width = 1024;
-    torch.shadow.mapSize.height = 1024;
+    // torch.shadow.mapSize.width = 1024;
+    // torch.shadow.mapSize.height = 1024;
     torch.penumbra = 1;
     torch.decay = 5;
     torch.distance = 2000;
@@ -225,13 +262,21 @@ class PlayerController {
     return torch;
   }
 
+  async initCandle() {
+    const candle = new Candle();
+    await candle.loadModel();
+    this.candle = candle;
+    this.camera.add(this.candle.model);
+    console.log(this.candle);
+  }
+
   handleTorch() {
     this.torch.position.set(0, 0, 1);
     this.torch.target = this.camera;
   }
 
   handleMovement() {
-    const speed = Constants.PLAYER_MOVE_SPEED_DEV; // TODO: change to normal 
+    const speed = Constants.PLAYER_MOVE_SPEED; // TODO: change to normal
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
@@ -245,7 +290,6 @@ class PlayerController {
     // if ( this.moveForward || this.moveBackward ) this.velocity.z -= this.direction.z * 400.0 * delta;
     // if ( this.moveLeft || this.moveRight ) this.velocity.x -= this.direction.x * 400.0 * delta;
 
-
     // constant velocity
 
     // the direction of the impulse;
@@ -254,25 +298,39 @@ class PlayerController {
     const lookDirection = this.controls.getDirection(new Vector3(0, 0, 0));
 
     if (this.moveForward || this.moveBackward) {
-      moveDirection.addVectors(moveDirection, lookDirection.multiplyScalar(this.direction.x));
+      moveDirection.addVectors(
+        moveDirection,
+        lookDirection.multiplyScalar(this.direction.x)
+      );
     }
 
-    const rightDirection = new Vector3(lookDirection.x, lookDirection.y, lookDirection.z).applyAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2);
+    const rightDirection = new Vector3(
+      lookDirection.x,
+      lookDirection.y,
+      lookDirection.z
+    ).applyAxisAngle(new Vector3(0, 1, 0), -Math.PI / 2);
     if (this.moveLeft || this.moveRight) {
       let d = 1;
-      if (this.moveBackward) d = -1
-      moveDirection.addVectors(moveDirection, rightDirection.multiplyScalar(d * this.direction.z));
-
+      if (this.moveBackward) d = -1;
+      moveDirection.addVectors(
+        moveDirection,
+        rightDirection.multiplyScalar(d * this.direction.z)
+      );
     }
     moveDirection.y = 0;
 
     moveDirection.normalize();
 
     // set up the impulse for movement
-    if (moveDirection.x == 0 && moveDirection.y == 0 && moveDirection == 0) return;
+    if (moveDirection.x == 0 && moveDirection.y == 0 && moveDirection == 0)
+      return;
 
-    let resultantImpulse = new Ammo.btVector3(moveDirection.x, moveDirection.y, moveDirection.z)
-    resultantImpulse.op_mul(Constants.PLAYER_MOVE_SPEED_DEV);
+    let resultantImpulse = new Ammo.btVector3(
+      moveDirection.x,
+      moveDirection.y,
+      moveDirection.z
+    );
+    resultantImpulse.op_mul(speed);
     // let resultantImpulse = new Ammo.btVector3(1, 0, 0)
     // resultantImpulse.op_mul(20);
 
@@ -283,10 +341,29 @@ class PlayerController {
     // this.controls.moveForward(-this.velocity.z * delta);
 
     this.camera.position.y += this.velocity.y;
+    this.playerObject.position.y += this.velocity.y;
     // this.camera.position.x += 1;
     this.prevTime = time;
   }
 
+  raycasterForward() {
+    //console.log(this.scene);
+    this.raycaster.set(
+      this.controls.getObject().position,
+      this.camera.getWorldDirection(new Vector3(0, 0, 0))
+    );
+    //console.log(this.scene)
+
+    const intersects = this.raycaster.intersectObjects(
+      this.scene.children,
+      true
+    );
+    if (intersects.length > 0) {
+      this.intersect = intersects[0].object.parent.parent;
+    } else {
+      this.intersect = null;
+    }
+  }
 }
 
 export default PlayerController;

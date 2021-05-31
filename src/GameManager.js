@@ -10,44 +10,61 @@ import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHel
 import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
-import NoiseGenerator from "./lib/NoiseGenerator"
+import NoiseGenerator from "./lib/NoiseGenerator";
 import state from "./State";
 import Stats from "three/examples/jsm/libs/stats.module";
+import SoundManagerGlobal from "./SoundManagerGlobal.js";
+import SoundManager from "./SoundManager";
+import MonsterManager from "./MonsterManager";
+import DevMap from "./DevMap";
+import Player from "./Player";
+import Utils from "./Utils";
 import SafeRoom from "./SafeRoom";
+import Door from "./Door";
+import SceneLoader from "./SceneLoader";
 
-let playerController,
+let player,
   scene,
   renderer,
   physics,
   mMap,
-  monster,
+  monsterManager,
   snowParticles,
   stats,
   saferoom1,
-  worldManager;
+  soundmanagerGlobal,
+  soundmanager,
+  worldManager,
+  door,
+  sceneLoader;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
+let devMap;
 
 const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    let noiseGen = new NoiseGenerator();
-    // noiseGen.generateNoiseMap();
-
     // initializing physics
     await Ammo();
     physics = new Physics();
     physics.initPhysics();
 
-
     initGraphics();
     await initWorld();
-
     window.addEventListener("resize", onWindowResize, true);
+    document.addEventListener("keydown", (event) => {
+      if (event.code != "KeyP") return;
+      var devCanvas = document.getElementById("devcanvas");
+      if (devCanvas.style.display === "none") {
+        devCanvas.style.display = "block";
+      } else {
+        devCanvas.style.display = "none";
+      }
+    });
     removeLoadingScreen();
-
+    soundmanager = null;
     animate();
   }
 }
@@ -65,7 +82,7 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  //scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
+  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
   renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -83,37 +100,59 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-    playerController.update();
+    player.playerController.update(deltaTime);
     physics.updatePhysics(deltaTime);
-    //moveBall();
-    playerController.updatePosition();
 
-    if (monster.path != "") monster.update(scene);
+    player.playerController.updatePosition();
+    player.updatePosition(player.playerController.camera.position, () => {
+      monsterManager.updateMonsterPath();
+    });
 
+    monsterManager.update();
+    if (monsterManager.monster != null) {
+      if (soundmanager == null) {
+        soundmanager = new SoundManager(
+          monsterManager.monster.Mesh,
+          player.playerController,
+          "./assets/sounds/monster.mp3"
+        );
+      } else {
+        soundmanager.bind(monsterManager.monster.Mesh);
+      }
+    } else if (!monsterManager.monster) {
+      soundmanager = null;
+    }
 
-
-    worldManager.updateObjs();//this needs to be just update for both battery and key
-    worldManager.pickUpBattery(playerController.camera.position.x, playerController.camera.position.z);
-    worldManager.pickUpKey(playerController.camera.position.x, playerController.camera.position.z);
+    worldManager.updateObjs(); //this needs to be just update for both battery and key
+    worldManager.pickUpBattery(
+      player.playerController.camera.position.x,
+      player.playerController.camera.position.z
+    );
+    worldManager.pickUpKey(
+      player.playerController.camera.position.x,
+      player.playerController.camera.position.z
+    );
     worldManager.displayItems();
     worldManager.lifeBar(playerController.torch.visible);
     worldManager.refillTorch();
     //console.log("asdasdasd", worldManager.torchLife)
     if (worldManager.torchLife <= 500) {
-      playerController.torch.visible = false;
+      player.playerController.torch.visible = false;
     }
     // worldManager.torchDisplay();
     // worldManager.keyDisplay();
     // worldManager.batteryDisplay();
 
-
-
     updateSnow(deltaTime);
     saferoom1.update(deltaTime);
     mMap.worldUpdate();
+    monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
+    devMap.update();
+
     render();
     stats.update();
   }
+  soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
 }
 
@@ -123,9 +162,7 @@ async function initWorld() {
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
-
   setUpGround();
-  setUpAmbientLight();
 
   maze1 = new Maze(
     Constants.MAP1_SIZE,
@@ -134,49 +171,55 @@ async function initWorld() {
   );
   maze1.growingTree();
   grid1 = maze1.getThickGrid();
-  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
 
+  let maze1Group = await renderMaze(maze1, grid1);
+
+  scene.add(maze1Group); // adds the maze in to the scene graph
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
-
   await saferoom1.loadModel("SafeRoomWDoors");
-  saferoom1.model.position.x =
-    (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
-  saferoom1.model.position.z =
-    (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
-  scene.add(saferoom1.model);
 
+  var playerPos = new THREE.Vector3(
+    Constants.PLAYER_INITIAL_POS.x,
+    Constants.PLAYER_INITIAL_POS.y,
+    Constants.PLAYER_INITIAL_POS.z
+  );
+  setUpAmbientLight();
 
-  playerController = new PlayerController(20, 10, 20, renderer.domElement);
+  var playerController = new PlayerController(
+    renderer.domElement,
+    maze1Group,
+    onInteractCB
+  );
+  await playerController.initCandle();
   scene.add(playerController.controls.getObject());
+  scene.add(playerController.playerObject);
+
+  soundmanagerGlobal = new SoundManagerGlobal(
+    playerController,
+    "assets/Sounds/ambience.mp3",
+    "assets/Sounds/footsteps.mp3"
+  );
+
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
-  setUpMonster();
-  //mMap = new MiniMap(playerController, grid1);
 
+  player = new Player(playerPos, playerController);
 
+  monsterManager = new MonsterManager(scene, player, grid1, clock);
+
+  devMap = new DevMap(grid1, player, monsterManager);
+  sceneLoader = new SceneLoader(
+    physics,
+    scene,
+    maze1Group,
+    saferoom1.model,
+    playerController
+  );
   mMap = new MiniMap(playerController, grid1);
+
   makeSnow(scene);
 }
-
-function setUpMonster() {
-  let monsterPosition = {
-    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-    y: 0,
-    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-  };
-  monster = new Monster(
-    monsterPosition,
-    Constants.MONSTER_SPEED_INVERSE,
-    scene
-  );
-  monster.getAstarPath(grid1, {
-    x: 1 * Constants.WALL_SIZE,
-    y: 0,
-    z: 1 * Constants.WALL_SIZE,
-  });
-}
-
 
 function setUpGround() {
   // set up the floor of the game
@@ -205,7 +248,7 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-function renderMaze(maze, grid) {
+async function renderMaze(maze, grid) {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
@@ -214,17 +257,11 @@ function renderMaze(maze, grid) {
   const wallHeight = 25;
   const wallWidth = 30;
 
-
   worldManager = new WorldManager(scene, grid);
 
   worldManager.setKey();
   worldManager.setBatteries();
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
-
-  // const wallHeight = 0.2 * Constants.WALL_SIZE;
-  // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  // var geometryArr = [];
-  // var wallRes = 5;
 
   const mazeGroup = new THREE.Group();
 
@@ -242,22 +279,28 @@ function renderMaze(maze, grid) {
           wallHeight,
           x + y
         );
-        wallMesh.position.set(x * Constants.WALL_SIZE, 0, y * Constants.WALL_SIZE);
+        wallMesh.position.set(
+          x * Constants.WALL_SIZE,
+          0,
+          y * Constants.WALL_SIZE
+        );
         mazeGroup.add(wallMesh);
         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
         continue;
-        // check if its the
-
-        //        scene.add(wallMesh)
-        // const m = new THREE.Matrix4();
-        //m.set(1, 0, 0, x * Constants.WALL_SIZE, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * Constants.WALL_SIZE, 0, 0, 0, 1);
-
-        // geometryArr.push(wallGeometry.applyMatrix4(m));
       }
     }
   }
-  //mazeGroup.position.y -= wallHeight / 4;
 
+  // add the door to the end of the maze
+  door = new Door("entrance");
+  await door.loadModel("Door");
+  scene.add(door.model);
+  door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
+  door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
+  door.model.position.y -= wallHeight / 2;
+
+  mazeGroup.add(door.model);
+  mazeGroup.name = "maze";
   return mazeGroup;
 }
 
@@ -333,15 +376,15 @@ function makeSnow(scene) {
   const pointMaterial = new THREE.PointsMaterial({
     // size: 8,
     color: 0xffffff,
+    opacity: 0.3,
     vertexColors: false,
     map: getTexture(),
     transparent: true,
     // opacity: 0.8,
     // blending: THREE.AdditiveBlending,
-    fog: true,
+    fog: false,
     depthTest: true,
   });
-
 
   const velocities = [];
   for (let i = 0; i < particleNum; i++) {
@@ -363,8 +406,8 @@ function makeSnow(scene) {
 }
 
 function updateSnow(delta) {
-  var playerX = playerController.camera.position.x;
-  var playerZ = playerController.camera.position.z;
+  var playerX = player.position.x;
+  var playerZ = player.position.z;
   const posArr = snowParticles.geometry.getAttribute("position").array;
 
   var offset = 100;
@@ -385,9 +428,20 @@ function updateSnow(delta) {
   snowParticles.geometry.attributes.position.needsUpdate = true;
 }
 
+function onInteractCB() {
+  const interactingObject = player.playerController.intersect;
+  if (interactingObject) {
+    switch (interactingObject.name) {
+      case "entrance":
+        door.openDoor(sceneLoader);
+    }
+  }
+}
+
 function onWindowResize() {
-  playerController.camera.aspect = window.innerWidth / window.innerHeight;
-  playerController.camera.updateProjectionMatrix();
+  player.playerController.camera.aspect =
+    window.innerWidth / window.innerHeight;
+  player.playerController.camera.updateProjectionMatrix();
 
   renderer.setSize(
     innerWidth / Constants.BLOCKINESS,
@@ -399,7 +453,7 @@ function onWindowResize() {
 }
 
 function render() {
-  renderer.render(scene, playerController.camera);
+  renderer.render(scene, player.playerController.camera);
 }
 
 export default GameManager;
