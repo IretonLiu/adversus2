@@ -109,20 +109,33 @@ function animate() {
     });
 
     monsterManager.update();
+
     if(monsterManager.monster != null)
     {
       if(soundmanager == null)
       {
-        soundmanager = new SoundManager(monsterManager.monster.Mesh,player.playerController, "./assets/sounds/monster.mp3");
+        soundmanager = new SoundManager(monsterManager.monster.Mesh, player.playerController, "assets/Sounds/monster.mp3");
       }
       else{
+        if(monsterManager.monster.Mesh != null)
+        {
         soundmanager.bind(monsterManager.monster.Mesh);
+        }
+        else
+        {
+          soundmanager.pause();
+        }
       }
     }
-    else if(!monsterManager.monster)
+    else
     {
+      if(soundmanager!=null)
+      {
+      soundmanager.pause()
+      }
       soundmanager = null;
     }
+
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
     worldManager.pickUpBattery(

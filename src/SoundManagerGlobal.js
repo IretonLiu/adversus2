@@ -44,7 +44,7 @@ getSound()
 walking()
 {
     const walking  = this.playerController.isMoving()
-    if(walking)
+    if(walking )
     {
     
         this.sound2.play()
@@ -54,20 +54,21 @@ walking()
     }
 }
 
-pause()
+
+menu(state)
 {
-    if(!state.isPlaying)
-    {   
-         this.sound.pause()
-    }
-    else if(state.isPlaying && !this.sound.isPlaying)
+    if(state && !this.sound.isPlaying)
     {
-         this.sound.play() 
-    }    
+        this.sound.play();
+    }
+    else if(!state && this.sound.isPlaying)
+    {
+        this.sound.pause();
+    }  
 }
 getIsplaying()
 {
-    return this.sound.getIsplaying()
+    return this.sound.getIsplaying
 }
 }
 

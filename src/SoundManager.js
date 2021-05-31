@@ -16,12 +16,12 @@ constructor(obj, playerController,soundPath)
         audioLoader.load( soundPath, function( buffer ) {
           sound.setBuffer( buffer );
           sound.setLoop( true );
-          sound.setVolume( 10);
+          sound.setVolume( 20);
           sound.play();
         
           
         })
-    sound.setRefDistance(3)
+    sound.setRefDistance(5)
     
 }
 
@@ -37,14 +37,10 @@ getSound()
 
 pause()
 {
-    if(!state.isPlaying )
-    {   
+ 
          this.sound.pause()
-    }
-    else if(state.isPlaying && !this.sound.isPlaying)
-    {
-         this.sound.play() 
-    }    
+
+
 }
 getIsplaying()
 {
@@ -54,7 +50,7 @@ getIsplaying()
 bind(mesh)
 {
     mesh.add(this.sound);
-    //this.pause();
+
 }
 }
 
