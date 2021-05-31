@@ -238,6 +238,7 @@ class PlayerController {
   initTorch() {
     const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
+    torch.visible = false;
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
     torch.intensity = 1.5;
@@ -267,7 +268,7 @@ class PlayerController {
   }
 
   handleMovement() {
-    const speed = Constants.PLAYER_MOVE_SPEED_DEV; // TODO: change to normal 
+    const speed = Constants.PLAYER_MOVE_SPEED; // TODO: change to normal 
     const time = performance.now();
     const delta = (time - this.prevTime) / 1000;
 
@@ -308,7 +309,7 @@ class PlayerController {
     if (moveDirection.x == 0 && moveDirection.y == 0 && moveDirection == 0) return;
 
     let resultantImpulse = new Ammo.btVector3(moveDirection.x, moveDirection.y, moveDirection.z)
-    resultantImpulse.op_mul(Constants.PLAYER_MOVE_SPEED_DEV);
+    resultantImpulse.op_mul(speed);
     // let resultantImpulse = new Ammo.btVector3(1, 0, 0)
     // resultantImpulse.op_mul(20);
 

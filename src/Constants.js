@@ -27,11 +27,11 @@ let Constants = {
   PROBABILITY_WALLS_REMOVED: 0.075,
 
   // blockiness of visuals
-  BLOCKINESS: 1,
+  BLOCKINESS: 4,
   WALL_SEGMENTS: 1,
 
   // player constants
-  PLAYER_MOVE_SPEED: 25,
+  PLAYER_MOVE_SPEED: 35,
   PLAYER_MOVE_SPEED_DEV: 100,
   PLAYER_INITIAL_POS: {
     x: 20,
@@ -40,11 +40,11 @@ let Constants = {
   },
 
   // monster controls
-  MONSTER_SPEED: 5000,
+  MONSTER_SPEED: 3000,
   MONSTER_RADIUS: 7.5,
 
   //Fog
-  FOG_FAR: 100,
+  FOG_FAR: 150,
   FOG_NEAR: 1,
 
   CAMERA_FAR: 200,

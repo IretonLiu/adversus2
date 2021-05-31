@@ -352,6 +352,7 @@ function makeSnow(scene) {
   const pointMaterial = new THREE.PointsMaterial({
     // size: 8,
     color: 0xffffff,
+    opacity: 0.3,
     vertexColors: false,
     map: getTexture(),
     transparent: true,
