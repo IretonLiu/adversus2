@@ -8,7 +8,9 @@ import {
     DoubleSide,
     ShaderMaterial,
     SphereBufferGeometry,
-    BackSide
+    BackSide,
+    BoxGeometry,
+    MeshStandardMaterial
 } from "three"
 
 class SafeRoom {
@@ -64,6 +66,17 @@ class SafeRoom {
                 flame2.position.set(candle2Pos.x, candle2Pos.y, candle2Pos.z,)
 
 
+                const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3,);
+                const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
+                exitBoundingBoxMaterial.visible = false;
+                const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
+
+                exitBoundingBoxMesh.name = "exit";
+                exitBoundingBoxMesh.position.x = 10;
+                exitBoundingBoxMesh.position.z = 12;
+                exitBoundingBoxMesh.position.y = 1.75;
+
+                this.model.add(exitBoundingBoxMesh);
                 this.model.add(candleLight1);
                 this.model.add(flame1);
                 this.model.add(candleLight2);

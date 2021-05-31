@@ -32,7 +32,6 @@ class Candle {
           this.candleLight.castShadow = true;
           this.candleLight.position.y = 0.8;
 
-
           const flame = this.createCandleLight();
           flame.position.y = 0.65;
 
@@ -46,7 +45,7 @@ class Candle {
         },
         (xhr) => {
           console.log(
-            "loading door: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
+            "loading candle: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
           );
         },
         reject

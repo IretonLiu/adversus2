@@ -8,6 +8,7 @@ class SceneLoader {
         this.maze1 = maze1;
         this.room1 = room1;
         this.playerController = playerController;
+        this.currentScene = "maze1";
     }
 
     loadScene(nextScene) {
@@ -15,6 +16,8 @@ class SceneLoader {
             this.scene.add(this.maze1);
         } else if (nextScene == "saferoom1") {
             this.clearScene();
+            this.currentScene = "saferoom1";
+            this.playerController.scene = this.room1;
             this.scene.add(this.room1);
         }
 
@@ -28,7 +31,7 @@ class SceneLoader {
 
         });
         this.scene.remove(this.maze1)
-
+        console.log(this.scene);
         this.playerController.reset();
         this.physics.createPlayerRB(this.playerController.playerObject);
     }

@@ -79,9 +79,9 @@ class WorldManager {
                 Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
             let randZ =
                 Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
-            console.log("gird length: ", this.grid.length);
-            console.log("x pos for battery", randX, "z pos for battery", randZ);
-            console.log("this is a problem: ", this.grid[randX][randZ]);
+            // console.log("gird length: ", this.grid.length);
+            // console.log("x pos for battery", randX, "z pos for battery", randZ);
+            // console.log("this is a problem: ", this.grid[randX][randZ]);
             if (this.grid[randX][randZ] === false) {
                 if (this.batteries.length != 0) {
                     for (let battery of this.batteries) {
@@ -144,7 +144,6 @@ class WorldManager {
             z >= this.gateKey.mesh.position.z - 10
         ) {
             this.keyDisplay();
-            console.log("asdasdasd", this.player);
             this.player.hasKey = true;
             this.gateKey.mesh.visible = false;
         }

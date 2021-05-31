@@ -74,8 +74,9 @@ class PlayerController {
     const controls = new PointerLockControls(this.camera, domElement);
     controls.maxPolarAngle = (29 * Math.PI) / 30;
     controls.minPolarAngle = (1 * Math.PI) / 30;
-    controls.addEventListener("unlock", function () {
-      self.openPauseMenu();
+    controls.addEventListener("unlock", () => {
+      if (!state.won)
+        this.openPauseMenu();
     });
     return controls;
   }
@@ -123,11 +124,11 @@ class PlayerController {
   setUpPauseScreen() {
     var pause = document.getElementById("pause");
 
-    document.getElementById("resume-button").onclick = () => {
+    document.getElementById("resume-button").addEventListener("click", () => {
+      state.isPlaying = true;
       this.controls.lock();
       pause.classList.add("hidden");
-      state.isPlaying = true;
-    };
+    });
   }
 
   setUpControls(self) {
@@ -363,7 +364,7 @@ class PlayerController {
       true
     );
     if (intersects.length > 0) {
-      this.intersect = intersects[0].object.parent.parent;
+      this.intersect = intersects[0].object;
     } else {
       this.intersect = null;
     }

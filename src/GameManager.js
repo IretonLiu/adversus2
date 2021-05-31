@@ -110,19 +110,27 @@ function animate() {
     });
 
     monsterManager.update();
+
     if (monsterManager.monster != null) {
       if (soundmanager == null) {
-        soundmanager = new SoundManager(
-          monsterManager.monster.Mesh,
-          player.playerController,
-          "./assets/sounds/monster.mp3"
-        );
-      } else {
-        soundmanager.bind(monsterManager.monster.Mesh);
+        soundmanager = new SoundManager(monsterManager.monster.Mesh, player.playerController, "assets/Sounds/monster.mp3");
       }
-    } else if (!monsterManager.monster) {
+      else {
+        if (monsterManager.monster.Mesh != null) {
+          soundmanager.bind(monsterManager.monster.Mesh);
+        }
+        else {
+          soundmanager.pause();
+        }
+      }
+    }
+    else {
+      if (soundmanager != null) {
+        soundmanager.pause()
+      }
       soundmanager = null;
     }
+
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
     worldManager.pickUpBattery(
@@ -136,7 +144,6 @@ function animate() {
     worldManager.displayItems();
     worldManager.lifeBar(player.playerController.torch.visible);
     worldManager.refillTorch();
-    //console.log("asdasdasd", worldManager.torchLife)
     if (worldManager.torchLife <= 500) {
       player.playerController.torch.visible = false;
     }
@@ -175,7 +182,7 @@ async function initWorld() {
 
   let maze1Group = await renderMaze(maze1, grid1);
 
-  scene.add(maze1Group); // adds the maze in to the scene graph
+  // scene.add(maze1Group); // adds the maze in to the scene graph
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
@@ -207,7 +214,7 @@ async function initWorld() {
 
   player = new Player(playerPos, playerController);
 
-  monsterManager = new MonsterManager(scene, player, grid1, clock);
+  monsterManager = new MonsterManager(maze1Group, player, grid1, clock);
 
   devMap = new DevMap(grid1, player, monsterManager);
   sceneLoader = new SceneLoader(
@@ -217,12 +224,15 @@ async function initWorld() {
     saferoom1.model,
     playerController
   );
+
+  sceneLoader.loadScene("maze1");
   mMap = new MiniMap(playerController, grid1);
 
   worldManager = new WorldManager(scene, grid1, player);
   await worldManager.setKey();
   await worldManager.setBatteries();
   makeSnow(scene);
+  makeSnow(maze1Group);
 }
 
 function setUpGround() {
@@ -301,6 +311,9 @@ async function renderMaze(maze, grid) {
 
   mazeGroup.add(door.model);
   mazeGroup.name = "maze";
+  worldManager = new WorldManager(mazeGroup, grid);
+  worldManager.setKey();
+  worldManager.setBatteries();
   return mazeGroup;
 }
 
@@ -430,15 +443,23 @@ function updateSnow(delta) {
 
 function onInteractCB() {
   const interactingObject = player.playerController.intersect;
-  console.log(player.hasKey)
   if (interactingObject) {
     switch (interactingObject.name) {
       case "entrance":
-        console.log(player.hasKey)
         if (player.hasKey) {
-          console.log(player.hasKey)
           door.openDoor(sceneLoader);
         }
+        break;
+      case "exit":
+        var winScreen = document.getElementById("win-screen");
+        winScreen.classList.remove("hidden");
+        state.isPlaying = false;
+        state.won = true;
+        this.controls.unlock();
+        document.getElementById("restart-button").onclick = () => {
+          location.reload();
+        };
+        break;
     }
   }
 }

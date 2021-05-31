@@ -40,7 +40,7 @@ let Constants = {
   },
 
   // monster controls
-  MONSTER_SPEED: 3000,
+  MONSTER_SPEED: 1000,
   MONSTER_RADIUS: 7.5,
 
   //Fog

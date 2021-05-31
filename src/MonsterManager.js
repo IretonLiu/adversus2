@@ -55,11 +55,24 @@ class MonsterManager {
     );
   }
 
+  backtrackMonster() {
+    // cause the monster to retrace its steps
+    // only start the backtrack if we aren't already doing so
+    if (!this.monster.backtracking) this.monster.startBacktrack();
+  }
+
   update() {
     if (this.monster) {
       if (this.monster.path == "") {
         this.despawnMonster();
         this.fear -= 15;
+        return;
+      } else if (
+        !this.monster.backtracking && // optimisation to prevent unnecessary raycasts in isVisible
+        this.monster.isVisible(this.player.playerController, true)
+      ) {
+        // if the monster is caught in the torch, we want it to start backtracking
+        this.backtrackMonster();
         return;
       }
       this.monster.update();
@@ -103,7 +116,7 @@ class MonsterManager {
   }
 
   updateMonsterPath() {
-    if (this.monster) {
+    if (this.monster && !this.monster.backtracking) {
       var playerPosition = Utils.convertThickGridToWorld(
         Utils.convertWorldToThickGrid(this.player.position)
       );
