@@ -11,6 +11,7 @@ import { PointerLockControls } from "three/examples/jsm/controls/PointerLockCont
 import Constants from "./Constants";
 import state from "./State";
 import SceneLoader from "./SceneLoader"
+import Candle from "./Candle";
 
 class PlayerController {
   constructor(domElement, scene, onInteractCB) {
@@ -37,8 +38,13 @@ class PlayerController {
     );
     this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
     this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
+
+    // the torch that is used by the player
     this.torch = this.initTorch();
     this.camera.add(this.torch);
+
+    // the candle that is used by the player
+    this.candle = null;
 
     this.target = new Object3D();
 
@@ -47,6 +53,7 @@ class PlayerController {
     this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
 
+    // setting up object interaction raycaster
     this.raycaster = new Raycaster();
     this.raycaster.near = 0.1;
     this.raycaster.far = 20;
@@ -216,10 +223,11 @@ class PlayerController {
     this.torch.visible = !this.torch.visible;
   }
 
-  update() {
+  update(time) {
     this.handleMovement();
     this.raycasterForward();
     this.handleTorch();
+    this.candle.update(time);
   }
 
   updatePosition() {
@@ -243,6 +251,13 @@ class PlayerController {
     torch.shadow.camera.far = 100;
     torch.angle = Math.PI / 7;
     return torch;
+  }
+
+  async initCandle() {
+    const candle = new Candle();
+    await candle.loadModel();
+    this.candle = candle;
+    this.camera.add(this.candle.model);
   }
 
   handleTorch() {

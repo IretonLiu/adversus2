@@ -1,109 +1,65 @@
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import {
-    Group,
-    PointLight,
-    Mesh,
-    MeshBasicMaterial,
-    FrontSide,
-    DoubleSide,
-    ShaderMaterial,
-    SphereBufferGeometry,
-    BackSide
-} from "three"
+import { FrontSide, Group, Mesh, PointLight, ShaderMaterial, SphereBufferGeometry } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-class SafeRoom {
+class Candle {
     constructor() {
         this.model = new Group();
-        this.flameMaterials = [];
-        this.candleLights = [];
         this.time = 0;
+        this.flameMaterial = null;
+        this.candleLight = null;
+
     }
 
-    loadModel(filename) {
-
+    loadModel() {
         const loader = new GLTFLoader();
-        const path = "./assets/models/saferoom/"
+        const path = "./assets/models/"
         const extension = ".glb"
         return new Promise((resolve, reject) => {
             //loader.load(url, data => resolve(data), null, reject);
-            loader.load(path + filename + extension, (gltf) => {
+            loader.load(path + "Candle" + extension, (gltf) => {
+                this.model.add(gltf.scene);
 
+                this.candleLight = new PointLight(0xffaa33, 1, 100, 5);
+                this.candleLight.shadow.bias = -0.001
+                this.candleLight.castShadow = true;
+                this.candleLight.position.y = 0.8;
 
-                const scene = gltf.scene;
-                scene.traverse(function (child) {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        child.material.side = DoubleSide;
-                        child.material.shadowSide = BackSide;
-                    }
-                });
-                this.model.add(scene)
+                const flame = this.createCandleLight();
+                flame.position.y = 0.65;
 
-                // the actual light source of the candle light
-                const candle1Pos = { x: 5.25, y: 1.95, z: -3.57 }
-                const candle2Pos = { x: -1.4, y: 2.05, z: 13.1 }
-
-                var candleLight1 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight1.position.set(candle1Pos.x, candle1Pos.y + 0.1, candle1Pos.z,);
-                candleLight1.shadow.bias = -0.001
-                candleLight1.castShadow = true;
-
-                var candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight2.position.set(candle2Pos.x, candle2Pos.y + 0.1, candle2Pos.z,);
-                candleLight2.shadow.bias = -0.001
-                candleLight2.castShadow = true;
-
-                this.candleLights.push(candleLight2);
-
-                // the candle light shape and material using glsl shader
-                const flame1 = this.createCandleLight();
-                flame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z,)
-
-                const flame2 = this.createCandleLight();
-                flame2.position.set(candle2Pos.x, candle2Pos.y, candle2Pos.z,)
-
-
-                this.model.add(candleLight1);
-                this.model.add(flame1);
-                this.model.add(candleLight2);
-                this.model.add(flame2);
-                this.model.position.set(40, -5, 40);
-                this.model.scale.x = 6;
-                this.model.scale.y = 6;
-                this.model.scale.z = 6;
-
+                this.model.add(this.candleLight);
+                this.model.add(flame);
+                this.model.rotateY(10 * Math.PI / 9)
+                this.model.position.z = -2;
+                this.model.position.y = -1.2
+                this.model.position.x = 1.5;
                 resolve("success");
             }, (xhr) => {
-                console.log("loading saferoom: " + (xhr.loaded / xhr.total * 100) + '% loaded');
+                console.log("loading door: " + (xhr.loaded / xhr.total * 100) + '% loaded');
             }, reject)
         });
+    }
+
+    update(time) {
+        this.time += time;
+        this.time = this.time % 1000;
+        this.flameMaterial.uniforms.time.value = this.time;
+
+        this.candleLight.position.x += Math.sin(this.time * Math.PI) * 0.0001;
+
     }
 
     createCandleLight() {
         let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
         flameGeo.translate(0, 0.5, 0);
         let flameMat = this.createShaderMaterial();
-        this.flameMaterials.push(flameMat);
+        this.flameMaterial = flameMat;
         let flame = new Mesh(flameGeo, flameMat);
         flame.scale.x = 0.1;
         flame.scale.y = 0.1;
         flame.scale.z = 0.1;
         return flame;
     }
-
-    update(time) {
-        this.time += time;
-        this.time = this.time % 1000;
-        this.flameMaterials[0].uniforms.time.value = this.time;
-        this.flameMaterials[1].uniforms.time.value = this.time;
-        for (var i = 0; i < this.candleLights.length; i++) {
-            this.candleLights[i].position.x += Math.sin(this.time * Math.PI) * 0.0001;
-            // this.candleLights[i].position.z += Math.cos(this.time * Math.PI * 0.75) * 0.0001;
-        }
-    }
-
-    // create the flame shader, credits to prisoner849
 
     createShaderMaterial() {
         return new ShaderMaterial({
@@ -189,4 +145,4 @@ class SafeRoom {
     }
 }
 
-export default SafeRoom;
+export default Candle;

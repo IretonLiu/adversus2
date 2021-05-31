@@ -67,7 +67,7 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  //scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
+  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
   renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -85,7 +85,7 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-    playerController.update();
+    playerController.update(deltaTime);
     physics.updatePhysics(deltaTime);
     //moveBall();
     playerController.updatePosition();
@@ -149,7 +149,10 @@ async function initWorld() {
   setUpAmbientLight();
 
   playerController = new PlayerController(renderer.domElement, maze1Group, onInteractCB);
+  await playerController.initCandle();
   scene.add(playerController.controls.getObject());
+  scene.add(playerController.playerObject);
+
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster(maze1Group);
 
@@ -355,7 +358,7 @@ function makeSnow(scene) {
     transparent: true,
     // opacity: 0.8,
     // blending: THREE.AdditiveBlending,
-    fog: true,
+    fog: false,
     depthTest: true,
   });
 
