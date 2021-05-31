@@ -35,19 +35,13 @@ class Battery extends PickUps {
 
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
-          // console.log(
-          //   "this is where the battery is: ",
-          //   this.mesh.position.x,
-          //   this.mesh.position.y,
-          //   this.mesh.position.z
-          // );
           scene.add(this.mesh);
 
           resolve("success");
         },
         (xhr) => {
           console.log(
-            "loading battery: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
+            "loading Battery: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
           );
         },
         reject
@@ -75,19 +69,13 @@ class GateKey extends PickUps {
           this.mesh.scale.set(30, 30, 30);
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
-          // console.log(
-          //   "this is where the Key is: ",
-          //   this.mesh.position.x,
-          //   this.mesh.position.y,
-          //   this.mesh.position.z
-          // );
           scene.add(this.mesh);
 
           resolve("success");
         },
         (xhr) => {
           console.log(
-            "loading key: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
+            "loading Key: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
           );
         },
         reject
