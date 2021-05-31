@@ -34,7 +34,7 @@ let Constants = {
   PLAYER_MOVE_SPEED_DEV: 100,
 
   // monster controls
-  MONSTER_SPEED: 500,
+  MONSTER_SPEED: 5000,
   MONSTER_RADIUS: 7.5,
 
   //Fog

@@ -53,6 +53,10 @@ class Monster {
     });
   }
 
+  remove(){
+    this.scene.remove(this.monsterObject);
+  }
+
   getAstarPath(grid, target) {
     const astar = new Astar(
       grid,

@@ -9,21 +9,28 @@ import Physics from "./lib/Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
 import Stats from "three/examples/jsm/libs/stats.module";
+import MonsterManager from "./MonsterManager";
+import DevMap from "./DevMap";
+import Player from "./Player";
+import Utils from "./Utils";
 
-let playerController,
+let player,
   scene,
   renderer,
   physics,
   mMap,
-  monster,
+  monsterManager,
   snowParticles,
   stats,
   saferoom1;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
+let devMap;
+
 import state from "./State";
 import SafeRoom from "./SafeRoom";
+import { Vector3 } from "three";
 
 const clock = new THREE.Clock();
 
@@ -78,17 +85,23 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-    playerController.update();
+    player.playerController.update();
     physics.updatePhysics(deltaTime);
-    //moveBall();
-    playerController.updatePosition();
 
-    if (monster.path != "") monster.update();
+    player.playerController.updatePosition();
+    player.updatePosition(player.playerController.camera.position, () => {
+      monsterManager.updateMonsterPath();
+    });
+
+    monsterManager.update();
 
     updateSnow(deltaTime);
 
     saferoom1.update(deltaTime);
     mMap.worldUpdate();
+
+    devMap.update();
+
     render();
     stats.update();
   }
@@ -124,27 +137,20 @@ async function initWorld() {
     (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
   scene.add(saferoom1.model);
 
-  playerController = new PlayerController(20, 10, 20, renderer.domElement);
+  var playerPos = new Vector3(20, 10, 20);
+  var playerController = new PlayerController(20, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
-  setUpMonster();
-  //mMap = new MiniMap(playerController, grid1);
+
+  player = new Player(playerPos, playerController);
+
+  monsterManager = new MonsterManager(scene, player, grid1, clock);
+  monsterManager.spawnMonster();
+
+  devMap = new DevMap(grid1, player, monsterManager);
 
   mMap = new MiniMap(playerController, grid1);
   makeSnow(scene);
-}
-
-function setUpMonster() {
-  let monsterPosition = {
-    x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-    y: 0,
-    z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
-  };
-  monster = new Monster(monsterPosition, scene, clock);
-  monster.getAstarPath(
-    grid1,
-    new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
-  );
 }
 
 function setUpGround() {
@@ -185,11 +191,6 @@ function renderMaze(maze, grid) {
 
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
-  // const wallHeight = 0.2 * Constants.WALL_SIZE;
-  // const wallMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  // var geometryArr = [];
-  // var wallRes = 5;
-
   const mazeGroup = new THREE.Group();
 
   for (var y = 0; y < 2 * maze.height + 1; y++) {
@@ -214,17 +215,9 @@ function renderMaze(maze, grid) {
         mazeGroup.add(wallMesh);
         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
         continue;
-        // check if its the
-
-        //        scene.add(wallMesh)
-        // const m = new THREE.Matrix4();
-        //m.set(1, 0, 0, x * Constants.WALL_SIZE, 0, 1, 0, wallHeight / 2, 0, 0, 1, y * Constants.WALL_SIZE, 0, 0, 0, 1);
-
-        // geometryArr.push(wallGeometry.applyMatrix4(m));
       }
     }
   }
-  //mazeGroup.position.y -= wallHeight / 4;
 
   return mazeGroup;
 }
@@ -330,8 +323,8 @@ function makeSnow(scene) {
 }
 
 function updateSnow(delta) {
-  var playerX = playerController.camera.position.x;
-  var playerZ = playerController.camera.position.z;
+  var playerX = player.position.x;
+  var playerZ = player.position.z;
   const posArr = snowParticles.geometry.getAttribute("position").array;
 
   var offset = 100;
@@ -353,8 +346,9 @@ function updateSnow(delta) {
 }
 
 function onWindowResize() {
-  playerController.camera.aspect = window.innerWidth / window.innerHeight;
-  playerController.camera.updateProjectionMatrix();
+  player.playerController.camera.aspect =
+    window.innerWidth / window.innerHeight;
+  player.playerController.camera.updateProjectionMatrix();
 
   renderer.setSize(
     innerWidth / Constants.BLOCKINESS,
@@ -366,7 +360,7 @@ function onWindowResize() {
 }
 
 function render() {
-  renderer.render(scene, playerController.camera);
+  renderer.render(scene, player.playerController.camera);
 }
 
 export default GameManager;
