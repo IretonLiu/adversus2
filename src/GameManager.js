@@ -109,18 +109,17 @@ function animate() {
     });
 
     monsterManager.update();
-    if(monsterManager.monster != null)
-    {
-      if(soundmanager == null)
-      {
-        soundmanager = new SoundManager(monsterManager.monster.Mesh,player.playerController, "./assets/sounds/monster.mp3");
-      }
-      else{
+    if (monsterManager.monster != null) {
+      if (soundmanager == null) {
+        soundmanager = new SoundManager(
+          monsterManager.monster.Mesh,
+          player.playerController,
+          "./assets/sounds/monster.mp3"
+        );
+      } else {
         soundmanager.bind(monsterManager.monster.Mesh);
       }
-    }
-    else if(!monsterManager.monster)
-    {
+    } else if (!monsterManager.monster) {
       soundmanager = null;
     }
 
@@ -207,7 +206,7 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
 
   monsterManager = new MonsterManager(scene, player, grid1, clock);
-  
+
   devMap = new DevMap(grid1, player, monsterManager);
   sceneLoader = new SceneLoader(
     physics,
@@ -429,7 +428,7 @@ function updateSnow(delta) {
 }
 
 function onInteractCB() {
-  const interactingObject = playerController.intersect;
+  const interactingObject = player.playerController.intersect;
   if (interactingObject) {
     switch (interactingObject.name) {
       case "entrance":
