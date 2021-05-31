@@ -37,6 +37,12 @@ class Monster {
     // NB - last element is the next point
     this.path = [];
 
+    // have a backtracking flag
+    this.backtracking = false;
+
+    // track path travelled
+    this.backtrackPath = [];
+
     this.Mesh = new Mesh();
 
     this.monsterObject = null;
@@ -200,6 +206,13 @@ class Monster {
     // calculate path from current position to aforementioned target, using astar
     astar.calculatePath();
     this.path = astar.getCurrentPath();
+
+    // we have a new path, so we don't have any backtracking available yet
+    // this.backtrackPath = [];
+    this.backtracking = false;
+
+    // have a new path - moving forwards
+    this.setSpeed(Constants.MONSTER_SPEED);
   }
 
   isInViewAngle(playerController, viewAngle) {
@@ -289,16 +302,21 @@ class Monster {
   isVisible(playerController, inTorch) {
     // check if the monster is on screen (could be visible in low light)
 
+    // check if monster actually exists
+    if (this.monsterObject === null) return false;
+
     // need to get the updated matrix representation
     playerController.camera.updateMatrixWorld();
+
+    // if want to check in torch, make sure torch is actually turned on
+    if (inTorch) {
+      if (!playerController.torch.visible) return false;
+    }
 
     // inTorch if want to check if it is in the torch's beam
     const viewAngle = inTorch
       ? playerController.torch.angle
       : ((playerController.camera.fov / 180) * Math.PI) / 2; // convert to radians and divide by two (relative to normal)
-
-    // check if monster actually exists
-    if (this.monsterObject === null) return false;
 
     // check if the monster is hidden in the fog
     if (this.isHiddenByFog(playerController)) return false;
@@ -319,6 +337,20 @@ class Monster {
   setSpeed(speed) {
     // update the monster's speed
     this.speed = speed;
+  }
+
+  startBacktrack() {
+    // need to update the path to be followed with the backtracking path
+    this.path = this.backtrackPath;
+
+    // empty the backtrack path
+    this.backtrackPath = [];
+
+    // set the backtracking flag
+    this.backtracking = true;
+
+    // we are backtracking - run away quickly
+    this.setSpeed(Constants.MONSTER_SPEED * 2);
   }
 
   update() {
@@ -356,7 +388,8 @@ class Monster {
       )
     ) {
       // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
-      this.path.pop();
+      // keep track of the previously travelled-to points
+      this.backtrackPath.push(this.path.pop());
     }
   }
 }

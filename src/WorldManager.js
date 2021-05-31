@@ -77,7 +77,7 @@ class WorldManager {
       }
       iter++;
     }
-    console.log("iterations :", iter);
+    // console.log("iterations :", iter);
   }
 
   pickUpBattery(x, z) {
@@ -104,16 +104,16 @@ class WorldManager {
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
       let randZ =
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
-      console.log("gird length: ", this.grid.length);
-      console.log("x pos for battery", randX, "z pos for battery", randZ);
-      console.log("this is a problem: ", this.grid[randX][randZ]);
+      // console.log("gird length: ", this.grid.length);
+      // console.log("x pos for battery", randX, "z pos for battery", randZ);
+      // console.log("this is a problem: ", this.grid[randX][randZ]);
       if (this.grid[randX][randZ] === false) {
         this.loadBattery(randX, randZ);
         numBats++;
       }
       iter++;
     }
-    console.log("iterations :", iter);
+    // console.log("iterations :", iter);
   }
 
   pickUpBattery(x, z) {
