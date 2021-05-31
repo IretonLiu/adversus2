@@ -30,8 +30,14 @@ let Constants = {
   BLOCKINESS: 4,
   WALL_SEGMENTS: 1,
 
+  // player constants
   PLAYER_MOVE_SPEED: 25,
   PLAYER_MOVE_SPEED_DEV: 100,
+  PLAYER_INITIAL_POS: {
+    x: 20,
+    y: 10,
+    z: 20
+  },
 
   // monster controls
   MONSTER_SPEED_INVERSE: 50,
@@ -41,8 +47,8 @@ let Constants = {
   FOG_NEAR: 1,
 
   CAMERA_FAR: 200,
-  AMBIENT_INTENSITY: 0.02,
-  //AMBIENT_INTENSITY: 2,
+  //AMBIENT_INTENSITY: 0.02,
+  AMBIENT_INTENSITY: 1,
 
   ANTIALIAS: true
 };

@@ -68,7 +68,7 @@ class SafeRoom {
                 this.model.add(flame1);
                 this.model.add(candleLight2);
                 this.model.add(flame2);
-                this.model.position.set(-70, -9.9, -50);
+                this.model.position.set(40, -5, 40);
                 this.model.scale.x = 6;
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;

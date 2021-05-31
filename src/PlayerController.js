@@ -4,15 +4,20 @@ import {
   SpotLight,
   PointLight,
   Object3D,
+  Raycaster,
+  Vector2,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
 import state from "./State";
+import SceneLoader from "./SceneLoader"
+
 class PlayerController {
-  constructor(x, y, z, domElement) {
+  constructor(domElement, scene, onInteractCB) {
     // setup player object for ammo
+    const playerPos = Constants.PLAYER_INITIAL_POS;
     this.playerObject = new Object3D();
-    this.playerObject.position.set(x, y, z);
+    this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();
     this.direction = new Vector3();
@@ -30,9 +35,8 @@ class PlayerController {
       0.1,
       Constants.CAMERA_FAR
     );
-    this.camera.position.set(x, y, z);
-    this.camera.lookAt(x + 1, y, z);
-
+    this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
     this.torch = this.initTorch();
     this.camera.add(this.torch);
 
@@ -42,6 +46,21 @@ class PlayerController {
     // set up the player controller to use the pointer lock controls
     this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
+
+    this.raycaster = new Raycaster();
+    this.raycaster.near = 0.1;
+    this.raycaster.far = 20;
+    this.intersect = null;
+    this.scene = scene;
+    this.onInteractCB = onInteractCB;
+  }
+
+  reset() {
+    const playerPos = Constants.PLAYER_INITIAL_POS;
+
+    this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
+    this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
   }
 
   initControls(domElement, self) {
@@ -164,8 +183,10 @@ class PlayerController {
           self.velocity.y = 0;
           break;
         case "KeyE":
-          this.turnTorchOff();
+          this.onInteractCB();
           break;
+
+
       }
     };
 
@@ -197,14 +218,13 @@ class PlayerController {
 
   update() {
     this.handleMovement();
-
+    this.raycasterForward();
     this.handleTorch();
   }
 
   updatePosition() {
     const pos = this.playerObject.position;
-    //console.log(pos);
-    this.camera.position.set(pos.x, pos.y, pos.z);
+    this.camera.position.set(pos.x, this.camera.position.y, pos.z);
   }
 
   initTorch() {
@@ -283,9 +303,24 @@ class PlayerController {
     // this.controls.moveForward(-this.velocity.z * delta);
 
     this.camera.position.y += this.velocity.y;
+    this.playerObject.position.y += this.velocity.y
     // this.camera.position.x += 1;
     this.prevTime = time;
   }
+
+  raycasterForward() {
+    //console.log(this.scene);
+    this.raycaster.set(this.controls.getObject().position, this.camera.getWorldDirection(new Vector3(0, 0, 0)));
+    //console.log(this.scene)
+
+    const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+    if (intersects.length > 0) {
+      this.intersect = intersects[0].object.parent.parent;
+    } else {
+      this.intersect = null;
+    }
+  }
+
 
 }
 

@@ -14,6 +14,8 @@ import NoiseGenerator from "./lib/NoiseGenerator"
 import state from "./State";
 import Stats from "three/examples/jsm/libs/stats.module";
 import SafeRoom from "./SafeRoom";
+import Door from "./Door"
+import SceneLoader from "./SceneLoader";
 
 let playerController,
   scene,
@@ -24,7 +26,9 @@ let playerController,
   snowParticles,
   stats,
   saferoom1,
-  worldManager;
+  worldManager,
+  door,
+  sceneLoader;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
@@ -33,13 +37,11 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-    let noiseGen = new NoiseGenerator();
-    // noiseGen.generateNoiseMap();
-
     // initializing physics
     await Ammo();
     physics = new Physics();
     physics.initPhysics();
+
 
 
     initGraphics();
@@ -117,14 +119,14 @@ function animate() {
 }
 
 async function initWorld() {
+
   const skybox = new Skybox("nightsky");
   scene.add(skybox.createSkybox());
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
-
   setUpGround();
-  setUpAmbientLight();
+
 
   maze1 = new Maze(
     Constants.MAP1_SIZE,
@@ -133,32 +135,37 @@ async function initWorld() {
   );
   maze1.growingTree();
   grid1 = maze1.getThickGrid();
-  scene.add(renderMaze(maze1, grid1)); // adds the maze in to the scene graph
+
+  let maze1Group = await renderMaze(maze1, grid1);
+
+
+  scene.add(maze1Group); // adds the maze in to the scene graph
 
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
-
   await saferoom1.loadModel("SafeRoomWDoors");
-  saferoom1.model.position.x =
-    (2 * Constants.MAP1_SIZE + 3.5) * Constants.WALL_SIZE;
-  saferoom1.model.position.z =
-    (2 * Constants.MAP1_SIZE + 1.5) * Constants.WALL_SIZE;
-  scene.add(saferoom1.model);
 
+  setUpAmbientLight();
 
-  playerController = new PlayerController(20, 10, 20, renderer.domElement);
+  playerController = new PlayerController(renderer.domElement, maze1Group, onInteractCB);
   scene.add(playerController.controls.getObject());
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
-  setUpMonster();
-  //mMap = new MiniMap(playerController, grid1);
+  setUpMonster(maze1Group);
 
+  sceneLoader = new SceneLoader(
+    physics,
+    scene,
+    maze1Group,
+    saferoom1.model,
+    playerController
+  )
 
   mMap = new MiniMap(playerController, grid1);
-  makeSnow(scene);
+  makeSnow(maze1Group);
 }
 
-function setUpMonster() {
+function setUpMonster(mazeGroup) {
   let monsterPosition = {
     x: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
     y: 0,
@@ -167,7 +174,7 @@ function setUpMonster() {
   monster = new Monster(
     monsterPosition,
     Constants.MONSTER_SPEED_INVERSE,
-    scene
+    mazeGroup
   );
   monster.getAstarPath(grid1, {
     x: 1 * Constants.WALL_SIZE,
@@ -204,7 +211,7 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-function renderMaze(maze, grid) {
+async function renderMaze(maze, grid) {
   // grid[maze.getThickIndex(0, 1)] = false;
   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
@@ -257,8 +264,19 @@ function renderMaze(maze, grid) {
   }
   //mazeGroup.position.y -= wallHeight / 4;
 
+  // add the door to the end of the maze
+  door = new Door("entrance");
+  await door.loadModel("Door");
+  scene.add(door.model);
+  door.model.position.x = Constants.WALL_SIZE * (2 * (maze.height));
+  door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
+  door.model.position.y -= wallHeight / 2;
+
+  mazeGroup.add(door.model);
+  mazeGroup.name = "maze";
   return mazeGroup;
 }
+
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -382,6 +400,17 @@ function updateSnow(delta) {
   }
 
   snowParticles.geometry.attributes.position.needsUpdate = true;
+}
+
+function onInteractCB() {
+  const interactingObject = playerController.intersect;
+  if (interactingObject) {
+    switch (interactingObject.name) {
+      case "entrance":
+        door.openDoor(sceneLoader);
+    }
+  }
+
 }
 
 function onWindowResize() {

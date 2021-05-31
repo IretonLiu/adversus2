@@ -10,7 +10,7 @@ import { Astar } from "./pathfinder/astar";
 import Constants from "./Constants";
 
 class Monster {
-  constructor(position, inverseSpeed,scene) {
+  constructor(position, inverseSpeed, scene) {
     // position is the monster's current position
     this.position = position;
 
@@ -42,8 +42,9 @@ class Monster {
     const loader = new GLTFLoader();
     loader.load("../assets/models/monster/scene.gltf", (gltf) => {
       this.monsterObject = gltf.scene;
-      this.monsterObject.position.set(this.position.x, this.position.y-10, this.position.z);
-      this.monsterObject.scale.set(10,10,10);
+      this.monsterObject.name = "monster";
+      this.monsterObject.position.set(this.position.x, this.position.y - 10, this.position.z);
+      this.monsterObject.scale.set(10, 10, 10);
       this.scene.add(this.monsterObject)
 
     });
@@ -86,7 +87,7 @@ class Monster {
     this.position.z += this.inverseSpeed * this.velocity * dir.z;
     this.monsterObject.position.x = this.position.x;
     this.monsterObject.position.z = this.position.z;
-    this.monsterObject.lookAt(new Vector3(dir.x,-10,dir.z).add(this.position));
+    this.monsterObject.lookAt(new Vector3(dir.x, -10, dir.z).add(this.position));
 
     if ((this.timeCount * this.inverseSpeed) % 1 === 0) {
       // const breadCrumb = new CylinderGeometry(2, 2, 5);
