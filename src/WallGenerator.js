@@ -140,6 +140,7 @@ class WallGenerator {
         wallGroup.add(this.generatePlane(4, sideWallGeometry, wallMaterial));
         break;
     }
+    wallGroup.name = "wall"
     return wallGroup;
   }
 
