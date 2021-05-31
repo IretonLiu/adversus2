@@ -48,6 +48,15 @@ class GameManager {
     await initWorld();
 
     window.addEventListener("resize", onWindowResize, true);
+    document.addEventListener("keydown", (event) => {
+      if(event.code != "KeyP") return;
+      var devCanvas = document.getElementById("devcanvas");
+      if (devCanvas.style.display === "none") {
+        devCanvas.style.display = "block";
+      } else {
+        devCanvas.style.display = "none";
+      }
+    });
     removeLoadingScreen();
 
     animate();

@@ -7,13 +7,16 @@ class DevMap {
     this.monsterManager = monsterManager;
 
     this.canvas = document.getElementById("devcanvas");
-    this.ctx = this.canvas.getContext("2d");
-    this.ctx.font = "25px Arial";
+    this.ctx = this.canvas?.getContext("2d");
+    if (this.ctx) {
+      this.ctx.font = "25px Arial";
 
-    this.cellSize = Math.floor(this.canvas.width / this.grid.length);
+      this.cellSize = Math.floor(this.canvas.width / this.grid.length);
+    }
   }
 
   update() {
+    if (!this.canvas) return;
     this.drawMap();
     this.drawPlayer();
     this.drawMonster();
@@ -45,7 +48,11 @@ class DevMap {
   updateFearText() {
     var fear = this.monsterManager.fear;
     this.ctx.fillStyle = "black";
-    this.ctx.fillText("Fear: " + parseFloat(fear).toFixed(2), 10, this.canvas.height - 10);
+    this.ctx.fillText(
+      "Fear: " + parseFloat(fear).toFixed(2),
+      10,
+      this.canvas.height - 10
+    );
   }
 
   drawMonster() {

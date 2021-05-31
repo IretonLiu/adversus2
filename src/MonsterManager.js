@@ -13,8 +13,8 @@ class MonsterManager {
     this.monster = null;
     this.clock = clock;
 
-    this.playerSpawnRadius = 3;
-    this.minRadius = 2;
+    this.playerSpawnRadius = 4;
+    this.minRadius = 1;
     this.percentageExplored = 0;
   }
 
