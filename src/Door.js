@@ -1,10 +1,12 @@
+import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import Constants from "./Constants";
 import SceneLoader from "./SceneLoader";
 
 class Door {
     constructor(doorName) {
         this.name = doorName;
-        this.model = null;
+        this.model = new Group;
     }
 
     loadModel(filename) {
@@ -14,16 +16,28 @@ class Door {
         return new Promise((resolve, reject) => {
             //loader.load(url, data => resolve(data), null, reject);
             loader.load(path + filename + extension, (gltf) => {
-                this.model = gltf.scene;
-                this.model.traverse(function (child) {
+                const scene = gltf.scene;
+                scene.traverse(function (child) {
                     if (child.isMesh) {
                         child.material.metalness = 0;
                     }
                 });
-                this.model.name = this.name;
+                this.model.add(scene);
+
+                // this.model.name = this.name;
                 this.model.scale.x = 6;
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;
+
+                const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3);
+                const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
+                exitBoundingBoxMaterial.visible = false;
+                const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
+                exitBoundingBoxMesh.position.y = 2.8;
+                exitBoundingBoxMesh.name = "entrance";
+
+                this.model.add(exitBoundingBoxMesh);
+
                 console.log(this.model);
                 resolve("success");
             }, (xhr) => {

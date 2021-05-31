@@ -1,4 +1,3 @@
-import SoundManager from "./SoundManager";
 import {
   Mesh,
   Vector3,
@@ -36,6 +35,12 @@ class Monster {
     // path is the list of points monster must go through to get to target
     // NB - last element is the next point
     this.path = [];
+
+    // have a backtracking flag
+    this.backtracking = false;
+
+    // track path travelled
+    this.backtrackPath = [];
 
     this.Mesh = new Mesh();
 
@@ -185,17 +190,28 @@ class Monster {
 
   // target in world coords
   getAstarPath(grid, target) {
+    // convert target and monster position to grid coordinates
+    const targetGrid = Utils.convertWorldToThickGrid(target);
+    const monsterGrid = Utils.convertWorldToThickGrid(this.position);
+
     const astar = new Astar(
       grid,
-      Math.ceil(this.position.x / Constants.WALL_SIZE),
-      Math.ceil(this.position.z / Constants.WALL_SIZE),
-      Math.ceil(target.x / Constants.WALL_SIZE),
-      Math.ceil(target.z / Constants.WALL_SIZE)
+      monsterGrid.x,
+      monsterGrid.y,
+      targetGrid.x,
+      targetGrid.y
     );
 
     // calculate path from current position to aforementioned target, using astar
     astar.calculatePath();
     this.path = astar.getCurrentPath();
+
+    // we have a new path, so we don't have any backtracking available yet
+    // this.backtrackPath = [];
+    this.backtracking = false;
+
+    // have a new path - moving forwards
+    this.setSpeed(Constants.MONSTER_SPEED);
   }
 
   isInViewAngle(playerController, viewAngle) {
@@ -242,7 +258,7 @@ class Monster {
     // can't see anything beyond the fog
     return (
       this.monsterObject.position.distanceTo(playerController.camera.position) >
-      Constants.FOG_FAR * 1.1 // add 10% buffer to fog threshold
+      Constants.FOG_FAR * 0.66 // add 10% buffer to fog threshold
     );
   }
 
@@ -285,16 +301,21 @@ class Monster {
   isVisible(playerController, inTorch) {
     // check if the monster is on screen (could be visible in low light)
 
+    // check if monster actually exists
+    if (this.monsterObject === null) return false;
+
     // need to get the updated matrix representation
     playerController.camera.updateMatrixWorld();
+
+    // if want to check in torch, make sure torch is actually turned on
+    if (inTorch) {
+      if (!playerController.torch.visible) return false;
+    }
 
     // inTorch if want to check if it is in the torch's beam
     const viewAngle = inTorch
       ? playerController.torch.angle
       : ((playerController.camera.fov / 180) * Math.PI) / 2; // convert to radians and divide by two (relative to normal)
-
-    // check if monster actually exists
-    if (this.monsterObject === null) return false;
 
     // check if the monster is hidden in the fog
     if (this.isHiddenByFog(playerController)) return false;
@@ -315,6 +336,20 @@ class Monster {
   setSpeed(speed) {
     // update the monster's speed
     this.speed = speed;
+  }
+
+  startBacktrack() {
+    // need to update the path to be followed with the backtracking path
+    this.path = this.backtrackPath;
+
+    // empty the backtrack path
+    this.backtrackPath = [];
+
+    // set the backtracking flag
+    this.backtracking = true;
+
+    // we are backtracking - run away quickly
+    this.setSpeed(Constants.MONSTER_SPEED * 2);
   }
 
   update() {
@@ -352,7 +387,8 @@ class Monster {
       )
     ) {
       // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
-      this.path.pop();
+      // keep track of the previously travelled-to points
+      this.backtrackPath.push(this.path.pop());
     }
   }
 }
