@@ -8,6 +8,7 @@ class DevMap {
 
     this.canvas = document.getElementById("devcanvas");
     this.ctx = this.canvas.getContext("2d");
+    this.ctx.font = "25px Arial";
 
     this.cellSize = Math.floor(this.canvas.width / this.grid.length);
   }
@@ -17,7 +18,10 @@ class DevMap {
     this.drawPlayer();
     this.drawMonster();
 
+    this.drawSpawnRadius();
     if (this.monsterManager.monster) this.drawMonsterPath();
+
+    this.updateFearText();
   }
 
   drawMonsterPath() {
@@ -27,8 +31,8 @@ class DevMap {
     this.monsterManager.monster.path.forEach((point) => {
       ctx.beginPath();
       ctx.arc(
-        point.x * this.cellSize + (0.5 * this.cellSize),
-        point.y * this.cellSize  + (0.5 * this.cellSize),
+        point.x * this.cellSize + 0.5 * this.cellSize,
+        point.y * this.cellSize + 0.5 * this.cellSize,
         5,
         0,
         2 * Math.PI
@@ -36,6 +40,12 @@ class DevMap {
       ctx.fill();
     });
     ctx.restore();
+  }
+
+  updateFearText() {
+    var fear = this.monsterManager.fear;
+    this.ctx.fillStyle = "black";
+    this.ctx.fillText("Fear: " + parseFloat(fear).toFixed(2), 10, this.canvas.height - 10);
   }
 
   drawMonster() {
@@ -53,6 +63,20 @@ class DevMap {
         this.cellSize
       );
     }
+  }
+
+  drawSpawnRadius() {
+    var cells = this.monsterManager.getCellsInRadius();
+    var ctx = this.ctx;
+    ctx.fillStyle = "#FFFF0050";
+    cells.forEach((cell) => {
+      ctx.fillRect(
+        cell.x * this.cellSize,
+        cell.y * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
+    });
   }
 
   drawPlayer() {

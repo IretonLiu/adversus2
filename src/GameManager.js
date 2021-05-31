@@ -99,7 +99,7 @@ function animate() {
 
     saferoom1.update(deltaTime);
     mMap.worldUpdate();
-
+    monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
     devMap.update();
 
     render();
@@ -145,11 +145,11 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
 
   monsterManager = new MonsterManager(scene, player, grid1, clock);
-  monsterManager.spawnMonster();
 
   devMap = new DevMap(grid1, player, monsterManager);
 
   mMap = new MiniMap(playerController, grid1);
+
   makeSnow(scene);
 }
 
