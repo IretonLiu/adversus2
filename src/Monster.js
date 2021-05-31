@@ -185,12 +185,16 @@ class Monster {
 
   // target in world coords
   getAstarPath(grid, target) {
+    // convert target and monster position to grid coordinates
+    const targetGrid = Utils.convertWorldToThickGrid(target);
+    const monsterGrid = Utils.convertWorldToThickGrid(this.position);
+
     const astar = new Astar(
       grid,
-      Math.ceil(this.position.x / Constants.WALL_SIZE),
-      Math.ceil(this.position.z / Constants.WALL_SIZE),
-      Math.ceil(target.x / Constants.WALL_SIZE),
-      Math.ceil(target.z / Constants.WALL_SIZE)
+      monsterGrid.x,
+      monsterGrid.y,
+      targetGrid.x,
+      targetGrid.y
     );
 
     // calculate path from current position to aforementioned target, using astar
@@ -242,7 +246,7 @@ class Monster {
     // can't see anything beyond the fog
     return (
       this.monsterObject.position.distanceTo(playerController.camera.position) >
-      Constants.FOG_FAR * 1.1 // add 10% buffer to fog threshold
+      Constants.FOG_FAR * 0.66 // add 10% buffer to fog threshold
     );
   }
 
