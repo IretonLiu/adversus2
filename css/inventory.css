@@ -1,0 +1,14 @@
+#inventory {
+    fill: #000;
+    background-color: #ffffff0d;
+    position: absolute;
+    top: 50;
+    left: 10;
+    width: 300px;
+    height: 200px;
+    z-index: 1;
+    filter: blur(.4px);
+    
+  }
+
+  

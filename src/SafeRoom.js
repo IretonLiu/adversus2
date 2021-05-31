@@ -68,7 +68,7 @@ class SafeRoom {
                 this.model.add(flame1);
                 this.model.add(candleLight2);
                 this.model.add(flame2);
-                this.model.position.set(-70, -9.9, -50);
+                this.model.position.set(40, -5, 40);
                 this.model.scale.x = 6;
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;
@@ -90,12 +90,8 @@ class SafeRoom {
         flame.scale.y = 0.1;
         flame.scale.z = 0.1;
         return flame;
-        // flame.position.set(0.06, 1.2, 0.06);
-        // flame.rotation.y = THREE.Math.degToRad(-45);
-        // caseMesh.add(flame);
     }
 
-    // create the flame shader, credits to prisoner849
     update(time) {
         this.time += time;
         this.time = this.time % 1000;
@@ -106,6 +102,9 @@ class SafeRoom {
             // this.candleLights[i].position.z += Math.cos(this.time * Math.PI * 0.75) * 0.0001;
         }
     }
+
+    // create the flame shader, credits to prisoner849
+
     createShaderMaterial() {
         return new ShaderMaterial({
             uniforms: {

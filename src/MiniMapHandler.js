@@ -27,6 +27,20 @@ class MiniMap {
     this.setUpControls();
   }
 
+  getPercentageExplored() {
+    var count = 0;
+    var open = 0;
+    for (var row = 0; row < this.visited.length; row++) {
+      for (var col = 0; col < this.visited[row].length; col++) {
+        if (this.maze[row][col]) continue;
+        open++;
+        if (this.visited[row][col]) count++;
+      }
+    }
+
+    return (100 * count) / open;
+  }
+
   setUpControls() {
     const onKeyDown = (event) => {
       switch (event.code) {
@@ -142,8 +156,6 @@ class MiniMap {
     ctx.fillStyle = "#ffffff";
     ctx.strokeStyle = ctx.fillStyle;
 
-    
-
     for (var row = 0; row < this.maze.length; row++) {
       for (var col = 0; col < this.maze[0].length; col++) {
         if (this.maze[row][col]) continue;
@@ -204,7 +216,6 @@ class MiniMap {
 
     ctx.canvas.width = this.width;
     ctx.canvas.height = this.height;
-
   }
 
   drawPlayer() {

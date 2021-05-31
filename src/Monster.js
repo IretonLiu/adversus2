@@ -62,6 +62,10 @@ class Monster {
     this.soundmanager = new SoundManager(this.Mesh ,this.playerController, 'assets/Sounds/monster.mp3');
   }
 
+  remove(){
+    this.scene.remove(this.monsterObject);
+  }
+
   getAstarPath(grid, target) {
     const astar = new Astar(
       grid,

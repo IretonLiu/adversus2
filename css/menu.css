@@ -16,6 +16,10 @@
 
 }
 
+#devcanvas{
+  display: none;
+}
+
 
 .button{
   background-color: #fff;
