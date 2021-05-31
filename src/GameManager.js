@@ -97,6 +97,7 @@ function animate() {
     worldManager.pickUpKey(playerController.camera.position.x, playerController.camera.position.z);
     worldManager.displayItems();
     worldManager.lifeBar(playerController.torch.visible);
+    worldManager.refillTorch();
     //console.log("asdasdasd", worldManager.torchLife)
     if (worldManager.torchLife <= 500) {
       playerController.torch.visible = false;
