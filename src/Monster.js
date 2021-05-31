@@ -222,14 +222,54 @@ class Monster {
     return angle <= viewAngle + bufferAngle;
   }
 
-  isVisible(playerController) {
-    // check if monster actually exists
-    if (this.monsterObject === null) return false;
+  isHiddenByFog(playerController) {
+    // deterine if the monster is hidden by the fog or not
+    // return true if CANNOT see
 
-    // need to get the updated matrix representation
-    playerController.camera.updateMatrixWorld();
+    // don't do anything if the monster doesn't exist - may as well say can't see it
+    if (this.monsterObject === null) return true;
 
-    // cast a ray to the monster's extremeties
+    // can't see anything beyond the fog
+    return (
+      this.monsterObject.position.distanceTo(playerController.camera.position) >
+      Constants.FOG_FAR * 1.1 // add 10% buffer to fog threshold
+    );
+  }
+
+  // isInTorch(playerController) {
+  //   // check if the monster is in the torch
+
+  //   // need to get the updated matrix representation
+  //   playerController.camera.updateMatrixWorld();
+
+  //   // check if monster actually exists
+  //   if (this.monsterObject === null) return false;
+
+  //   // check if the monster is hidden in the fog
+  //   if (this.isHiddenByFog(playerController)) return false;
+
+  //   // if get here, then the monster is not hidden by fog
+
+  //   // check of the monster is even in the frustum
+  //   if (
+  //     this.isInViewAngle(
+  //       playerController,
+  //       ((playerController.camera.fov / 180) * Math.PI) / 2 // convert to radians and divide by two (relative to normal)
+  //     )
+  //   ) {
+  //     // monster is not hidden by fog, and is in the viewing angle
+  //     // check if it is hidden by other objects
+  //     return this.isInFront(playerController);
+  //   }
+
+  //   // if get here, monster is obscured, or not in view
+  //   return false;
+  // }
+
+  isInFront(playerController) {
+    // do raycasting to the monster's extremities to see if it is hidden by anything
+
+    // cast a ray to the monster's extremeties - can't move up/down so don't check top/bottom
     let targets = [
       this.getLeftmostPoint(playerController.camera),
       this.getRightmostPoint(playerController.camera),
@@ -237,34 +277,57 @@ class Monster {
       // this.getBottommostPoint(playerController.camera),
     ];
 
-    // check of the monster is even in the torch
-    if (this.isInViewAngle(playerController, ((70 / 180) * Math.PI) / 2)) {
-      //((70 / 180) * Math.PI) / 2
-      // console.log("in angle");
-      let raycaster = new Raycaster();
+    let raycaster = new Raycaster();
 
-      for (let vector of targets) {
-        // cast a ray to this vector
-        raycaster.set(
-          playerController.camera.position,
-          vector.sub(playerController.camera.position).normalize()
-        );
+    for (let vector of targets) {
+      // cast a ray to this vector
+      raycaster.set(
+        playerController.camera.position,
+        vector.sub(playerController.camera.position).normalize()
+      );
 
-        // check if we intersect the monster FIRST (if not first, monster is behind something)
-        let intersects = raycaster.intersectObjects(this.scene.children, true);
-        if (intersects.length) {
-          const intersect = intersects[0];
-          // check the mesh id's match
-          if (intersect.object.geometry.uuid === this.checkVisibleId)
-            return true;
-        }
+      // check if we intersect the monster FIRST (if not first, monster is behind something)
+      let intersects = raycaster.intersectObjects(this.scene.children, true);
+      if (intersects.length) {
+        // intersects is ordered by distance, so the first is the closest intersection
+        const intersect = intersects[0];
+        // check the mesh id's match
+        // if they do, our first intersection is the monster
+        if (intersect.object.geometry.uuid === this.checkVisibleId) return true;
       }
-
-      // if get here, then have tried all the target vectors and none match, so object is obscured
-      return false;
     }
 
-    // if get here, monster is obscured, or not in torch
+    // if get here, then have tried all the target vectors and none match, so object is obscured
+    return false;
+  }
+
+  isVisible(playerController, inTorch) {
+    // check if the monster is on screen (could be visible in low light)
+
+    // need to get the updated matrix representation
+    playerController.camera.updateMatrixWorld();
+
+    // inTorch if want to check if it is in the torch's beam
+    const viewAngle = inTorch
+      ? playerController.torch.angle
+      : ((playerController.camera.fov / 180) * Math.PI) / 2; // convert to radians and divide by two (relative to normal)
+
+    // check if monster actually exists
+    if (this.monsterObject === null) return false;
+
+    // check if the monster is hidden in the fog
+    if (this.isHiddenByFog(playerController)) return false;
+
+    // if get here, then the monster is not hidden by fog
+
+    // check of the monster is even in the frustum
+    if (this.isInViewAngle(playerController, viewAngle)) {
+      // monster is not hidden by fog, and is in the viewing angle
+      // check if it is hidden by other objects
+      return this.isInFront(playerController);
+    }
+
+    // if get here, monster is obscured, or not in view
     return false;
   }
 

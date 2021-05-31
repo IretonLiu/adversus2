@@ -60,7 +60,7 @@ function removeLoadingScreen() {
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  //scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
+  scene.fog = new THREE.Fog(0x101010, Constants.FOG_NEAR, Constants.FOG_FAR);
 
   renderer = new THREE.WebGLRenderer({ antialias: Constants.ANTIALIAS });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -85,7 +85,7 @@ function animate() {
 
     if (monster.path != "") monster.update();
 
-    monster.isVisible(playerController);
+    // console.log(monster.isVisible(playerController, true));
 
     updateSnow(deltaTime);
 
