@@ -174,7 +174,7 @@ async function initWorld() {
 
   let maze1Group = await renderMaze(maze1, grid1);
 
-  scene.add(maze1Group); // adds the maze in to the scene graph
+  // scene.add(maze1Group); // adds the maze in to the scene graph
 
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
@@ -206,7 +206,7 @@ async function initWorld() {
 
   player = new Player(playerPos, playerController);
 
-  monsterManager = new MonsterManager(scene, player, grid1, clock);
+  monsterManager = new MonsterManager(maze1Group, player, grid1, clock);
 
   devMap = new DevMap(grid1, player, monsterManager);
   sceneLoader = new SceneLoader(
@@ -216,9 +216,11 @@ async function initWorld() {
     saferoom1.model,
     playerController
   );
+
+  sceneLoader.loadScene("maze1");
   mMap = new MiniMap(playerController, grid1);
 
-  makeSnow(scene);
+  makeSnow(maze1Group);
 }
 
 function setUpGround() {
@@ -257,10 +259,7 @@ async function renderMaze(maze, grid) {
   const wallHeight = 25;
   const wallWidth = 30;
 
-  worldManager = new WorldManager(scene, grid);
 
-  worldManager.setKey();
-  worldManager.setBatteries();
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
   const mazeGroup = new THREE.Group();
@@ -301,6 +300,9 @@ async function renderMaze(maze, grid) {
 
   mazeGroup.add(door.model);
   mazeGroup.name = "maze";
+  worldManager = new WorldManager(mazeGroup, grid);
+  worldManager.setKey();
+  worldManager.setBatteries();
   return mazeGroup;
 }
 
@@ -434,6 +436,17 @@ function onInteractCB() {
     switch (interactingObject.name) {
       case "entrance":
         door.openDoor(sceneLoader);
+        break;
+      case "exit":
+        var winScreen = document.getElementById("win-screen");
+        winScreen.classList.remove("hidden");
+        state.isPlaying = false;
+        state.won = true;
+        this.controls.unlock();
+        document.getElementById("restart-button").onclick = () => {
+          location.reload();
+        };
+        break;
     }
   }
 }
