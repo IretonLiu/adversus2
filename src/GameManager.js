@@ -148,6 +148,7 @@ function animate() {
     );
     worldManager.displayItems();
     worldManager.lifeBar(player.playerController.torch.visible);
+    worldManager.refillTorch();
     //console.log("asdasdasd", worldManager.torchLife)
     if (worldManager.torchLife <= 500) {
       player.playerController.torch.visible = false;
@@ -220,7 +221,7 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
 
   monsterManager = new MonsterManager(scene, player, grid1, clock);
-  
+
   devMap = new DevMap(grid1, player, monsterManager);
   sceneLoader = new SceneLoader(
     physics,
@@ -442,7 +443,7 @@ function updateSnow(delta) {
 }
 
 function onInteractCB() {
-  const interactingObject = playerController.intersect;
+  const interactingObject = player.playerController.intersect;
   if (interactingObject) {
     switch (interactingObject.name) {
       case "entrance":

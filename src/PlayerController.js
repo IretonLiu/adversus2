@@ -187,6 +187,10 @@ class PlayerController {
         case "KeyZ":
           self.velocity.y = 0;
           break;
+
+        case "KeyF":
+          this.turnTorchOff();
+          break;
         case "KeyE":
           this.onInteractCB();
           break;
@@ -244,14 +248,14 @@ class PlayerController {
   }
 
   initTorch() {
-    const mapSize = Constants.MAP_SIZE;
+    // const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
     torch.visible = false;
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
     torch.intensity = 1.5;
-    torch.shadow.mapSize.width = 1024;
-    torch.shadow.mapSize.height = 1024;
+    // torch.shadow.mapSize.width = 1024;
+    // torch.shadow.mapSize.height = 1024;
     torch.penumbra = 1;
     torch.decay = 5;
     torch.distance = 2000;

@@ -34,13 +34,13 @@ let Constants = {
   PLAYER_MOVE_SPEED: 35,
   PLAYER_MOVE_SPEED_DEV: 100,
   PLAYER_INITIAL_POS: {
-    x: 20,
+    x: 30,
     y: 10,
-    z: 20
+    z: 30,
   },
 
   // monster controls
-  MONSTER_SPEED: 3000,
+  MONSTER_SPEED: 1000,
   MONSTER_RADIUS: 7.5,
 
   //Fog
