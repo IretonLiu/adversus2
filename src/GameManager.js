@@ -311,9 +311,6 @@ async function renderMaze(maze, grid) {
 
   mazeGroup.add(door.model);
   mazeGroup.name = "maze";
-  worldManager = new WorldManager(mazeGroup, grid);
-  worldManager.setKey();
-  worldManager.setBatteries();
   return mazeGroup;
 }
 
