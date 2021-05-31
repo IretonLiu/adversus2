@@ -14,7 +14,7 @@ import NoiseGenerator from "./lib/NoiseGenerator";
 import state from "./State";
 import Stats from "three/examples/jsm/libs/stats.module";
 import SoundManagerGlobal from "./SoundManagerGlobal.js";
-
+import SoundManager from "./SoundManager";
 import MonsterManager from "./MonsterManager";
 import DevMap from "./DevMap";
 import Player from "./Player";
@@ -33,6 +33,7 @@ let player,
   stats,
   saferoom1,
   soundmanagerGlobal,
+  soundmanager,
   worldManager,
   door,
   sceneLoader;
@@ -63,7 +64,7 @@ class GameManager {
       }
     });
     removeLoadingScreen();
-
+    soundmanager = null;
     animate();
   }
 }
@@ -108,6 +109,20 @@ function animate() {
     });
 
     monsterManager.update();
+    if(monsterManager.monster != null)
+    {
+      if(soundmanager == null)
+      {
+        soundmanager = new SoundManager(monsterManager.monster.Mesh,player.playerController, "./assets/sounds/monster.mp3");
+      }
+      else{
+        soundmanager.bind(monsterManager.monster.Mesh);
+      }
+    }
+    else if(!monsterManager.monster)
+    {
+      soundmanager = null;
+    }
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
     worldManager.pickUpBattery(
@@ -192,7 +207,7 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
 
   monsterManager = new MonsterManager(scene, player, grid1, clock);
-
+  
   devMap = new DevMap(grid1, player, monsterManager);
   sceneLoader = new SceneLoader(
     physics,

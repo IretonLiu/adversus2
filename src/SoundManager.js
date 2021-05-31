@@ -37,7 +37,7 @@ getSound()
 
 pause()
 {
-    if(!state.isPlaying)
+    if(!state.isPlaying )
     {   
          this.sound.pause()
     }

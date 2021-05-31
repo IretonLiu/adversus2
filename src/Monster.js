@@ -59,7 +59,7 @@ class Monster {
       this.monsterObject.scale.set(10, 10, 10);
       this.scene.add(this.monsterObject);
     });
-    this.soundmanager = new SoundManager(this.Mesh ,this.playerController, 'assets/Sounds/monster.mp3');
+
   }
 
   remove(){
@@ -120,7 +120,6 @@ class Monster {
       // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
       this.path.pop();
     }
-    this.soundmanager.bind(this.monsterObject);
   }
 }
 
