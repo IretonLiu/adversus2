@@ -43,12 +43,7 @@ class WorldManager {
     }
 
     updateObjs() {
-        // to animate the battery and key
-        // call in animate function
-        //console.log(this.gateKey.mesh);
-        // if (this.gateKey.mesh === null || this.batteries[0].mesh === null) {
-        //     return;
-        // }
+
 
         this.gateKey.mesh.rotation.y += 2 / 180;
         for (let battery of this.batteries) {
@@ -79,18 +74,24 @@ class WorldManager {
                 Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
             let randZ =
                 Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
-            console.log("gird length: ", this.grid.length);
-            console.log("x pos for battery", randX, "z pos for battery", randZ);
-            console.log("this is a problem: ", this.grid[randX][randZ]);
             if (this.grid[randX][randZ] === false) {
                 if (this.batteries.length != 0) {
+                    let duplicate = false;
                     for (let battery of this.batteries) {
-                        if (battery.x != randX && battery.z != randZ && this.gateKey.x != randX && this.gateKey.z != randZ) {
-                            await this.loadBattery(randX, randZ);
-                            numBats++;
+                        if ((battery.x === randX && battery.z === randZ) ||
+                            (this.gateKey.x === randX && this.gateKey.z === randZ)) {
+                            duplicate = true;
+                            break;
                         }
+
                     }
+                    if (!duplicate) {
+                        await this.loadBattery(randX, randZ);
+                        numBats++;
+                    }
+
                 }
+
                 else {
                     await this.loadBattery(randX, randZ);
                     numBats++;
@@ -99,7 +100,7 @@ class WorldManager {
             }
             iter++;
         }
-        console.log("iterations :", iter);
+
     }
 
     async setKey() {
@@ -113,9 +114,7 @@ class WorldManager {
     }
 
     pickUpBattery(x, z) {
-        // if (this.batteries[0].mesh === null) {
-        //     return;
-        // }
+
         for (let battery of this.batteries) {
             if (
                 x <= battery.mesh.position.x + 10 &&
@@ -134,9 +133,7 @@ class WorldManager {
     }
 
     pickUpKey(x, z) {
-        // if (this.gateKey.mesh === null) {
-        //     return;
-        // }
+
         if (
             x <= this.gateKey.mesh.position.x + 10 &&
             x >= this.gateKey.mesh.position.x - 10 &&
@@ -144,21 +141,10 @@ class WorldManager {
             z >= this.gateKey.mesh.position.z - 10
         ) {
             this.keyDisplay();
-            console.log("asdasdasd", this.player);
             this.player.hasKey = true;
             this.gateKey.mesh.visible = false;
         }
     }
-
-    // batteryLifeOnPickUp(life) {
-    //     if (this.battery.life > 90) {
-    //         this.battery.life += 100 - this.battery.life;
-    //     }
-    //     else {
-    //         this.battery.life += 10;
-    //     }
-
-    // }
 
     torchDisplay() {
         let img = document.createElement("img");
