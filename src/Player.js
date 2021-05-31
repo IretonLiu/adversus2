@@ -2,11 +2,12 @@ import Utils from "./Utils";
 import * as THREE from "three";
 import { Vector2 } from "three";
 
+
 class Player {
   constructor(position, playerController) {
     // this position is in world coordinates
     this.position = position;
-
+    this.hasKey = false;
     this.playerController = playerController;
 
     // grid coordinate - check if it changed

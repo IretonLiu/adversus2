@@ -65,6 +65,7 @@ class GameManager {
     });
     removeLoadingScreen();
     soundmanager = null;
+    render();
     animate();
   }
 }
@@ -218,6 +219,9 @@ async function initWorld() {
   );
   mMap = new MiniMap(playerController, grid1);
 
+  worldManager = new WorldManager(scene, grid1, player);
+  await worldManager.setKey();
+  await worldManager.setBatteries();
   makeSnow(scene);
 }
 
@@ -257,10 +261,6 @@ async function renderMaze(maze, grid) {
   const wallHeight = 25;
   const wallWidth = 30;
 
-  worldManager = new WorldManager(scene, grid);
-
-  worldManager.setKey();
-  worldManager.setBatteries();
   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
   const mazeGroup = new THREE.Group();
@@ -430,10 +430,15 @@ function updateSnow(delta) {
 
 function onInteractCB() {
   const interactingObject = player.playerController.intersect;
+  console.log(player.hasKey)
   if (interactingObject) {
     switch (interactingObject.name) {
       case "entrance":
-        door.openDoor(sceneLoader);
+        console.log(player.hasKey)
+        if (player.hasKey) {
+          console.log(player.hasKey)
+          door.openDoor(sceneLoader);
+        }
     }
   }
 }

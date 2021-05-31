@@ -17,9 +17,10 @@ class PickUps {
 class Battery extends PickUps {
   //unique functions for battery
 
-  constructor() {
+  constructor(x, z) {
     super();
-    //this.life = life;
+    this.x = x;
+    this.z = z;
   }
 
   makeBattery(scene, x, z) {
@@ -57,8 +58,10 @@ class Battery extends PickUps {
 
 class GateKey extends PickUps {
   //unique functions for keys
-  constructor() {
+  constructor(x, z) {
     super();
+    this.x = x;
+    this.z = z;
   }
 
   makeKey(scene, x, z) {
