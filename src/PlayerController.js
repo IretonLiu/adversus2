@@ -187,6 +187,10 @@ class PlayerController {
         case "KeyZ":
           self.velocity.y = 0;
           break;
+
+        case "KeyF":
+          this.turnTorchOff();
+          break;
         case "KeyE":
           this.onInteractCB();
           break;

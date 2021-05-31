@@ -133,7 +133,7 @@ function animate() {
       player.playerController.camera.position.z
     );
     worldManager.displayItems();
-    worldManager.lifeBar(playerController.torch.visible);
+    worldManager.lifeBar(player.playerController.torch.visible);
     worldManager.refillTorch();
     //console.log("asdasdasd", worldManager.torchLife)
     if (worldManager.torchLife <= 500) {
