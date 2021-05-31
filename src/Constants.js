@@ -16,7 +16,7 @@ let Constants = {
   //The percentage to take up of the shortest side of the viewport
   MINIMAP_FULLSCREEN_PERC: 0.9,
   PLAYER_MIN_SIZE_MINIMAP_FULLSCREEN: 12,
-  MINIMAP_DISCOVER_THRESHOLD: 0.80,
+  MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
   MAP1_SIZE: 5,
@@ -40,7 +40,8 @@ let Constants = {
   },
 
   // monster controls
-  MONSTER_SPEED_INVERSE: 50,
+  MONSTER_SPEED: 500,
+  MONSTER_RADIUS: 7.5,
 
   //Fog
   FOG_FAR: 50,
@@ -50,7 +51,7 @@ let Constants = {
   AMBIENT_INTENSITY: 0.02,
   //AMBIENT_INTENSITY: 1,
 
-  ANTIALIAS: true
+  ANTIALIAS: true,
 };
 
 export default Constants;

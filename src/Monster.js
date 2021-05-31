@@ -4,29 +4,30 @@ import {
   MeshBasicMaterial,
   Vector3,
   MeshStandardMaterial,
+  Vector2,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Astar } from "./pathfinder/astar";
 import Constants from "./Constants";
+import Utils from "./Utils";
 
 class Monster {
-  constructor(position, inverseSpeed, scene) {
-    // position is the monster's current position
-    this.position = position;
+  constructor(position, scene, clock) {
+    // position is the monster's current position in world coordinates
+    this.position = new Vector3(position.x, position.y, position.z);
 
+    // local refernce to the scene
     this.scene = scene;
 
-    // velocity is constant
-    this.velocity = Constants.WALL_SIZE;
+    // keep track of the game clock
+    this.clock = clock;
 
-    // inverseSpeed is the multiplier to slow down the movement of the monster
-    this.inverseSpeed = 1 / inverseSpeed;
+    // monster's speed
+    this.speed = Constants.MONSTER_SPEED;
 
-    // timeCount is used to decide when to move on to the next direction
-    this.timeCount = 0;
-
-    // path is the list of directions monster must follow to get to target
-    this.path = "";
+    // path is the list of points monster must go through to get to target
+    // NB - last element is the next point
+    this.path = [];
 
     this.monsterObject = null;
     this.initThreeObject();
@@ -42,11 +43,13 @@ class Monster {
     const loader = new GLTFLoader();
     loader.load("../assets/models/monster/scene.gltf", (gltf) => {
       this.monsterObject = gltf.scene;
-      this.monsterObject.name = "monster";
-      this.monsterObject.position.set(this.position.x, this.position.y - 10, this.position.z);
+      this.monsterObject.position.set(
+        this.position.x,
+        this.position.y - 10,
+        this.position.z
+      );
       this.monsterObject.scale.set(10, 10, 10);
-      this.scene.add(this.monsterObject)
-
+      this.scene.add(this.monsterObject);
     });
   }
 
@@ -62,43 +65,47 @@ class Monster {
     this.path = astar.getCurrentPath();
   }
 
-  update(scene) {
+  setSpeed(speed) {
+    // update the monster's speed
+    this.speed = speed;
+  }
+
+  update() {
+    // don't do anything if the monster doesn't exist
     if (!this.monsterObject) return;
-    this.timeCount++;
 
-    var dirRep = this.path.charAt(this.path.length - 1); // the char representation of the path
-    var dir;
-    switch (dirRep) {
-      case Constants.NORTH:
-        dir = { x: 0, z: -1 };
-        break;
-      case Constants.SOUTH:
-        dir = { x: 0, z: 1 };
-        break;
-      case Constants.WEST:
-        dir = { x: -1, z: 0 };
-        break;
-      case Constants.EAST:
-        dir = { x: 1, z: 0 };
-        break;
-    }
+    // get movement direction as direction from current position to astar next position
+    let nextPoint = this.path[this.path.length - 1]; // the array representation of the path
 
-    this.position.x += this.inverseSpeed * this.velocity * dir.x;
-    this.position.z += this.inverseSpeed * this.velocity * dir.z;
+    // expected world point
+    let expectedWorldPosition = Utils.convertThickGridToWorld(nextPoint);
+
+    // direction vector to new world position
+    let worldDirection = expectedWorldPosition
+      .clone()
+      .sub(this.position)
+      .normalize();
+
+    // update the monster's position using the delta time
+    const deltaTime = this.clock.getDelta();
+
+    this.position.x += deltaTime * this.speed * worldDirection.x;
+    this.position.z += deltaTime * this.speed * worldDirection.z;
     this.monsterObject.position.x = this.position.x;
     this.monsterObject.position.z = this.position.z;
-    this.monsterObject.lookAt(new Vector3(dir.x, -10, dir.z).add(this.position));
+    this.monsterObject.lookAt(
+      new Vector3(worldDirection.x, -10, worldDirection.z).add(this.position)
+    );
 
-    if ((this.timeCount * this.inverseSpeed) % 1 === 0) {
-      // const breadCrumb = new CylinderGeometry(2, 2, 5);
-      // const bcMaterial = new MeshBasicMaterial({ color: 0x00ff00 });
-      // var bc = new Mesh(breadCrumb, bcMaterial);
-      // bc.position.x = this.position.x;
-      // bc.position.z = this.position.z;
-      // scene.add(bc);
-
-      // remove the current direction from the path
-      this.path = this.path.slice(0, this.path.length - 1);
+    if (
+      Utils.isInRadiusOfPoint(
+        this.position,
+        expectedWorldPosition,
+        Constants.MONSTER_RADIUS
+      )
+    ) {
+      // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
+      this.path.pop();
     }
   }
 }

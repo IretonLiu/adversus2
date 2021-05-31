@@ -42,8 +42,6 @@ class GameManager {
     physics = new Physics();
     physics.initPhysics();
 
-
-
     initGraphics();
     await initWorld();
 
@@ -90,7 +88,7 @@ function animate() {
     //moveBall();
     playerController.updatePosition();
 
-    if (monster.path != "") monster.update(scene);
+    if (monster.path != "") monster.update();
 
 
 
@@ -141,7 +139,6 @@ async function initWorld() {
 
   scene.add(maze1Group); // adds the maze in to the scene graph
 
-
   // adding the saferoom into the game;
   saferoom1 = new SafeRoom();
   await saferoom1.loadModel("SafeRoomWDoors");
@@ -174,18 +171,12 @@ function setUpMonster(mazeGroup) {
     y: 0,
     z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(
-    monsterPosition,
-    Constants.MONSTER_SPEED_INVERSE,
-    mazeGroup
+  monster = new Monster(monsterPosition, scene, clock);
+  monster.getAstarPath(
+    grid1,
+    new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
   );
-  monster.getAstarPath(grid1, {
-    x: 1 * Constants.WALL_SIZE,
-    y: 0,
-    z: 1 * Constants.WALL_SIZE,
-  });
 }
-
 
 function setUpGround() {
   // set up the floor of the game
@@ -251,7 +242,11 @@ async function renderMaze(maze, grid) {
           wallHeight,
           x + y
         );
-        wallMesh.position.set(x * Constants.WALL_SIZE, 0, y * Constants.WALL_SIZE);
+        wallMesh.position.set(
+          x * Constants.WALL_SIZE,
+          0,
+          y * Constants.WALL_SIZE
+        );
         mazeGroup.add(wallMesh);
         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
         continue;
@@ -361,7 +356,6 @@ function makeSnow(scene) {
     fog: false,
     depthTest: true,
   });
-
 
   const velocities = [];
   for (let i = 0; i < particleNum; i++) {
