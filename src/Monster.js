@@ -1,3 +1,4 @@
+import SoundManager from "./SoundManager"
 import {
   CylinderGeometry,
   Mesh,
@@ -10,14 +11,17 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Astar } from "./pathfinder/astar";
 import Constants from "./Constants";
 import Utils from "./Utils";
+import playerController from "./PlayerController"
 
 class Monster {
-  constructor(position, scene, clock) {
+  constructor(position, scene, clock, playerController) {
     // position is the monster's current position in world coordinates
     this.position = new Vector3(position.x, position.y, position.z);
 
     // local refernce to the scene
     this.scene = scene;
+
+    this.playerController = playerController;
 
     // keep track of the game clock
     this.clock = clock;
@@ -29,8 +33,12 @@ class Monster {
     // NB - last element is the next point
     this.path = [];
 
+    this.Mesh = new Mesh;
+
     this.monsterObject = null;
     this.initThreeObject();
+    
+
   }
 
   initThreeObject() {
@@ -46,11 +54,12 @@ class Monster {
       this.monsterObject.position.set(
         this.position.x,
         this.position.y - 10,
-        this.position.z
+        this.position.z,
       );
       this.monsterObject.scale.set(10, 10, 10);
       this.scene.add(this.monsterObject);
     });
+    this.soundmanager = new SoundManager(this.Mesh ,this.playerController, 'assets/Sounds/monster.mp3');
   }
 
   getAstarPath(grid, target) {
@@ -107,6 +116,7 @@ class Monster {
       // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
       this.path.pop();
     }
+    this.soundmanager.bind(this.monsterObject);
   }
 }
 

@@ -9,6 +9,8 @@ import Physics from "./lib/Physics.js";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
 import Stats from "three/examples/jsm/libs/stats.module";
+import SoundManagerGlobal from "./SoundManagerGlobal.js";
+
 
 let playerController,
   scene,
@@ -18,7 +20,8 @@ let playerController,
   monster,
   snowParticles,
   stats,
-  saferoom1;
+  saferoom1,
+  soundmanagerGlobal;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
@@ -31,6 +34,8 @@ class GameManager {
   async init() {
     let noiseGen = new NoiseGenerator();
     // noiseGen.generateNoiseMap();
+    //initializing audio listener
+
 
     // initializing physics
     await Ammo();
@@ -39,7 +44,6 @@ class GameManager {
 
     initGraphics();
     await initWorld();
-
     window.addEventListener("resize", onWindowResize, true);
     removeLoadingScreen();
 
@@ -56,6 +60,8 @@ function removeLoadingScreen() {
     loadingScreen.remove();
   });
 }
+
+
 
 function initGraphics() {
   scene = new THREE.Scene();
@@ -92,6 +98,7 @@ function animate() {
     render();
     stats.update();
   }
+  soundmanagerGlobal.walking()
   requestAnimationFrame(animate);
 }
 
@@ -126,6 +133,9 @@ async function initWorld() {
 
   playerController = new PlayerController(20, 10, 20, renderer.domElement);
   scene.add(playerController.controls.getObject());
+
+  soundmanagerGlobal = new SoundManagerGlobal(playerController, 'assets/Sounds/ambience.mp3', 'assets/Sounds/footsteps.mp3');
+  
   physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
   setUpMonster();
   //mMap = new MiniMap(playerController, grid1);
@@ -140,7 +150,7 @@ function setUpMonster() {
     y: 0,
     z: (2 * Constants.MAP1_SIZE - 1) * Constants.WALL_SIZE,
   };
-  monster = new Monster(monsterPosition, scene, clock);
+  monster = new Monster(monsterPosition, scene, clock, playerController);
   monster.getAstarPath(
     grid1,
     new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)

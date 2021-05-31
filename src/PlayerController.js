@@ -4,6 +4,7 @@ import {
   SpotLight,
   PointLight,
   Object3D,
+
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
@@ -17,6 +18,8 @@ class PlayerController {
     this.velocity = new Vector3();
     this.direction = new Vector3();
     this.prevTime = performance.now();
+
+
 
     this.moveForward = false;
     this.moveBackward = false;
@@ -42,6 +45,8 @@ class PlayerController {
     // set up the player controller to use the pointer lock controls
     this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
+
+
   }
 
   initControls(domElement, self) {
@@ -201,6 +206,16 @@ class PlayerController {
     this.handleTorch();
   }
 
+  isMoving()
+  {
+    if(this.moveForward || this.moveLeft || this.moveRight|| this.moveBackward)
+    {
+      return true;
+    }
+    else{
+      return false
+    }
+  }
   updatePosition() {
     const pos = this.playerObject.position;
     //console.log(pos);
