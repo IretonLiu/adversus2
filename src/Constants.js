@@ -42,7 +42,7 @@ let Constants = {
   TORCH_DEPLETION_RATE: 10,
 
   // monster controls
-  MONSTER_SPEED: 500,
+  MONSTER_SPEED: 40,
   MONSTER_RADIUS: 7.5,
 
   //Fog
