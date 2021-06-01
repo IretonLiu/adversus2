@@ -21,6 +21,7 @@ class Battery extends PickUps {
     super();
     this.x = x;
     this.z = z;
+
   }
 
   makeBattery(scene, x, z) {
@@ -36,7 +37,6 @@ class Battery extends PickUps {
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
           scene.add(this.mesh);
-
           resolve("success");
         },
         (xhr) => {
