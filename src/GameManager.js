@@ -189,6 +189,8 @@ function animate() {
     devMap.drawBatterys(worldManager.batteries);
     devMap.drawKey(worldManager.gateKey);
 
+    document.getElementById("timer").innerHTML = new Date(clock.getElapsedTime() * 1000).toISOString().substr(11, 8);
+
     render();
     stats.update();
   }
