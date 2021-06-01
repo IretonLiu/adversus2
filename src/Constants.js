@@ -19,7 +19,7 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
-  MAP1_SIZE: 15,
+  MAP1_SIZE: 10,
   MAP2_SIZE: 10,
   MAP3_SIZE: 15,
 
