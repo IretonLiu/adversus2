@@ -84,7 +84,10 @@ function setUpPostProcessing() {
   const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, player.playerController.camera);
   outlinePass.hiddenEdgeColor.set("#000000");
   outlinePass.visibleEdgeColor.set("#888888");
-  outlinePass.edgeStrength = Number(2)
+  outlinePass.edgeStrength = Number(10);
+  outlinePass.pulsePeriod = Number(2);
+  outlinePass.edgeThickness = 0.5;
+  outlinePass.edgeGlow = 0;
 
   composer.addPass(outlinePass);
 
