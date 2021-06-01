@@ -65,7 +65,6 @@ class MonsterManager {
 
   update() {
     if (this.monster) {
-      console.log(this.monster.speed);
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
         Utils.convertWorldToThickGrid(this.monster.position).equals(
