@@ -10,12 +10,30 @@
   align-items: center;
 }
 
-.hidden{
+.hidden {
   display: none !important;
 }
 
-#pause h1{
+#pause h1 {
   color: #fff;
   font-size: 100px;
+}
 
+#controls {
+  color: #fff;
+  position: absolute;
+  left: 10;
+  bottom: 10;
+  font-size: 2em;
+}
+
+#controls h2{
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing:7px;
+}
+
+#controls ul {
+  /* list-style-type: none; */
+  line-height: 150%;
 }
