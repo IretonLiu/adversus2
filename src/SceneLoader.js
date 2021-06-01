@@ -13,6 +13,7 @@ class SceneLoader {
 
     loadScene(nextScene) {
         if (nextScene == "maze1") {
+            
             this.scene.add(this.maze1);
         } else if (nextScene == "saferoom1") {
             this.clearScene();

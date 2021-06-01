@@ -23,6 +23,9 @@ import SafeRoom from "./SafeRoom";
 import Door from "./Door";
 import SceneLoader from "./SceneLoader";
 
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+
 let player,
   scene,
   renderer,
@@ -36,7 +39,8 @@ let player,
   soundmanager,
   worldManager,
   door,
-  sceneLoader;
+  sceneLoader,
+  composer;
 
 let maze1, grid1, maze2, grid2, maze3, grid3;
 
@@ -113,24 +117,24 @@ function animate() {
 
     if (monsterManager.monster != null) {
       if (soundmanager == null) {
-        soundmanager = new SoundManager(monsterManager.monster.Mesh, player.playerController, "assets/Sounds/monster.mp3");
-      }
-      else {
+        soundmanager = new SoundManager(
+          monsterManager.monster.Mesh,
+          player.playerController,
+          "assets/Sounds/monster.mp3"
+        );
+      } else {
         if (monsterManager.monster.Mesh != null) {
           soundmanager.bind(monsterManager.monster.Mesh);
-        }
-        else {
+        } else {
           soundmanager.pause();
         }
       }
-    }
-    else {
+    } else {
       if (soundmanager != null) {
-        soundmanager.pause()
+        soundmanager.pause();
       }
       soundmanager = null;
     }
-
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
     worldManager.pickUpBattery(
@@ -144,7 +148,7 @@ function animate() {
     worldManager.displayItems();
     worldManager.lifeBar(player.playerController.torch.visible);
     worldManager.refillTorch();
-    if (worldManager.torchLife <= 500) {
+    if (worldManager.torchLife <= 0) {
       player.playerController.torch.visible = false;
     }
     // worldManager.torchDisplay();
@@ -156,6 +160,8 @@ function animate() {
     mMap.worldUpdate();
     monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
     devMap.update();
+    devMap.drawBatterys(worldManager.batteries);
+    devMap.drawKey(worldManager.gateKey);
 
     render();
     stats.update();
@@ -166,7 +172,8 @@ function animate() {
 
 async function initWorld() {
   const skybox = new Skybox("nightsky");
-  scene.add(skybox.createSkybox());
+  //TODO: Make this dynamic based on map size
+  scene.add(skybox.createSkybox(8000));
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
@@ -228,12 +235,14 @@ async function initWorld() {
   sceneLoader.loadScene("maze1");
   mMap = new MiniMap(playerController, grid1);
 
-  worldManager = new WorldManager(scene, grid1, player);
+  worldManager = new WorldManager(scene, grid1, player, clock);
   await worldManager.setKey();
   await worldManager.setBatteries();
   makeSnow(scene);
   makeSnow(maze1Group);
 }
+
+
 
 function setUpGround() {
   // set up the floor of the game
@@ -445,6 +454,7 @@ function onInteractCB() {
       case "entrance":
         if (player.hasKey) {
           door.openDoor(sceneLoader);
+          mMap.hideMap();
         }
         break;
       case "exit":

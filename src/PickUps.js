@@ -69,6 +69,7 @@ class GateKey extends PickUps {
           this.mesh.scale.set(30, 30, 30);
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
+
           scene.add(this.mesh);
 
           resolve("success");

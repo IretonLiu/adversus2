@@ -27,7 +27,7 @@ class Candle {
         (gltf) => {
           this.model.add(gltf.scene);
 
-          this.candleLight = new PointLight(0xffaa33, 1, 100, 5);
+          this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
           this.candleLight.shadow.bias = -0.001;
           this.candleLight.castShadow = true;
           this.candleLight.position.y = 0.8;

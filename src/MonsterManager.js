@@ -34,7 +34,7 @@ class MonsterManager {
 
   updatePercentageExplored(percExplored) {
     if (percExplored > this.percentageExplored) {
-      this.fear += percExplored - this.percentageExplored;
+      this.fear += 1.5;
     }
     this.percentageExplored = percExplored;
   }

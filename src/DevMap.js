@@ -15,6 +15,34 @@ class DevMap {
     }
   }
 
+  drawBatterys(batterys) {
+    if (!this.ctx) return;
+    var ctx = this.ctx;
+    for (var i = 0; i < batterys.length; i++) {
+      var batt = batterys[i];
+      ctx.fillStyle = "orange";
+      ctx.fillRect(
+        batt.x * this.cellSize,
+        batt.z * this.cellSize,
+        this.cellSize,
+        this.cellSize
+      );
+    }
+  }
+
+  drawKey(key) {
+    if (!this.ctx) return;
+    var ctx = this.ctx;
+
+    ctx.fillStyle = "pink";
+    ctx.fillRect(
+      key.x * this.cellSize,
+      key.z * this.cellSize,
+      this.cellSize,
+      this.cellSize
+    );
+  }
+
   update() {
     if (!this.canvas) return;
     this.drawMap();

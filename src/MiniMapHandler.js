@@ -209,6 +209,11 @@ class MiniMap {
     this.updateFullScreenSizes();
   }
 
+  hideMap() {
+    var canvas = document.getElementById("minimap");
+    canvas.style.display = "none";
+  }
+
   minimize() {
     ctx.canvas.classList.remove("fullscreen");
     this.width = Constants.MINIMAP_SIDE_LENGTH;

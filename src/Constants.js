@@ -19,7 +19,7 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
-  MAP1_SIZE: 5,
+  MAP1_SIZE: 15,
   MAP2_SIZE: 10,
   MAP3_SIZE: 15,
 
@@ -39,19 +39,21 @@ let Constants = {
     z: 30,
   },
 
+  TORCH_DEPLETION_RATE: 10,
+
   // monster controls
-  MONSTER_SPEED: 200,
+  MONSTER_SPEED: 500,
   MONSTER_RADIUS: 7.5,
 
   //Fog
   FOG_FAR: 150,
   FOG_NEAR: 1,
 
-  CAMERA_FAR: 200,
+  CAMERA_FAR: 10000,
   AMBIENT_INTENSITY: 0.02,
   //AMBIENT_INTENSITY: 1,
 
-  ANTIALIAS: true,
+  ANTIALIAS: false,
 };
 
 export default Constants;
