@@ -9,6 +9,7 @@ import {
   BoxGeometry,
   Box3,
   Vector2,
+  Clock,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Astar } from "./pathfinder/astar";
@@ -17,7 +18,7 @@ import Utils from "./Utils";
 import playerController from "./PlayerController";
 
 class Monster {
-  constructor(position, scene, clock, playerController) {
+  constructor(position, scene, playerController) {
     // position is the monster's current position in world coordinates
     this.position = new Vector3(position.x, position.y, position.z);
 
@@ -27,7 +28,7 @@ class Monster {
     this.playerController = playerController;
 
     // keep track of the game clock
-    this.clock = clock;
+    this.clock = new Clock();
 
     // monster's speed
     this.speed = Constants.MONSTER_SPEED;

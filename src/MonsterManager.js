@@ -46,7 +46,7 @@ class MonsterManager {
 
   spawnMonster(monsterGridLoc) {
     var monsterWorldPos = Utils.convertThickGridToWorld(monsterGridLoc);
-    this.monster = new Monster(monsterWorldPos, this.scene, this.clock);
+    this.monster = new Monster(monsterWorldPos, this.scene);
     var playerPosition = Utils.convertThickGridToWorld(
       Utils.convertWorldToThickGrid(this.player.position)
     );
@@ -67,7 +67,13 @@ class MonsterManager {
     if (this.monster) {
       console.log(this.monster.speed);
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
-      if (Utils.convertWorldToThickGrid(this.monster.position).equals(Utils.convertWorldToThickGrid(this.player.playerController.camera.position))) {
+      if (
+        Utils.convertWorldToThickGrid(this.monster.position).equals(
+          Utils.convertWorldToThickGrid(
+            this.player.playerController.camera.position
+          )
+        )
+      ) {
         state.isPlaying = false;
         var loseScreen = document.getElementById("lose-screen");
         loseScreen.classList.remove("hidden");
