@@ -5,12 +5,9 @@ import PlayerController from "./PlayerController.js";
 import Monster from "./Monster.js";
 import MiniMap from "./MiniMapHandler";
 import WallGenerator from "./WallGenerator.js";
-import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { VertexNormalsHelper } from "three/examples/jsm/helpers/VertexNormalsHelper.js";
 import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
-import NoiseGenerator from "./lib/NoiseGenerator";
 import state from "./State";
 import Stats from "three/examples/jsm/libs/stats.module";
 import SoundManagerGlobal from "./SoundManagerGlobal.js";
@@ -22,9 +19,9 @@ import Utils from "./Utils";
 import SafeRoom from "./SafeRoom";
 import Door from "./Door";
 import SceneLoader from "./SceneLoader";
-
-import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
 
 let player,
   scene,
@@ -69,9 +66,35 @@ class GameManager {
     });
     removeLoadingScreen();
     soundmanager = null;
-    render();
+
+    setUpPostProcessing();
+    //render();
     animate();
   }
+}
+
+function setUpPostProcessing() {
+  // initialization of post processing
+  composer = new EffectComposer(renderer);
+  const renderPass = new RenderPass(scene, player.playerController.camera);
+
+  composer.addPass(renderPass);
+
+  // setting up outlines and its parameters
+  const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, player.playerController.camera);
+  outlinePass.hiddenEdgeColor.set("#000000");
+  outlinePass.visibleEdgeColor.set("#888888");
+  outlinePass.edgeStrength = Number(2)
+
+  composer.addPass(outlinePass);
+
+  // setting up the objects to be outlined
+  const outlineObjects = [];
+  for (let battery of worldManager.batteries) {
+    outlineObjects.push(battery.mesh);
+  }
+  outlineObjects.push(worldManager.gateKey.mesh);
+  outlinePass.selectedObjects = outlineObjects;
 }
 
 function removeLoadingScreen() {
@@ -486,7 +509,8 @@ function onWindowResize() {
 }
 
 function render() {
-  renderer.render(scene, player.playerController.camera);
+  composer.render();
+  //renderer.render(scene, player.playerController.camera);
 }
 
 export default GameManager;

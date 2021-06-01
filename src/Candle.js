@@ -1,4 +1,6 @@
 import {
+  BackSide,
+  DoubleSide,
   FrontSide,
   Group,
   Mesh,
@@ -25,12 +27,23 @@ class Candle {
       loader.load(
         path + "Candle" + extension,
         (gltf) => {
+
+          const scene = gltf.scene;
+          scene.traverse((child) => {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              child.material.side = DoubleSide;
+              child.material.shadowSide = BackSide;
+            }
+          })
+
           this.model.add(gltf.scene);
 
           this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
           this.candleLight.shadow.bias = -0.001;
           this.candleLight.castShadow = true;
-          this.candleLight.position.y = 0.8;
+          this.candleLight.position.y = 1;
 
           const flame = this.createCandleLight();
           flame.position.y = 0.65;
