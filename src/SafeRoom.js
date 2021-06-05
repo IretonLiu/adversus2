@@ -65,13 +65,13 @@ class SafeRoom {
                 const flame2 = this.createCandleLight();
                 flame2.position.set(candle2Pos.x, candle2Pos.y, candle2Pos.z,)
 
-
+                // set up the bounding boxes for the exits of the saferoom
                 const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3,);
                 const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
                 exitBoundingBoxMaterial.visible = false;
                 const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
 
-                exitBoundingBoxMesh.name = "exit";
+                exitBoundingBoxMesh.name = "maze2entrance";
                 exitBoundingBoxMesh.position.x = 10;
                 exitBoundingBoxMesh.position.z = 12;
                 exitBoundingBoxMesh.position.y = 1.75;

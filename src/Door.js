@@ -6,9 +6,10 @@ import SceneLoader from "./SceneLoader";
 class Door {
     constructor(doorName) {
         this.name = doorName;
-        this.model = new Group;
+        this.model = new Group();
     }
 
+    // loads the door model
     loadModel(filename) {
         const loader = new GLTFLoader();
         const path = "./assets/models/saferoom/"
@@ -29,12 +30,13 @@ class Door {
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;
 
+                // sets the bounding box for user interaction
                 const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3);
                 const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
                 exitBoundingBoxMaterial.visible = false;
                 const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
                 exitBoundingBoxMesh.position.y = 2.8;
-                exitBoundingBoxMesh.name = "entrance";
+                exitBoundingBoxMesh.name = this.doorName;
 
                 this.model.add(exitBoundingBoxMesh);
 
@@ -46,9 +48,7 @@ class Door {
         });
     }
 
-    openDoor(sceneLoader) {
-        sceneLoader.loadScene("saferoom1");
-    }
+
 }
 
 export default Door;

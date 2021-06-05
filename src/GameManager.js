@@ -182,7 +182,7 @@ function animate() {
     // worldManager.batteryDisplay();
 
     updateSnow(deltaTime);
-    saferoom1.update(deltaTime);
+    //saferoom1.update(deltaTime);
     mMap.worldUpdate();
     monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
     devMap.update();
@@ -207,67 +207,71 @@ async function initWorld() {
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
-  maze1 = new Maze(
-    Constants.MAP1_SIZE,
-    Constants.MAP1_SIZE,
-    Constants.PROBABILITY_WALLS_REMOVED
+
+  sceneLoader = new SceneLoader(
+    physics,
+    scene,
   );
-  maze1.growingTree();
-  grid1 = maze1.getThickGrid();
-
-  let maze1Group = await renderMaze(maze1, grid1);
-
-  // scene.add(maze1Group); // adds the maze in to the scene graph
-
-  // adding the saferoom into the game;
-  saferoom1 = new SafeRoom();
-  await saferoom1.loadModel("SafeRoomWDoors");
+  //sceneLoader.initMaze1();
+  await sceneLoader.loadMaze1();
 
   var playerPos = new THREE.Vector3(
     Constants.PLAYER_INITIAL_POS.x,
     Constants.PLAYER_INITIAL_POS.y,
     Constants.PLAYER_INITIAL_POS.z
   );
-  setUpAmbientLight();
-
   var playerController = new PlayerController(
     renderer.domElement,
-    maze1Group,
-    onInteractCB
+    sceneLoader.currentScene,
   );
+  physics.createPlayerRB(playerController.playerObject);
+
   await playerController.initCandle();
+
+  player = new Player(playerPos, playerController);
+
+  sceneLoader.addPlayer(player)
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
+  scene.add(sceneLoader.currentScene);
 
+  mMap = new MiniMap(playerController, sceneLoader.grid1);
+
+  // maze1 = new Maze(
+  //   Constants.MAP1_SIZE,
+  //   Constants.MAP1_SIZE,
+  //   Constants.PROBABILITY_WALLS_REMOVED
+  // );
+  // maze1.growingTree();
+  // grid1 = maze1.getThickGrid();
+
+  //let maze1Group = await renderMaze(maze1, grid1);
+
+  // scene.add(maze1Group); // adds the maze in to the scene graph
+
+  // adding the saferoom into the game;
+  // saferoom1 = new SafeRoom();
+  // await saferoom1.loadModel("SafeRoomWDoors");
+
+
+
+  setUpAmbientLight();
   soundmanagerGlobal = new SoundManagerGlobal(
     playerController,
     "assets/Sounds/ambience.mp3",
     "assets/Sounds/footsteps.mp3"
   );
 
-  physics.createPlayerRB(playerController.playerObject, 2, 2, 2);
 
-  player = new Player(playerPos, playerController);
+  monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
 
-  monsterManager = new MonsterManager(maze1Group, player, grid1, clock);
+  devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
 
-  devMap = new DevMap(grid1, player, monsterManager);
-  sceneLoader = new SceneLoader(
-    physics,
-    scene,
-    maze1Group,
-    saferoom1.model,
-    playerController
-  );
-
-  sceneLoader.loadScene("maze1");
-  mMap = new MiniMap(playerController, grid1);
-
-  worldManager = new WorldManager(scene, grid1, player, clock);
+  worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock);
   await worldManager.setKey();
   await worldManager.setBatteries();
-  makeSnow(scene);
-  makeSnow(maze1Group);
+  //makeSnow(scene);
+  makeSnow(sceneLoader.currentScene);
 }
 
 
@@ -299,57 +303,57 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-async function renderMaze(maze, grid) {
-  // grid[maze.getThickIndex(0, 1)] = false;
-  // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
+// async function renderMaze(maze, grid) {
+//   // grid[maze.getThickIndex(0, 1)] = false;
+//   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
 
-  // grid[1][0] = false;
-  grid[2 * maze.width - 1][2 * maze.height] = false;
-  const wallHeight = 25;
-  const wallWidth = 30;
+//   // grid[1][0] = false;
+//   grid[2 * maze.width - 1][2 * maze.height] = false;
+//   const wallHeight = 25;
+//   const wallWidth = 30;
 
-  const wallGenerator = new WallGenerator(wallWidth, wallHeight);
+//   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
 
-  const mazeGroup = new THREE.Group();
+//   const mazeGroup = new THREE.Group();
 
-  for (var y = 0; y < 2 * maze.height + 1; y++) {
-    for (var x = 0; x < 2 * maze.width + 1; x++) {
-      if (grid[y][x]) {
-        //var wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
-        var wallMesh;
+//   for (var y = 0; y < 2 * maze.height + 1; y++) {
+//     for (var x = 0; x < 2 * maze.width + 1; x++) {
+//       if (grid[y][x]) {
+//         //var wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
+//         var wallMesh;
 
-        let binString = wallGenerator.genBinaryString(x, y, grid, maze);
-        let config = wallGenerator.getWallConfig(binString);
-        wallMesh = wallGenerator.createWall(
-          config,
-          Constants.WALL_SIZE,
-          wallHeight,
-          x + y
-        );
-        wallMesh.position.set(
-          x * Constants.WALL_SIZE,
-          0,
-          y * Constants.WALL_SIZE
-        );
-        mazeGroup.add(wallMesh);
-        physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
-        continue;
-      }
-    }
-  }
+//         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
+//         let config = wallGenerator.getWallConfig(binString);
+//         wallMesh = wallGenerator.createWall(
+//           config,
+//           Constants.WALL_SIZE,
+//           wallHeight,
+//           x + y
+//         );
+//         wallMesh.position.set(
+//           x * Constants.WALL_SIZE,
+//           0,
+//           y * Constants.WALL_SIZE
+//         );
+//         mazeGroup.add(wallMesh);
+//         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
+//         continue;
+//       }
+//     }
+//   }
 
-  // add the door to the end of the maze
-  door = new Door("entrance");
-  await door.loadModel("Door");
-  scene.add(door.model);
-  door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
-  door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
-  door.model.position.y -= wallHeight / 2;
+// add the door to the end of the maze
+// door = new Door("entrance");
+// await door.loadModel("Door");
+// scene.add(door.model);
+// door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
+// door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
+// door.model.position.y -= wallHeight / 2;
 
-  mazeGroup.add(door.model);
-  mazeGroup.name = "maze";
-  return mazeGroup;
-}
+// mazeGroup.add(door.model);
+// mazeGroup.name = "maze";
+// return mazeGroup;
+// }
 
 function randomIntFromInterval(min, max) {
   // min and max included
