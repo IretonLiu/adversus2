@@ -36,7 +36,7 @@ class Door {
                 exitBoundingBoxMaterial.visible = false;
                 const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
                 exitBoundingBoxMesh.position.y = 2.8;
-                exitBoundingBoxMesh.name = this.doorName;
+                exitBoundingBoxMesh.name = this.name;
 
                 this.model.add(exitBoundingBoxMesh);
 

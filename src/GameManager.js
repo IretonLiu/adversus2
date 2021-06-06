@@ -1,10 +1,7 @@
 import * as THREE from "three";
 import Skybox from "./Skybox";
-import Maze from "./lib/MazeGenerator";
 import PlayerController from "./PlayerController.js";
-import Monster from "./Monster.js";
 import MiniMap from "./MiniMapHandler";
-import WallGenerator from "./WallGenerator.js";
 import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
@@ -15,9 +12,6 @@ import SoundManager from "./SoundManager";
 import MonsterManager from "./MonsterManager";
 import DevMap from "./DevMap";
 import Player from "./Player";
-import Utils from "./Utils";
-import SafeRoom from "./SafeRoom";
-import Door from "./Door";
 import SceneLoader from "./SceneLoader";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -31,17 +25,16 @@ let player,
   monsterManager,
   snowParticles,
   stats,
-  saferoom1,
   soundmanagerGlobal,
   soundmanager,
   worldManager,
-  door,
   sceneLoader,
   composer;
 
-let maze1, grid1, maze2, grid2, maze3, grid3;
 
 let devMap;
+
+let loadingScreen;
 
 const clock = new THREE.Clock();
 
@@ -51,6 +44,7 @@ class GameManager {
     await Ammo();
     physics = new Physics();
     physics.initPhysics();
+    loadingScreen = document.getElementById("loading-screen");
 
     initGraphics();
     await initWorld();
@@ -101,13 +95,12 @@ function setUpPostProcessing() {
 }
 
 function removeLoadingScreen() {
-  const loadingScreen = document.getElementById("loading-screen");
   loadingScreen.classList.add("fade-out");
 
   // optional: remove loader from DOM via event listener
-  loadingScreen.addEventListener("transitionend", () => {
-    loadingScreen.remove();
-  });
+  // loadingScreen.addEventListener("transitionend", () => {
+  //   loadingScreen.remove();
+  // });
 }
 
 function initGraphics() {
@@ -207,10 +200,10 @@ async function initWorld() {
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
-
   sceneLoader = new SceneLoader(
     physics,
     scene,
+    loadingScreen,
   );
   //sceneLoader.initMaze1();
   await sceneLoader.loadMaze1();
@@ -223,39 +216,23 @@ async function initWorld() {
   var playerController = new PlayerController(
     renderer.domElement,
     sceneLoader.currentScene,
+    onInteractCB,
   );
   physics.createPlayerRB(playerController.playerObject);
-
   await playerController.initCandle();
-
   player = new Player(playerPos, playerController);
+  monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
 
-  sceneLoader.addPlayer(player)
+  sceneLoader.addActors(player, monsterManager);
+
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
   scene.add(sceneLoader.currentScene);
 
   mMap = new MiniMap(playerController, sceneLoader.grid1);
 
-  // maze1 = new Maze(
-  //   Constants.MAP1_SIZE,
-  //   Constants.MAP1_SIZE,
-  //   Constants.PROBABILITY_WALLS_REMOVED
-  // );
-  // maze1.growingTree();
-  // grid1 = maze1.getThickGrid();
-
-  //let maze1Group = await renderMaze(maze1, grid1);
-
-  // scene.add(maze1Group); // adds the maze in to the scene graph
-
-  // adding the saferoom into the game;
-  // saferoom1 = new SafeRoom();
-  // await saferoom1.loadModel("SafeRoomWDoors");
-
-
-
   setUpAmbientLight();
+
   soundmanagerGlobal = new SoundManagerGlobal(
     playerController,
     "assets/Sounds/ambience.mp3",
@@ -263,7 +240,6 @@ async function initWorld() {
   );
 
 
-  monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
 
   devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
 
@@ -273,7 +249,6 @@ async function initWorld() {
   //makeSnow(scene);
   makeSnow(sceneLoader.currentScene);
 }
-
 
 
 function setUpGround() {
@@ -303,57 +278,6 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-// async function renderMaze(maze, grid) {
-//   // grid[maze.getThickIndex(0, 1)] = false;
-//   // grid[maze.getThickIndex(2 * maze.width - 1, 2 * maze.height)] = false;
-
-//   // grid[1][0] = false;
-//   grid[2 * maze.width - 1][2 * maze.height] = false;
-//   const wallHeight = 25;
-//   const wallWidth = 30;
-
-//   const wallGenerator = new WallGenerator(wallWidth, wallHeight);
-
-//   const mazeGroup = new THREE.Group();
-
-//   for (var y = 0; y < 2 * maze.height + 1; y++) {
-//     for (var x = 0; x < 2 * maze.width + 1; x++) {
-//       if (grid[y][x]) {
-//         //var wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
-//         var wallMesh;
-
-//         let binString = wallGenerator.genBinaryString(x, y, grid, maze);
-//         let config = wallGenerator.getWallConfig(binString);
-//         wallMesh = wallGenerator.createWall(
-//           config,
-//           Constants.WALL_SIZE,
-//           wallHeight,
-//           x + y
-//         );
-//         wallMesh.position.set(
-//           x * Constants.WALL_SIZE,
-//           0,
-//           y * Constants.WALL_SIZE
-//         );
-//         mazeGroup.add(wallMesh);
-//         physics.createWallRB(wallMesh, Constants.WALL_SIZE, wallHeight);
-//         continue;
-//       }
-//     }
-//   }
-
-// add the door to the end of the maze
-// door = new Door("entrance");
-// await door.loadModel("Door");
-// scene.add(door.model);
-// door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
-// door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
-// door.model.position.y -= wallHeight / 2;
-
-// mazeGroup.add(door.model);
-// mazeGroup.name = "maze";
-// return mazeGroup;
-// }
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -479,14 +403,16 @@ function updateSnow(delta) {
   snowParticles.geometry.attributes.position.needsUpdate = true;
 }
 
-function onInteractCB() {
+async function onInteractCB() {
+  console.log("hello")
   const interactingObject = player.playerController.intersect;
+  console.log(interactingObject);
   if (interactingObject) {
     switch (interactingObject.name) {
-      case "entrance":
+      case "maze1exit":
         if (player.hasKey) {
-          door.openDoor(sceneLoader);
           mMap.hideMap();
+          await sceneLoader.loadScene("saferoom1")
         }
         break;
       case "exit":
@@ -494,7 +420,7 @@ function onInteractCB() {
         winScreen.classList.remove("hidden");
         state.isPlaying = false;
         state.gameover = true;
-        this.controls.unlock();
+        player.playerController.controls.unlock();
         document.getElementById("restart-button-1").onclick = () => {
           location.reload();
         };

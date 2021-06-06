@@ -52,6 +52,7 @@ class PlayerController {
     // set up the player controller to use the pointer lock controls
     this.controls = this.initControls(domElement, this);
     this.setUpControls(this);
+    this.setUpInteraction();
 
     // setting up object interaction raycaster
     this.raycaster = new Raycaster();
@@ -188,13 +189,10 @@ class PlayerController {
         case "KeyZ":
           self.velocity.y = 0;
           break;
-
         case "KeyF":
           this.turnTorchOff();
           break;
-        case "KeyE":
-          this.onInteractCB();
-          break;
+
       }
     };
 
@@ -218,6 +216,19 @@ class PlayerController {
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
     document.addEventListener("click", onClick);
+  }
+
+  setUpInteraction() {
+    const onKeyUp = async (event) => {
+      if (!state.isPlaying) return;
+      switch (event.code) {
+        case "KeyE":
+          await this.onInteractCB();
+          break;
+      }
+    }
+    document.addEventListener("keyup", onKeyUp);
+
   }
 
   turnTorchOff() {

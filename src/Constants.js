@@ -19,7 +19,7 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
-  MAP1_SIZE: 10,
+  MAP1_SIZE: 5,
   MAP2_SIZE: 10,
   MAP3_SIZE: 15,
 
@@ -31,8 +31,8 @@ let Constants = {
   WALL_SEGMENTS: 1,
 
   // player constants
-  PLAYER_MOVE_SPEED: 35,
-  PLAYER_MOVE_SPEED_DEV: 100,
+  //PLAYER_MOVE_SPEED: 35,
+  PLAYER_MOVE_SPEED: 100,
   PLAYER_INITIAL_POS: {
     x: 30,
     y: 10,

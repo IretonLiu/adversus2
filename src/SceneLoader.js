@@ -1,15 +1,17 @@
 import Constants from "./Constants";
 import Door from "./Door";
-import PlayerController from "./PlayerController";
 import * as THREE from "three";
 import WallGenerator from "./WallGenerator";
 import Maze from "./lib/MazeGenerator";
+import SafeRoom from "./SafeRoom";
 class SceneLoader {
-    constructor(physics, scene,) {
+    constructor(physics, scene, loadingScreen) {
         this.physics = physics;
         this.scene = scene;
+        this.loadingScreen = loadingScreen;
 
         this.player = null;
+        this.monster = null;
         // this.minimap = minimap;
 
         this.maze1 = null;
@@ -19,32 +21,32 @@ class SceneLoader {
         this.currentScene = null;
         this.currentSceneName = "";
 
+        this.saferoom1 = null;
+
         // this.player.playerController.onInteractCB = this.onInteractCB;
     }
 
-    loadScene(nextSceneName) {
+    async loadScene(nextSceneName) {
+        this.loadingScreen.classList.remove("fade-out");
+        //this.loadingScreen.style.opacity = "1";
+        this.player.playerController.reset();
+        this.monster.despawnMonster();
         // clear the scene if one exists
         if (this.currentScene) this.clearScene();
 
         // initialize player rigidbody
-        this.physics.createPlayerRB(this.playerController.playerObject);
+        this.physics.createPlayerRB(this.player.playerController.playerObject);
 
         // load another scene based on the scene name
         if (nextSceneName == "maze1") {
-            //this.scene.add(this.maze1);
             this.loadMaze1();
-            this.player.playerController.scene = this.currentScene;
-
         } else if (nextSceneName == "saferoom1") {
-
-            // TODO: change this
-            this.scene.add(this.room1);
-            this.player.playerController.scene = this.room1;
-            this.currentScene = this.room1;
+            await this.loadRoom1();
         }
-
+        this.player.playerController.scene = this.currentScene;
+        this.scene.add(this.currentScene);
+        this.loadingScreen.classList.add("fade-out");
     }
-
 
     clearScene() {
         // empty the geometry and the material used in the previous scene
@@ -52,14 +54,24 @@ class SceneLoader {
             if (child.userData.physicsBody)
                 this.physics.physicsWorld.removeRigidBody(child.userData.physicsBody);
             if (child.isMesh) {
-                child.geometry.dispose();
-                child.material.dispose();
-                this.scene.remove(child);
+
+                if (child.geometry)
+                    child.geometry.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        for (let m of child.material) {
+                            m.dispose()
+                        }
+                    } else {
+                        child.material.dispose()
+                    }
+                }
+                // this.scene.remove(child);
             }
         });
         this.scene.remove(this.currentScene)
         //console.log(this.scene);
-        this.playerController.reset();
+
     }
 
     // initializes the maze structure
@@ -78,8 +90,8 @@ class SceneLoader {
         if (!this.maze1)
             this.initMaze1();
 
-        let grid1 = this.maze1.getThickGrid();
-        grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
+        this.grid1 = this.maze1.getThickGrid();
+        this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
         const wallHeight = 25;
         const wallWidth = 30;
 
@@ -126,45 +138,27 @@ class SceneLoader {
         this.currentSceneName = mazeGroup.name;
 
         this.currentScene = mazeGroup;
-        this.currentScene = mazeGroup;
-
         // this.scene.add(this.currentScene);
     }
 
-    onInteractCB() {
-        const interactingObject = player.playerController.intersect;
-        if (interactingObject) {
-            switch (interactingObject.name) {
-                case "maze1exit":
-                    if (player.hasKey) {
-                        this.loadScene("saferoom1");
-                        mMap.hideMap();
-                    }
-                    break;
-                case "maze2entrance":
-                    var winScreen = document.getElementById("win-screen");
-                    winScreen.classList.remove("hidden");
-                    state.isPlaying = false;
-                    state.gameover = true;
-                    this.controls.unlock();
-                    document.getElementById("restart-button-1").onclick = () => {
-                        location.reload();
-                    };
-                    break;
-            }
-        }
+    async loadRoom1() {
+        this.saferoom1 = new SafeRoom("saferoom1");
+        await this.saferoom1.loadModel("SafeRoom1")
+        this.currentScene = this.saferoom1.model;
+        this.currentSceneName = "saferoom1";
     }
 
-
-    addPlayer(player) {
+    addActors(player, monster) {
         this.player = player;
-        this.player.playerController.onInteractCB = this.onInteractCB;
+        this.monster = monster
     }
 
-    // updateSafeRoom() {
-    //     if(this.currentSceneName == "saferoom1")
+    updateCurrentScene(time) {
+        if (this.currentSceneName == "saferoom1")
+            this.saferoom1.update(time);
+    }
 
-    // }
+
 }
 
 export default SceneLoader;

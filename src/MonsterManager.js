@@ -40,8 +40,10 @@ class MonsterManager {
   }
 
   despawnMonster() {
-    this.monster.remove();
-    this.monster = null;
+    if (this.monster) {
+      this.monster.remove();
+      this.monster = null;
+    }
   }
 
   spawnMonster(monsterGridLoc) {

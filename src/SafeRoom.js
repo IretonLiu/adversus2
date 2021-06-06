@@ -14,11 +14,12 @@ import {
 } from "three"
 
 class SafeRoom {
-    constructor() {
+    constructor(name) {
         this.model = new Group();
         this.flameMaterials = [];
         this.candleLights = [];
         this.time = 0;
+        this.name = name;
     }
 
     loadModel(filename) {
@@ -85,7 +86,7 @@ class SafeRoom {
                 this.model.scale.x = 6;
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;
-
+                this.model.name = ""
                 resolve("success");
             }, (xhr) => {
                 console.log("loading saferoom: " + (xhr.loaded / xhr.total * 100) + '% loaded');
