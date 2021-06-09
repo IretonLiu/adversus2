@@ -30,17 +30,12 @@ class SceneLoader {
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
 
-        // reinitialize the player and monster if they exist
-        if (this.player) {
-            this.physics.createPlayerRB(this.player.playerController.playerObject);
-            this.player.playerController.reset();
-        }
-        if (this.monster)
-            this.monster.despawnMonster();
-
         // clear the scene if one exists
         if (this.currentScene)
             this.clearScene();
+        // reinitialize the player and monster if they exist
+
+
         // load another scene based on the scene name
         if (nextSceneName == "maze1") {
             if (!this.maze1) {
@@ -51,8 +46,14 @@ class SceneLoader {
             await this.loadRoom1();
         }
 
-        if (this.player)
+        if (this.player) {
+            this.player.playerController.reset();
+            this.physics.createPlayerRB(this.player.playerController.playerObject);
             this.player.playerController.scene = this.currentScene;
+
+        }
+        if (this.monster)
+            this.monster.despawnMonster();
 
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
@@ -80,6 +81,7 @@ class SceneLoader {
             }
         });
         this.scene.remove(this.currentScene)
+        this.physics.physicsWorld.removeRigidBody(this.player.playerController.playerObject.userData.physicsBody)
         //console.log(this.scene);
 
     }

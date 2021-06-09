@@ -310,7 +310,7 @@ class Monster {
 
     // if want to check in torch, make sure torch is actually turned on
     if (inTorch) {
-      if (!playerController.torch.visible) return false;
+      if (!playerController.torchOn) return false;
     }
 
     // inTorch if want to check if it is in the torch's beam

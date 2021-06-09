@@ -41,6 +41,8 @@ class PlayerController {
 
     // the torch that is used by the player
     this.torch = this.initTorch();
+    this.torchOn = false;
+
     this.camera.add(this.torch);
 
     // the candle that is used by the player
@@ -239,9 +241,11 @@ class PlayerController {
   // to give the effect that the torch is being turned on and off
   // visibility is chosen instead of visibility because of performance reasons
   turnTorchOff() {
-    if (this.torch.intensity == 1.5)
+    if (this.torchOn)
       this.torch.intensity = 0;
     else this.torch.intensity = 1.5;
+
+    this.torchOn = !this.torchOn;
   }
 
   update(time) {

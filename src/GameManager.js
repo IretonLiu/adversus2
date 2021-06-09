@@ -69,6 +69,7 @@ class GameManager {
   }
 }
 
+// set up all the post processing needed 
 function setUpPostProcessing() {
   // initialization of post processing
   composer = new EffectComposer(renderer);
@@ -171,10 +172,10 @@ function animate() {
       player.playerController.camera.position.z
     );
     worldManager.displayItems();
-    worldManager.lifeBar(player.playerController.torch.intensity);
+    worldManager.lifeBar(player.playerController.torchOn);
     worldManager.refillTorch();
     if (worldManager.torchLife <= 0) {
-      player.playerController.torch.intensity = 0;
+      player.playerController.torchOn = false;
     }
     worldManager.keyDisplay();
 
