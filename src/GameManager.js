@@ -58,7 +58,9 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen();
+    removeLoadingScreen(() => {
+
+    });
     soundmanager = null;
 
     setUpPostProcessing();
@@ -94,15 +96,17 @@ function setUpPostProcessing() {
   outlinePass.selectedObjects = outlineObjects;
 }
 
+// TODO: polish the loading screen removal logic;
 function removeLoadingScreen() {
   loadingScreen.classList.add("fade-out");
 
-  // optional: remove loader from DOM via event listener
+  //optional: remove loader from DOM via event listener
   // loadingScreen.addEventListener("transitionend", () => {
   //   loadingScreen.remove();
   // });
 }
 
+// initialises all the graphics of the game
 function initGraphics() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
@@ -121,12 +125,14 @@ function initGraphics() {
   document.body.appendChild(renderer.domElement);
 }
 
+// the main animation / game loop logic
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
     player.playerController.update(deltaTime);
     physics.updatePhysics(deltaTime);
 
+    // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
     player.updatePosition(player.playerController.camera.position, () => {
       monsterManager.updateMonsterPath();
@@ -165,14 +171,13 @@ function animate() {
       player.playerController.camera.position.z
     );
     worldManager.displayItems();
-    worldManager.lifeBar(player.playerController.torch.visible);
+    worldManager.lifeBar(player.playerController.torch.intensity);
     worldManager.refillTorch();
     if (worldManager.torchLife <= 0) {
-      player.playerController.torch.visible = false;
+      player.playerController.torch.intensity = 0;
     }
-    // worldManager.torchDisplay();
-    // worldManager.keyDisplay();
-    // worldManager.batteryDisplay();
+    worldManager.keyDisplay();
+
 
     updateSnow(deltaTime);
     //saferoom1.update(deltaTime);
@@ -191,6 +196,7 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
+// initialises the game world
 async function initWorld() {
   const skybox = new Skybox("nightsky");
   //TODO: Make this dynamic based on map size
@@ -206,7 +212,7 @@ async function initWorld() {
     loadingScreen,
   );
   //sceneLoader.initMaze1();
-  await sceneLoader.loadMaze1();
+  await sceneLoader.loadScene("maze1");
 
   var playerPos = new THREE.Vector3(
     Constants.PLAYER_INITIAL_POS.x,
@@ -222,8 +228,8 @@ async function initWorld() {
   await playerController.initCandle();
   player = new Player(playerPos, playerController);
   monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
-
   sceneLoader.addActors(player, monsterManager);
+
 
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);

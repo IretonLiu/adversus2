@@ -185,7 +185,7 @@ class WorldManager {
   lifeBar(torchState) {
     var delta = this.clock.getDelta();
     //this decreases the torches life bar
-    if (torchState) {
+    if (torchState == 1.5) {
       if (this.torchLife >= 0) {
         this.torchLife -= Constants.TORCH_DEPLETION_RATE * 100 * delta;
       }

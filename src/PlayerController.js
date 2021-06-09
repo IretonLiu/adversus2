@@ -63,6 +63,8 @@ class PlayerController {
     this.onInteractCB = onInteractCB;
   }
 
+  // reset the player position to the initial position
+  // this is used when scene changing takes player
   reset() {
     const playerPos = Constants.PLAYER_INITIAL_POS;
 
@@ -71,7 +73,8 @@ class PlayerController {
     this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
   }
 
-  initControls(domElement, self) {
+  // initialize the pointer lock controls for the player
+  initControls(domElement) {
     const controls = new PointerLockControls(this.camera, domElement);
     controls.maxPolarAngle = (29 * Math.PI) / 30;
     controls.minPolarAngle = (1 * Math.PI) / 30;
@@ -139,6 +142,7 @@ class PlayerController {
       if (!state.isPlaying) return;
       switch (event.code) {
         case "KeyW":
+          console.log("w")
           self.moveForward = true;
           break;
 
@@ -231,8 +235,13 @@ class PlayerController {
 
   }
 
+  // changes the intensity of the torch
+  // to give the effect that the torch is being turned on and off
+  // visibility is chosen instead of visibility because of performance reasons
   turnTorchOff() {
-    this.torch.visible = !this.torch.visible;
+    if (this.torch.intensity == 1.5)
+      this.torch.intensity = 0;
+    else this.torch.intensity = 1.5;
   }
 
   update(time) {
@@ -262,10 +271,10 @@ class PlayerController {
   initTorch() {
     // const mapSize = Constants.MAP_SIZE;
     var torch = new SpotLight(0xffffff);
-    torch.visible = false;
+    torch.visible = true;
     torch.shadow.bias = -0.0001;
     torch.castShadow = true;
-    torch.intensity = 1.5;
+    torch.intensity = 0;
     // torch.shadow.mapSize.width = 1024;
     // torch.shadow.mapSize.height = 1024;
     torch.penumbra = 1;

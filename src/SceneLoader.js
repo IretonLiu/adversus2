@@ -19,7 +19,7 @@ class SceneLoader {
 
         // this.room1 = null;
         this.currentScene = null;
-        this.currentSceneName = "";
+        this.currentSceneName = null;
 
         this.saferoom1 = null;
 
@@ -29,21 +29,31 @@ class SceneLoader {
     async loadScene(nextSceneName) {
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
-        this.player.playerController.reset();
-        this.monster.despawnMonster();
+
+        // reinitialize the player and monster if they exist
+        if (this.player) {
+            this.physics.createPlayerRB(this.player.playerController.playerObject);
+            this.player.playerController.reset();
+        }
+        if (this.monster)
+            this.monster.despawnMonster();
+
         // clear the scene if one exists
-        if (this.currentScene) this.clearScene();
-
-        // initialize player rigidbody
-        this.physics.createPlayerRB(this.player.playerController.playerObject);
-
+        if (this.currentScene)
+            this.clearScene();
         // load another scene based on the scene name
         if (nextSceneName == "maze1") {
-            this.loadMaze1();
+            if (!this.maze1) {
+                this.initMaze1();
+            }
+            await this.loadMaze("maze1", this.maze1, this.grid1);
         } else if (nextSceneName == "saferoom1") {
             await this.loadRoom1();
         }
-        this.player.playerController.scene = this.currentScene;
+
+        if (this.player)
+            this.player.playerController.scene = this.currentScene;
+
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
     }
@@ -83,15 +93,16 @@ class SceneLoader {
         );
         this.maze1.growingTree();
         this.grid1 = this.maze1.getThickGrid();
+        this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
+
     }
 
     // render and add the maze to the scene
-    async loadMaze1() {
-        if (!this.maze1)
-            this.initMaze1();
 
-        this.grid1 = this.maze1.getThickGrid();
-        this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
+    async loadMaze(name, maze, grid) {
+
+
+
         const wallHeight = 25;
         const wallWidth = 30;
 
@@ -99,13 +110,13 @@ class SceneLoader {
 
         const mazeGroup = new THREE.Group();
 
-        for (var y = 0; y < 2 * this.maze1.height + 1; y++) {
-            for (var x = 0; x < 2 * this.maze1.width + 1; x++) {
-                if (this.grid1[y][x]) {
+        for (var y = 0; y < 2 * maze.height + 1; y++) {
+            for (var x = 0; x < 2 * maze.width + 1; x++) {
+                if (grid[y][x]) {
                     //var wallMesh = new THREE.Mesh(wallGeometry, wallMaterial);
                     var wallMesh;
 
-                    let binString = wallGenerator.genBinaryString(x, y, this.grid1, this.maze1);
+                    let binString = wallGenerator.genBinaryString(x, y, grid, maze);
                     let config = wallGenerator.getWallConfig(binString);
                     wallMesh = wallGenerator.createWall(
                         config,
@@ -129,17 +140,18 @@ class SceneLoader {
         const door = new Door("maze1exit");
         await door.loadModel("Door");
         this.scene.add(door.model);
-        door.model.position.x = Constants.WALL_SIZE * (2 * this.maze1.height);
-        door.model.position.z = Constants.WALL_SIZE * (2 * (this.maze1.width - 0.5));
+        door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
+        door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
         door.model.position.y -= wallHeight / 2;
         mazeGroup.add(door.model);
 
-        mazeGroup.name = "maze1";
-        this.currentSceneName = mazeGroup.name;
+        mazeGroup.name = name;
+        this.currentSceneName = name;
 
         this.currentScene = mazeGroup;
         // this.scene.add(this.currentScene);
     }
+
 
     async loadRoom1() {
         this.saferoom1 = new SafeRoom("saferoom1");
