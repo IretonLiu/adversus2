@@ -5,14 +5,15 @@ import WallGenerator from "./WallGenerator";
 import Maze from "./lib/MazeGenerator";
 import SafeRoom from "./SafeRoom";
 import MiniMap from "./MiniMapHandler";
+import state from "./State";
 class SceneLoader {
-    constructor(physics, scene, loadingScreen) {
+    constructor(physics, scene, loadingScreen, monsterManager) {
         this.physics = physics;
         this.scene = scene;
         this.loadingScreen = loadingScreen;
 
         this.player = null;
-        this.monster = null;
+        this.monsterManager = monsterManager;
         // this.minimap = minimap;
 
         this.maze1 = null;
@@ -33,6 +34,7 @@ class SceneLoader {
     }
 
     async loadScene(nextSceneName) {
+        state.isPlaying = false;
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
 
@@ -82,11 +84,9 @@ class SceneLoader {
             this.player.playerController.scene = this.currentScene;
 
         }
-        if (this.monster)
-            this.monster.despawnMonster();
-
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
+        state.isPlaying = true;
     }
 
     clearScene() {
@@ -112,6 +112,9 @@ class SceneLoader {
         });
         this.scene.remove(this.currentScene)
         this.physics.physicsWorld.removeRigidBody(this.player.playerController.playerObject.userData.physicsBody)
+        if (this.monsterManager.monster)
+            this.monsterManager.despawnMonster();
+
         //console.log(this.scene);
 
     }
@@ -207,9 +210,9 @@ class SceneLoader {
         return new MiniMap(this.player.playerController, this.currentGrid)
     }
 
-    addActors(player, monster) {
+    addActors(player, monsterManager) {
         this.player = player;
-        this.monster = monster
+        this.monsterManager = monsterManager
     }
 
 

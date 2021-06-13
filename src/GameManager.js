@@ -136,10 +136,11 @@ function animate() {
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
     player.updatePosition(player.playerController.camera.position, () => {
-      monsterManager.updateMonsterPath();
+      if (sceneLoader.currentScene.name == 'maze1')
+        monsterManager.updateMonsterPath();
     });
 
-    monsterManager.update();
+
 
     if (monsterManager.monster != null) {
       if (soundmanager == null) {
@@ -183,7 +184,12 @@ function animate() {
     updateSnow(deltaTime);
     //saferoom1.update(deltaTime);
     mMap.worldUpdate();
-    monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
+
+    if (sceneLoader.currentScene.name == 'maze1') {
+      monsterManager.update();
+      monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
+
+    }
     devMap.update();
     devMap.drawBatterys(worldManager.batteries);
     devMap.drawKey(worldManager.gateKey);
@@ -192,9 +198,12 @@ function animate() {
 
     render();
     stats.update();
+    if (sceneLoader.currentScene.name == "saferoom1")
+      console.log(monsterManager)
   }
   soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
+
 }
 
 // initialises the game world
