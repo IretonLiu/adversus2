@@ -72,7 +72,7 @@ class SafeRoom {
                 exitBoundingBoxMaterial.visible = false;
                 const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
 
-                exitBoundingBoxMesh.name = "maze2entrance";
+                exitBoundingBoxMesh.name = this.name + "exit";
                 exitBoundingBoxMesh.position.x = 10;
                 exitBoundingBoxMesh.position.z = 12;
                 exitBoundingBoxMesh.position.y = 1.75;
@@ -86,7 +86,7 @@ class SafeRoom {
                 this.model.scale.x = 6;
                 this.model.scale.y = 6;
                 this.model.scale.z = 6;
-                this.model.name = ""
+                this.model.name = this.name;
                 resolve("success");
             }, (xhr) => {
                 console.log("loading saferoom: " + (xhr.loaded / xhr.total * 100) + '% loaded');

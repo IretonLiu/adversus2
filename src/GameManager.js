@@ -215,6 +215,7 @@ async function initWorld() {
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1");
 
+  // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
     Constants.PLAYER_INITIAL_POS.x,
     Constants.PLAYER_INITIAL_POS.y,
@@ -231,12 +232,12 @@ async function initWorld() {
   monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
   sceneLoader.addActors(player, monsterManager);
 
+  mMap = sceneLoader.loadNewMinimap();
 
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
   scene.add(sceneLoader.currentScene);
 
-  mMap = new MiniMap(playerController, sceneLoader.grid1);
 
   setUpAmbientLight();
 
@@ -411,9 +412,7 @@ function updateSnow(delta) {
 }
 
 async function onInteractCB() {
-  console.log("hello")
   const interactingObject = player.playerController.intersect;
-  console.log(interactingObject);
   if (interactingObject) {
     switch (interactingObject.name) {
       case "maze1exit":
@@ -422,15 +421,17 @@ async function onInteractCB() {
           await sceneLoader.loadScene("saferoom1")
         }
         break;
-      case "exit":
-        var winScreen = document.getElementById("win-screen");
-        winScreen.classList.remove("hidden");
-        state.isPlaying = false;
-        state.gameover = true;
-        player.playerController.controls.unlock();
-        document.getElementById("restart-button-1").onclick = () => {
-          location.reload();
-        };
+      case "saferoom1exit":
+        await sceneLoader.loadScene("maze2")
+
+        // var winScreen = document.getElementById("win-screen");
+        // winScreen.classList.remove("hidden");
+        // state.isPlaying = false;
+        // state.gameover = true;
+        // player.playerController.controls.unlock();
+        // document.getElementById("restart-button-1").onclick = () => {
+        //   location.reload();
+        // };
         break;
     }
   }

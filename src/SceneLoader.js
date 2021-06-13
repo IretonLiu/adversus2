@@ -4,6 +4,7 @@ import * as THREE from "three";
 import WallGenerator from "./WallGenerator";
 import Maze from "./lib/MazeGenerator";
 import SafeRoom from "./SafeRoom";
+import MiniMap from "./MiniMapHandler";
 class SceneLoader {
     constructor(physics, scene, loadingScreen) {
         this.physics = physics;
@@ -17,6 +18,11 @@ class SceneLoader {
         this.maze1 = null;
         this.grid1 = null;
 
+        this.maze2 = null;
+        this.grid2 = null;
+
+        this.currentMaze = null;
+        // this.currentGrid = null;
         // this.room1 = null;
         this.currentScene = null;
         this.currentSceneName = null;
@@ -42,7 +48,16 @@ class SceneLoader {
                 this.initMaze1();
             }
             await this.loadMaze("maze1", this.maze1, this.grid1);
-        } else if (nextSceneName == "saferoom1") {
+            this.currentGrid = this.grid1;
+        } else if (nextSceneName == "maze2") {
+            if (!this.maze2) {
+                this.initMaze2();
+            }
+            await this.loadMaze("maze2", this.maze2, this.grid2);
+            this.currentGrid = this.grid2;
+
+        }
+        else if (nextSceneName == "saferoom1") {
             await this.loadRoom1();
         }
 
@@ -96,6 +111,18 @@ class SceneLoader {
         this.maze1.growingTree();
         this.grid1 = this.maze1.getThickGrid();
         this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
+
+    }
+
+    initMaze2() {
+        this.maze2 = new Maze(
+            Constants.MAP2_SIZE,
+            Constants.MAP2_SIZE,
+            Constants.PROBABILITY_WALLS_REMOVED
+        );
+        this.maze2.growingTree();
+        this.grid2 = this.maze2.getThickGrid();
+        this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     }
 
@@ -172,7 +199,9 @@ class SceneLoader {
             this.saferoom1.update(time);
     }
 
-
+    loadNewMinimap() {
+        return new MiniMap(this.player.playerController, this.currentGrid)
+    }
 }
 
 export default SceneLoader;
