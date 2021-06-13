@@ -211,6 +211,7 @@ async function initWorld() {
     physics,
     scene,
     loadingScreen,
+
   );
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1");

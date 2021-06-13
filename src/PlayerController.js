@@ -2,15 +2,12 @@ import {
   PerspectiveCamera,
   Vector3,
   SpotLight,
-  PointLight,
   Object3D,
   Raycaster,
-  Vector2,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
 import state from "./State";
-import SceneLoader from "./SceneLoader";
 import Candle from "./Candle";
 
 class PlayerController {
@@ -73,6 +70,17 @@ class PlayerController {
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
     this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
+  }
+
+  // set the player's position to anywhere in the world
+  // sets where the camera should look at
+  setPosition(x, z, lx, lz) {
+
+    this.playerObject.position.x = x * Constants.WALL_SIZE;
+    this.playerObject.position.z = z * Constants.WALL_SIZE;
+    this.camera.position.x = x * Constants.WALL_SIZE;
+    this.camera.position.z = z * Constants.WALL_SIZE;
+    this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 
   // initialize the pointer lock controls for the player
@@ -144,7 +152,6 @@ class PlayerController {
       if (!state.isPlaying) return;
       switch (event.code) {
         case "KeyW":
-          console.log("w")
           self.moveForward = true;
           break;
 
@@ -296,7 +303,6 @@ class PlayerController {
     await candle.loadModel();
     this.candle = candle;
     this.camera.add(this.candle.model);
-    console.log(this.candle);
   }
 
   handleTorch() {
@@ -376,12 +382,10 @@ class PlayerController {
   }
 
   raycasterForward() {
-    //console.log(this.scene);
     this.raycaster.set(
       this.controls.getObject().position,
       this.camera.getWorldDirection(new Vector3(0, 0, 0))
     );
-    //console.log(this.scene)
 
     const intersects = this.raycaster.intersectObjects(
       this.scene.children,

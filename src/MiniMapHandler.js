@@ -214,6 +214,11 @@ class MiniMap {
     canvas.style.display = "none";
   }
 
+  showMap() {
+    var canvas = document.getElementById("minimap");
+    canvas.style.display = "show";
+  }
+
   minimize() {
     ctx.canvas.classList.remove("fullscreen");
     this.width = Constants.MINIMAP_SIDE_LENGTH;

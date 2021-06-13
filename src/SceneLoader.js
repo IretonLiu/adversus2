@@ -22,7 +22,7 @@ class SceneLoader {
         this.grid2 = null;
 
         this.currentMaze = null;
-        // this.currentGrid = null;
+        this.currentGrid = null;
         // this.room1 = null;
         this.currentScene = null;
         this.currentSceneName = null;
@@ -37,8 +37,10 @@ class SceneLoader {
         //this.loadingScreen.style.opacity = "1";
 
         // clear the scene if one exists
-        if (this.currentScene)
+        if (this.currentScene) {
             this.clearScene();
+        }
+
         // reinitialize the player and monster if they exist
 
 
@@ -48,17 +50,30 @@ class SceneLoader {
                 this.initMaze1();
             }
             await this.loadMaze("maze1", this.maze1, this.grid1);
+            this.currentMaze = this.maze1;
             this.currentGrid = this.grid1;
+
+            // checks if the player just left the exit
+            // and set the players position accordingly
+            if (this.currentScene && this.currentScene.name == "saferoom1") {
+                const exitPos2D = this.maze1.getGridExitPosition();
+                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
+            }
         } else if (nextSceneName == "maze2") {
             if (!this.maze2) {
                 this.initMaze2();
             }
             await this.loadMaze("maze2", this.maze2, this.grid2);
+            this.currentMaze = this.maze2;
             this.currentGrid = this.grid2;
 
-        }
-        else if (nextSceneName == "saferoom1") {
+            if (this.currentScene && this.currentScene.name == "saferoom2") {
+                const exitPos2D = this.maze2.getGridExitPosition();
+                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
+            }
+        } else if (nextSceneName == "saferoom1") {
             await this.loadRoom1();
+            this.saferoom1.setupColliders(this.physics);
         }
 
         if (this.player) {
@@ -125,7 +140,6 @@ class SceneLoader {
         this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     }
-
     // render and add the maze to the scene
 
     async loadMaze(name, maze, grid) {
@@ -184,9 +198,13 @@ class SceneLoader {
 
     async loadRoom1() {
         this.saferoom1 = new SafeRoom("saferoom1");
-        await this.saferoom1.loadModel("SafeRoom1")
+        await this.saferoom1.loadModel("SafeRoom1", this.physics)
         this.currentScene = this.saferoom1.model;
         this.currentSceneName = "saferoom1";
+    }
+
+    loadNewMinimap() {
+        return new MiniMap(this.player.playerController, this.currentGrid)
     }
 
     addActors(player, monster) {
@@ -194,14 +212,12 @@ class SceneLoader {
         this.monster = monster
     }
 
+
     updateCurrentScene(time) {
         if (this.currentSceneName == "saferoom1")
             this.saferoom1.update(time);
     }
 
-    loadNewMinimap() {
-        return new MiniMap(this.player.playerController, this.currentGrid)
-    }
 }
 
 export default SceneLoader;

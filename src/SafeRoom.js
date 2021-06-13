@@ -10,7 +10,9 @@ import {
     SphereBufferGeometry,
     BackSide,
     BoxGeometry,
-    MeshStandardMaterial
+    MeshStandardMaterial,
+    Vector3,
+    Object3D
 } from "three"
 
 class SafeRoom {
@@ -22,7 +24,7 @@ class SafeRoom {
         this.name = name;
     }
 
-    loadModel(filename) {
+    loadModel(filename, physics) {
 
         const loader = new GLTFLoader();
         const path = "./assets/models/saferoom/"
@@ -41,51 +43,46 @@ class SafeRoom {
                         child.material.shadowSide = BackSide;
                     }
                 });
+
+                scene.scale.x = 6;
+                scene.scale.y = 6;
+                scene.scale.z = 6;
                 this.model.add(scene)
 
                 // the actual light source of the candle light
-                const candle1Pos = { x: 5.25, y: 1.95, z: -3.57 }
-                const candle2Pos = { x: -1.4, y: 2.05, z: 13.1 }
+                const candle1Pos = { x: 31.5, y: 12.5, z: -21.5 }
+                const candle2Pos = { x: -8.4, y: 12.5, z: 78.7 }
 
-                var candleLight1 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight1.position.set(candle1Pos.x, candle1Pos.y + 0.1, candle1Pos.z,);
+                const candleLight1 = new PointLight(0xffaa33, 10, 100, 5);
                 candleLight1.shadow.bias = -0.001
                 candleLight1.castShadow = true;
-
-                var candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight2.position.set(candle2Pos.x, candle2Pos.y + 0.1, candle2Pos.z,);
-                candleLight2.shadow.bias = -0.001
-                candleLight2.castShadow = true;
-
-                this.candleLights.push(candleLight2);
-
+                this.candleLights.push(candleLight1);
                 // the candle light shape and material using glsl shader
                 const flame1 = this.createCandleLight();
-                flame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z,)
+                const candleFlame1 = new Group();
+                candleFlame1.add(candleLight1)
+                candleFlame1.add(flame1)
+                candleFlame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z,);
 
+
+
+                const candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
+                candleLight2.shadow.bias = -0.001
+                candleLight2.castShadow = true;
+                this.candleLights.push(candleLight2);
                 const flame2 = this.createCandleLight();
-                flame2.position.set(candle2Pos.x, candle2Pos.y, candle2Pos.z,)
-
+                const candleFlame2 = new Group();
+                candleFlame2.add(candleLight2)
+                candleFlame2.add(flame2)
+                candleFlame2.position.set(candle2Pos.x, candle2Pos.y + 0.6, candle2Pos.z,);
                 // set up the bounding boxes for the exits of the saferoom
-                const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3,);
-                const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
-                exitBoundingBoxMaterial.visible = false;
-                const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
 
-                exitBoundingBoxMesh.name = this.name + "exit";
-                exitBoundingBoxMesh.position.x = 10;
-                exitBoundingBoxMesh.position.z = 12;
-                exitBoundingBoxMesh.position.y = 1.75;
-
-                this.model.add(exitBoundingBoxMesh);
-                this.model.add(candleLight1);
-                this.model.add(flame1);
-                this.model.add(candleLight2);
-                this.model.add(flame2);
+                this.setupDoors();
+                //this.setupColliders(physics);
+                this.model.add(candleFlame1);
+                this.model.add(candleFlame2);
                 this.model.position.set(40, -5, 40);
-                this.model.scale.x = 6;
-                this.model.scale.y = 6;
-                this.model.scale.z = 6;
+
                 this.model.name = this.name;
                 resolve("success");
             }, (xhr) => {
@@ -94,15 +91,64 @@ class SafeRoom {
         });
     }
 
+    setupColliders(physics) {
+        const wallColliderSize = {
+            x: 0.6,
+            y: 48,
+            z: 150
+        }
+        const wallGeometry = new BoxGeometry(wallColliderSize.x, wallColliderSize.y, wallColliderSize.z);
+        const wallMaterial = new MeshStandardMaterial({ color: 0xffffff });
+        //exitBoundingBoxMaterial.visible = false;
+        const frontWall = new Object3D();
+        frontWall.position.x = 60;
+        frontWall.position.z = 15;
+        this.model.add(frontWall);
+        physics.createBoxRB(this.model, frontWall, wallColliderSize);
+
+        const backWall = new Object3D();
+        backWall.position.x = -60;
+        backWall.position.z = 15;
+        this.model.add(backWall);
+        physics.createBoxRB(this.model, backWall, wallColliderSize);
+
+        const leftWall = new Object3D();
+        leftWall.rotateY(Math.PI / 2)
+        leftWall.position.z = 83;
+        this.model.add(leftWall);
+        physics.createBoxRB(this.model, leftWall, wallColliderSize);
+
+        const rightWall = new Object3D();
+        rightWall.rotateY(Math.PI / 2)
+        rightWall.position.z = -62;
+        this.model.add(rightWall);
+        physics.createBoxRB(this.model, rightWall, wallColliderSize);
+    }
+
+    setupDoors() {
+        const exitBoundingBoxGeometry = new BoxGeometry(5, 18, 18,);
+        const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
+        exitBoundingBoxMaterial.visible = true;
+        const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
+
+        exitBoundingBoxMesh.name = this.name + "exit";
+        exitBoundingBoxMesh.position.x = 60;
+        exitBoundingBoxMesh.position.z = 70;
+        exitBoundingBoxMesh.position.y = 10.5;
+        this.model.add(exitBoundingBoxMesh)
+    }
+
     createCandleLight() {
         let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
         flameGeo.translate(0, 0.5, 0);
         let flameMat = this.createShaderMaterial();
         this.flameMaterials.push(flameMat);
         let flame = new Mesh(flameGeo, flameMat);
-        flame.scale.x = 0.1;
-        flame.scale.y = 0.1;
-        flame.scale.z = 0.1;
+        flame.position.y = -1;
+        flame.scale.x = 0.5;
+        flame.scale.y = 0.5;
+        flame.scale.z = 0.5;
+
         return flame;
     }
 
