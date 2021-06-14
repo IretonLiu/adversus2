@@ -223,6 +223,14 @@ class Maze {
     return y * (2 * this.width + 1) + x;
   }
 
+  getGridExitPosition() {
+    exit = {
+      x: 2 * this.height - 1,
+      z: 2 * this.width - 1
+    }
+    return exit;
+  }
+
   drawThickMaze(ctx) {
     var thickMaze = this.getThickGrid();
     var stepSize = 20;

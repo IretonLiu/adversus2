@@ -24,7 +24,7 @@ let Constants = {
   MAP3_SIZE: 15,
 
   // percentage of walls removed
-  PROBABILITY_WALLS_REMOVED: 0.075,
+  PROBABILITY_WALLS_REMOVED: 0.75,
 
   // blockiness of visuals
   BLOCKINESS: 4,

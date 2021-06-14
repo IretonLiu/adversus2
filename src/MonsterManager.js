@@ -40,6 +40,7 @@ class MonsterManager {
   }
 
   despawnMonster() {
+    console.log("this is called")
     if (this.monster) {
       this.monster.remove();
       this.monster = null;
