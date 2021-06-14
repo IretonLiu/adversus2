@@ -26,7 +26,7 @@ class SceneLoader {
         this.currentGrid = null;
         // this.room1 = null;
         this.currentScene = null;
-        this.currentSceneName = null;
+        //this.currentSceneName = null;
 
         this.saferoom1 = null;
 
@@ -44,6 +44,9 @@ class SceneLoader {
         }
 
         // reinitialize the player and monster if they exist
+        if (this.player) {
+            this.player.playerController.reset();
+        }
 
 
         // load another scene based on the scene name
@@ -51,16 +54,20 @@ class SceneLoader {
             if (!this.maze1) {
                 this.initMaze1();
             }
+
+            if (this.currentScene && this.currentScene.name == "saferoom1") {
+                console.log("from saferoom")
+                const exitPos2D = this.maze1.getGridExitPosition();
+                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
+            }
+
             await this.loadMaze("maze1", this.maze1, this.grid1);
             this.currentMaze = this.maze1;
             this.currentGrid = this.grid1;
 
-            // checks if the player just left the exit
+            // checks if the player just returned to the previous maze
             // and set the players position accordingly
-            if (this.currentScene && this.currentScene.name == "saferoom1") {
-                const exitPos2D = this.maze1.getGridExitPosition();
-                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
-            }
+
         } else if (nextSceneName == "maze2") {
             if (!this.maze2) {
                 this.initMaze2();
@@ -77,13 +84,12 @@ class SceneLoader {
             await this.loadRoom1();
             this.saferoom1.setupColliders(this.physics);
         }
-
         if (this.player) {
-            this.player.playerController.reset();
             this.physics.createPlayerRB(this.player.playerController.playerObject);
             this.player.playerController.scene = this.currentScene;
-
         }
+
+
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
         state.isPlaying = true;
@@ -140,6 +146,8 @@ class SceneLoader {
         );
         this.maze2.growingTree();
         this.grid2 = this.maze2.getThickGrid();
+        this.grid2[1][0] = false;
+
         this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     }
@@ -181,18 +189,39 @@ class SceneLoader {
                 }
             }
         }
+        const doorBoundingBoxSize = {
+            x: 6,
+            y: 20,
+            z: 30
+        }
 
         // add the door to the end of the maze
-        const door = new Door("maze1exit");
-        await door.loadModel("Door");
-        this.scene.add(door.model);
-        door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
-        door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
-        door.model.position.y -= wallHeight / 2;
-        mazeGroup.add(door.model);
+        if (!grid[2 * maze.width - 1][2 * maze.height]) {
+            const door = new Door(name + "exit");
+            await door.loadModel("Door", doorBoundingBoxSize);
+            this.scene.add(door.model);
+            door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
+            door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width) - 1);
+            door.model.position.y -= wallHeight / 2;
 
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            mazeGroup.add(door.model);
+        }
+        if (!grid[1][0]) {
+            const door = new Door(name + "entrance");
+            await door.loadModel("Door", doorBoundingBoxSize);
+            this.scene.add(door.model);
+            door.model.position.x = Constants.WALL_SIZE * 0;
+            door.model.position.z = Constants.WALL_SIZE * 1;
+            door.model.position.y -= wallHeight / 2;
+
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            mazeGroup.add(door.model);
+        }
+
+        // sets the name for a maze group
         mazeGroup.name = name;
-        this.currentSceneName = name;
+        //this.currentSceneName = name;
 
         this.currentScene = mazeGroup;
         // this.scene.add(this.currentScene);
@@ -202,8 +231,10 @@ class SceneLoader {
     async loadRoom1() {
         this.saferoom1 = new SafeRoom("saferoom1");
         await this.saferoom1.loadModel("SafeRoom1", this.physics)
+
+        // model contains the scene name
         this.currentScene = this.saferoom1.model;
-        this.currentSceneName = "saferoom1";
+        //this.currentScene.name = "saferoom1"
     }
 
     loadNewMinimap() {

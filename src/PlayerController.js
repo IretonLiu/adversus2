@@ -76,10 +76,9 @@ class PlayerController {
   // sets where the camera should look at
   setPosition(x, z, lx, lz) {
 
-    this.playerObject.position.x = x * Constants.WALL_SIZE;
-    this.playerObject.position.z = z * Constants.WALL_SIZE;
-    this.camera.position.x = x * Constants.WALL_SIZE;
-    this.camera.position.z = z * Constants.WALL_SIZE;
+    console.log(x, z, lx, lz)
+    this.playerObject.position.set(x * Constants.WALL_SIZE, this.playerObject.position.y, z * Constants.WALL_SIZE);
+    this.camera.position.set(x * Constants.WALL_SIZE, this.camera.position.y, z * Constants.WALL_SIZE);
     this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 

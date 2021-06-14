@@ -198,8 +198,6 @@ function animate() {
 
     render();
     stats.update();
-    if (sceneLoader.currentScene.name == "saferoom1")
-      console.log(monsterManager)
   }
   soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
@@ -431,18 +429,25 @@ async function onInteractCB() {
           await sceneLoader.loadScene("saferoom1")
         }
         break;
-      case "saferoom1exit":
-        await sceneLoader.loadScene("maze2")
 
-        // var winScreen = document.getElementById("win-screen");
-        // winScreen.classList.remove("hidden");
-        // state.isPlaying = false;
-        // state.gameover = true;
-        // player.playerController.controls.unlock();
-        // document.getElementById("restart-button-1").onclick = () => {
-        //   location.reload();
-        // };
+      case "saferoom1entrance":
+        console.log("here");
+        await sceneLoader.loadScene("maze1");
         break;
+      case "saferoom1exit":
+        await sceneLoader.loadScene("maze2");
+        break;
+      case "maze2entrance":
+        await sceneLoader.loadScene("saferoom1")
+
+      // var winScreen = document.getElementById("win-screen");
+      // winScreen.classList.remove("hidden");
+      // state.isPlaying = false;
+      // state.gameover = true;
+      // player.playerController.controls.unlock();
+      // document.getElementById("restart-button-1").onclick = () => {
+      //   location.reload();
+      // };
     }
   }
 }

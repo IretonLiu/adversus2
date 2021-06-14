@@ -102,13 +102,44 @@ class Physics {
 
   }
 
-  createBoxRB(room, threeObj, size) {
+  createRoomRB(room, threeObj, size) {
     let transform = new Ammo.btTransform();
     const pos = threeObj.position.clone().add(room.position)
 
-    console.log(pos.x, pos.y, pos.z)
     transform.setIdentity();
     transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+    transform.setRotation(
+      new Ammo.btQuaternion(threeObj.quaternion.x, threeObj.quaternion.y, threeObj.quaternion.z, threeObj.quaternion.w)
+    );
+
+    let motionState = new Ammo.btDefaultMotionState(transform);
+    let colliderShape = new Ammo.btBoxShape(
+      new Ammo.btVector3(size.x / 2, size.y / 2, size.z / 2)
+    );
+    colliderShape.setMargin(0.05);
+
+    // setup inertia of the object
+    let localInertia = new Ammo.btVector3(0, 0, 0);
+    colliderShape.calculateLocalInertia(0, localInertia);
+
+    // generate the rigidbody
+    let rbInfo = new Ammo.btRigidBodyConstructionInfo(
+      0,
+      motionState,
+      colliderShape,
+      localInertia
+    );
+    let rb = new Ammo.btRigidBody(rbInfo);
+    rb.setRestitution(1);
+    this.physicsWorld.addRigidBody(rb);
+    threeObj.userData.physicsBody = rb;
+  }
+
+  createBoxRB(threeObj, size) {
+    let transform = new Ammo.btTransform();
+    const pos = threeObj.position;
+    transform.setIdentity();
+    transform.setOrigin(new Ammo.btVector3(pos.x, 10, pos.z));
     transform.setRotation(
       new Ammo.btQuaternion(threeObj.quaternion.x, threeObj.quaternion.y, threeObj.quaternion.z, threeObj.quaternion.w)
     );
