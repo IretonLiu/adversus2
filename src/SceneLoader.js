@@ -8,11 +8,11 @@ import MiniMap from "./MiniMapHandler";
 import state from "./State";
 import SoundManagerGlobal from "./SoundManagerGlobal";
 class SceneLoader {
-    constructor(physics, scene, loadingScreen, soundManagerGlobal) {
+    constructor(physics, scene, loadingScreen) {
         this.physics = physics;
         this.scene = scene;
         this.loadingScreen = loadingScreen;
-        this.soundManagerGlobal = soundManagerGlobal;
+
 
         this.player = null;
         // this.monsterManager = monsterManager;
@@ -26,12 +26,10 @@ class SceneLoader {
 
         this.currentMaze = null;
         this.currentGrid = null;
-        // this.room1 = null;
         this.currentScene = null;
-        //this.currentSceneName = null;
-
         this.saferoom1 = null;
 
+        this.soundManagerGlobal = null;
         // this.player.playerController.onInteractCB = this.onInteractCB;
     }
 
