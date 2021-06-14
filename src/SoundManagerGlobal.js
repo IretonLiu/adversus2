@@ -24,7 +24,7 @@ class SoundManagerGlobal {
         audioLoader.load(footstep, function (buffer) {
             sound2.setBuffer(buffer);
             sound2.setLoop(true);
-            sound2.setVolume(0.2);
+            sound2.setVolume(0.01);
         })
         sound2.hasPlaybackControl = true;
 
@@ -52,6 +52,11 @@ class SoundManagerGlobal {
             this.sound2.pause();
             this.isWalkPlaying = false;
         }
+    }
+
+    walkingVol(newvol)
+    {
+        this.sound2.setVolume(0.1)
     }
 
     pause() {
