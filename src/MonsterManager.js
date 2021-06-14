@@ -13,6 +13,8 @@ class MonsterManager {
     this.scene = scene;
     this.grid = grid;
     this.monster = null;
+
+    // TODO: this clock can potentially cause problems
     this.clock = clock;
 
     this.playerSpawnRadius = 4;
