@@ -32,7 +32,12 @@ class SceneLoader {
         // this.player.playerController.onInteractCB = this.onInteractCB;
     }
 
-    async loadScene(nextSceneName) {
+
+    async loadScene(nextSceneName, playVideo) {
+        if(playVideo)
+        {
+           this.playLoadingVideo() 
+        }
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
 
@@ -72,6 +77,8 @@ class SceneLoader {
 
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
+    
+
     }
 
     clearScene() {
@@ -201,6 +208,20 @@ class SceneLoader {
 
     loadNewMinimap() {
         return new MiniMap(this.player.playerController, this.currentGrid)
+    }
+
+
+     async playLoadingVideo(){
+        const vp = document.getElementById("video_player")
+        vp.style.visibility = "visible"
+        vp.load()
+        vp.play()
+        vp.addEventListener("ended",  async ()=>
+        {
+            vp.style.visibility = "hidden"
+            
+        })
+        
     }
 }
 

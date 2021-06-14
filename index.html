@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/winscreen.css"/>
     <link rel="stylesheet" href="/css/losescreen.css"/>
     <link rel="stylesheet" href="/css/timer.css"/>
+    <link rel= "stylesheet" href="/css/video_player.css"/>
     <meta charset="utf-8" />
     <meta
       name="viewport"
@@ -59,6 +60,8 @@
         </ul>
       </div>
     </section>
+    
+  
 
     <section id="win-screen" class="hidden">
       <h1>Congrats on beating the beta  more coming soon...</h1>
@@ -70,20 +73,31 @@
       <div id="restart-button-2" class="button">Restart</div>
     </section>
 
-    
 
     <canvas id="minimap"></canvas>
     <canvas id="devcanvas" width="440" height="440"></canvas>
 
-    <canvas id="inventory"></canvas>
+    
+      
+    <video id= "video_player">
+      <source src="./public/assets/Videos/Transition.mp4">
+    </video>
+ 
+
+    <canvas id="inventory">
+      
+    </canvas>
     <h4
       id="numBats"
       style="color: white; position: absolute; top: 17vh; left: 8ch"
     ></h4>
-  
+
+
     <h1 id="timer"></h1>
   
     <script src="/ammo/ammo.wasm.js"></script>
     <script defer type="module" src="/src/main.js"></script>
   </body>
+
+
 </html>

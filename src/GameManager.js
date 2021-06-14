@@ -40,6 +40,8 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
+
+
     // initializing physics
     await Ammo();
     physics = new Physics();
@@ -213,7 +215,7 @@ async function initWorld() {
     loadingScreen,
   );
   //sceneLoader.initMaze1();
-  await sceneLoader.loadScene("maze1");
+  await sceneLoader.loadScene("maze1", false);
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
@@ -418,11 +420,11 @@ async function onInteractCB() {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
-          await sceneLoader.loadScene("saferoom1")
+          await sceneLoader.loadScene("saferoom1", true)
         }
         break;
       case "saferoom1exit":
-        await sceneLoader.loadScene("maze2")
+        await sceneLoader.loadScene("maze2", true)
 
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");
