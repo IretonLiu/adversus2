@@ -14,12 +14,12 @@ class SoundManager {
         audioLoader.load(soundPath, function (buffer) {
             sound.setBuffer(buffer);
             sound.setLoop(true);
-            sound.setVolume(20);
-            sound.play();
+            sound.setVolume(5);
+            sound.play()
 
 
         })
-        sound.setRefDistance(10);
+        sound.setRefDistance(2);
 
     }
 
@@ -43,8 +43,9 @@ class SoundManager {
     }
 
     bind(mesh) {
+        
         mesh.add(this.sound);
-
+        this.sound.panner.position= this.obj.position
     }
 }
 

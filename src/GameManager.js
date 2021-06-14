@@ -445,7 +445,7 @@ function monsterSoundTracker() {
       soundmanager = new SoundManager(
         monsterManager.monster.Mesh,
         player.playerController,
-        "assets/Sounds/monster.mp3"
+        "assets/Sounds/JockeySounds.mp3"
       );
     } else {
       if (monsterManager.monster.Mesh != null) {
