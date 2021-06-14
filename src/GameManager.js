@@ -200,7 +200,7 @@ async function initWorld() {
     physics,
     scene,
     loadingScreen,
-
+    soundmanagerGlobal,
   );
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1", false);
@@ -221,7 +221,7 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
   monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
   sceneLoader.addActors(player, monsterManager);
-
+  sceneLoader.initSound();
   mMap = sceneLoader.loadNewMinimap();
 
   scene.add(playerController.controls.getObject());
@@ -408,39 +408,15 @@ async function onInteractCB() {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
-          soundmanagerGlobal = new SoundManagerGlobal(
-            player.playerController,
-            "assets/Sounds/ambience.mp3",
-            "assets/Sounds/footsteps.mp3"
-          );
-
           await sceneLoader.loadScene("saferoom1", true)
         }
-        soundmanagerGlobal.walkingVol(0.3);
         break;
-
       case "saferoom1entrance":
         mMap.showMap();
         await sceneLoader.loadScene("maze1");
         break;
       case "saferoom1exit":
-        soundmanagerGlobal = new SoundManagerGlobal(
-          player.playerController,
-          "assets/Sounds/ambience.mp3",
-          "assets/Sounds/walking.mp3"
-        );
         await sceneLoader.loadScene("maze2", true)
-
-        sound2.setVolume(0.01);
-
-        // var winScreen = document.getElementById("win-screen");
-        // winScreen.classList.remove("hidden");
-        // state.isPlaying = false;
-        // state.gameover = true;
-        // player.playerController.controls.unlock();
-        // document.getElementById("restart-button-1").onclick = () => {
-        //   location.reload();
-        // };
         break;
       case "maze2entrance":
         await sceneLoader.loadScene("saferoom1")

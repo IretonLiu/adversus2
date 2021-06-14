@@ -54,9 +54,8 @@ class SoundManagerGlobal {
         }
     }
 
-    walkingVol(newvol)
-    {
-        this.sound2.setVolume(0.1)
+    setFootstepVol(newVolume) {
+        this.sound2.setVolume(newVolume);
     }
 
     pause() {
