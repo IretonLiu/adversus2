@@ -25,7 +25,6 @@ let player,
   monsterManager,
   snowParticles,
   stats,
-  soundmanagerGlobal,
   soundmanager,
   worldManager,
   sceneLoader,
@@ -180,8 +179,9 @@ function animate() {
 
     render();
     stats.update();
+    sceneLoader.soundManagerGlobal.walking();
+
   }
-  soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
 
 }
@@ -200,7 +200,6 @@ async function initWorld() {
     physics,
     scene,
     loadingScreen,
-    soundmanagerGlobal,
   );
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1", false);
