@@ -202,7 +202,7 @@ class PlayerController {
           self.velocity.y = 0;
           break;
         case "KeyF":
-          this.turnTorchOff();
+          this.toggleTorch();
           break;
 
       }
@@ -215,11 +215,12 @@ class PlayerController {
         //   self.controls.lock();
         //   break;
         case 2:
-          this.turnTorchOff();
+          this.toggleTorch();
           break;
       }
     };
 
+    // what does this do?
     const onRightClick = (event) => {
       if (!state.isPlaying) return;
       this.turnTorchOff();
@@ -246,7 +247,7 @@ class PlayerController {
   // changes the intensity of the torch
   // to give the effect that the torch is being turned on and off
   // visibility is chosen instead of visibility because of performance reasons
-  turnTorchOff() {
+  toggleTorch() {
     if (this.torchOn)
       this.torch.intensity = 0;
     else this.torch.intensity = 1.5;

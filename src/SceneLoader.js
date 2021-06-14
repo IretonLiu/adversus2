@@ -33,8 +33,13 @@ class SceneLoader {
         // this.player.playerController.onInteractCB = this.onInteractCB;
     }
 
-    async loadScene(nextSceneName) {
-        state.isPlaying = false;
+
+    async loadScene(nextSceneName, playVideo) {
+        if(playVideo)
+        {
+           this.playLoadingVideo() 
+        }
+        state.isPlaying = false
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
 
@@ -252,6 +257,23 @@ class SceneLoader {
             this.saferoom1.update(time);
     }
 
+    loadNewMinimap() {
+        return new MiniMap(this.player.playerController, this.currentGrid)
+    }
+
+
+     async playLoadingVideo(){
+        const vp = document.getElementById("video_player")
+        vp.style.visibility = "visible"
+        vp.load()
+        vp.play()
+        vp.addEventListener("ended",  async ()=>
+        {
+            vp.style.visibility = "hidden"
+            
+        })
+        
+    }
 }
 
 export default SceneLoader;
