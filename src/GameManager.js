@@ -231,14 +231,6 @@ async function initWorld() {
 
   setUpAmbientLight();
 
-  soundmanagerGlobal = new SoundManagerGlobal(
-    playerController,
-    "assets/Sounds/ambience.mp3",
-    "assets/Sounds/walking.mp3"
-  );
-
-
-
   devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
 
   worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock);
