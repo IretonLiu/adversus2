@@ -158,7 +158,7 @@ function animate() {
 
     render();
     stats.update();
-    //sceneLoader.soundManagerGlobal.walking();
+    sceneLoader.soundManagerGlobal.walking();
   }
   requestAnimationFrame(animate);
 }

@@ -90,6 +90,10 @@ class Monster {
         this.position.y,
         this.position.z
       );
+      this.Mesh.position.setX(this.position.x)
+      this.Mesh.position.setY(this.position.y)
+      this.Mesh.position.setZ(this.position.z)
+
 
       // add the monster to the scene
       this.scene.add(this.monsterObject);
@@ -357,6 +361,9 @@ class Monster {
     // don't do anything if the monster doesn't exist
     if (!this.monsterObject) return;
 
+    this.Mesh.position.setX(this.monsterObject.position.x)
+    this.Mesh.position.setY(this.monsterObject.position.y)
+    this.Mesh.position.setZ(this.monsterObject.position.z)
     // get movement direction as direction from current position to astar next position
     let nextPoint = this.path[this.path.length - 1]; // the array representation of the path
 
