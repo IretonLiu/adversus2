@@ -216,7 +216,7 @@ class MiniMap {
 
   showMap() {
     var canvas = document.getElementById("minimap");
-    canvas.style.display = "show";
+    canvas.style.display = "block";
   }
 
   minimize() {

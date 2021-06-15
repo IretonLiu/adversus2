@@ -7,12 +7,12 @@ import SafeRoom from "./SafeRoom";
 import MiniMap from "./MiniMapHandler";
 import state from "./State";
 import SoundManagerGlobal from "./SoundManagerGlobal";
+import DevMap from "./DevMap";
 class SceneLoader {
     constructor(physics, scene, loadingScreen) {
         this.physics = physics;
         this.scene = scene;
         this.loadingScreen = loadingScreen;
-
 
         this.player = null;
         // this.monsterManager = monsterManager;
@@ -31,14 +31,29 @@ class SceneLoader {
 
         this.soundManagerGlobal = null;
         // this.player.playerController.onInteractCB = this.onInteractCB;
+
+        this.devMap = null; //new DevMap(sceneLoader.grid1, player, monsterManager);
     }
 
+    createDevMap() {
+        // create a new dev map
+        this.devMap = new DevMap(
+            this.currentGrid,
+            this.player,
+            this.monsterManager
+        );
+    }
 
-    async loadScene(nextSceneName, playVideo, worldManager) {
+    getDevMap() {
+        // return the dev map
+        return this.devMap;
+    }
+
+    async loadScene(nextSceneName, playVideo, worldManager = null) {
         if (playVideo) {
-            this.playLoadingVideo()
+            this.playLoadingVideo();
         }
-        state.isPlaying = false
+        state.isPlaying = false;
         this.loadingScreen.classList.remove("fade-out");
         //this.loadingScreen.style.opacity = "1";
 
@@ -61,17 +76,21 @@ class SceneLoader {
             // checks if the player just returned to the previous maze
             // and set the players position accordingly
             if (this.currentScene && this.currentScene.name == "saferoom1") {
-                console.log("from saferoom")
+                console.log("from saferoom");
                 const exitPos2D = this.maze1.getGridExitPosition();
-                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
+                this.player.playerController.setPosition(
+                    exitPos2D.x,
+                    exitPos2D.z,
+                    exitPos2D.x - 1,
+                    exitPos2D.z
+                );
             }
 
             // load the actual maze
             await this.loadMaze("maze1", this.maze1, this.grid1);
             this.currentMaze = this.maze1;
             this.currentGrid = this.grid1;
-
-
+            worldManager.loadWorld(this.currentScene, this.player, this.currentGrid);
         } else if (nextSceneName == "maze2") {
             if (!this.maze2) {
                 this.initMaze2();
@@ -79,7 +98,12 @@ class SceneLoader {
 
             if (this.currentScene && this.currentScene.name == "saferoom2") {
                 const exitPos2D = this.maze2.getGridExitPosition();
-                this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
+                this.player.playerController.setPosition(
+                    exitPos2D.x,
+                    exitPos2D.z,
+                    exitPos2D.x - 1,
+                    exitPos2D.z
+                );
             }
 
             await this.loadMaze("maze2", this.maze2, this.grid2);
@@ -96,14 +120,14 @@ class SceneLoader {
 
         // checks if there is already a soundManagerGlobal
         // otherwise it is going to be initialised after the player is initialised.
-        if (this.soundManagerGlobal)
-            this.loadSound();
+        if (this.soundManagerGlobal) this.loadSound();
 
         this.scene.add(this.currentScene);
-        worldManager.loadWorld(this.currentScene, this.player, this.currentGrid);
         this.loadingScreen.classList.add("fade-out");
         state.isPlaying = true;
 
+        // update the class's objects to use the new context
+        this.updatePlayableObjects();
     }
 
     clearScene() {
@@ -112,28 +136,36 @@ class SceneLoader {
             if (child.userData.physicsBody)
                 this.physics.physicsWorld.removeRigidBody(child.userData.physicsBody);
             if (child.isMesh) {
-
-                if (child.geometry)
-                    child.geometry.dispose();
+                if (child.geometry) child.geometry.dispose();
                 if (child.material) {
                     if (Array.isArray(child.material)) {
                         for (let m of child.material) {
-                            m.dispose()
+                            m.dispose();
                         }
                     } else {
-                        child.material.dispose()
+                        child.material.dispose();
                     }
                 }
                 // this.scene.remove(child);
             }
         });
-        this.scene.remove(this.currentScene)
-        this.physics.physicsWorld.removeRigidBody(this.player.playerController.playerObject.userData.physicsBody)
-        if (this.monsterManager.monster)
-            this.monsterManager.despawnMonster();
+        this.scene.remove(this.currentScene);
+        this.physics.physicsWorld.removeRigidBody(
+            this.player.playerController.playerObject.userData.physicsBody
+        );
+        if (this.monsterManager.monster) this.monsterManager.despawnMonster();
 
         //console.log(this.scene);
+    }
 
+    updatePlayableObjects() {
+        // set the new context for the monster manager
+        if (this.monsterManager) {
+            this.monsterManager.setNewScene(this.currentScene, this.currentGrid);
+        }
+
+        // set a new dev map
+        this.createDevMap();
     }
 
     // initializes the maze structure
@@ -146,7 +178,6 @@ class SceneLoader {
         this.maze1.growingTree();
         this.grid1 = this.maze1.getThickGrid();
         this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
-
     }
 
     initMaze2() {
@@ -160,7 +191,6 @@ class SceneLoader {
         this.grid2[1][0] = false;
 
         this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
-
     }
     // render and add the maze to the scene
 
@@ -170,7 +200,7 @@ class SceneLoader {
         const wallGenerator = new WallGenerator(wallWidth, wallHeight);
         const mazeGroup = new THREE.Group();
 
-        // loads the 3D objects based on the generated maze 
+        // loads the 3D objects based on the generated maze
         for (var y = 0; y < 2 * maze.height + 1; y++) {
             for (var x = 0; x < 2 * maze.width + 1; x++) {
                 if (grid[y][x]) {
@@ -199,8 +229,8 @@ class SceneLoader {
         const doorBoundingBoxSize = {
             x: 6,
             y: 20,
-            z: 30
-        }
+            z: 30,
+        };
 
         // add the door to the end of the maze
         if (!grid[2 * maze.width - 1][2 * maze.height]) {
@@ -208,10 +238,10 @@ class SceneLoader {
             await door.loadModel("Door", doorBoundingBoxSize);
             this.scene.add(door.model);
             door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
-            door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width) - 1);
+            door.model.position.z = Constants.WALL_SIZE * (2 * maze.width - 1);
             door.model.position.y -= wallHeight / 2;
 
-            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize);
             mazeGroup.add(door.model);
         }
         if (!grid[1][0]) {
@@ -222,7 +252,7 @@ class SceneLoader {
             door.model.position.z = Constants.WALL_SIZE * 1;
             door.model.position.y -= wallHeight / 2;
 
-            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize);
             mazeGroup.add(door.model);
         }
 
@@ -234,10 +264,9 @@ class SceneLoader {
         // this.scene.add(this.currentScene);
     }
 
-
     async loadRoom1() {
         this.saferoom1 = new SafeRoom("saferoom1");
-        await this.saferoom1.loadModel("SafeRoom1", this.physics)
+        await this.saferoom1.loadModel("SafeRoom1", this.physics);
 
         // model contains the scene name
         this.currentScene = this.saferoom1.model;
@@ -245,12 +274,12 @@ class SceneLoader {
     }
 
     loadNewMinimap() {
-        return new MiniMap(this.player.playerController, this.currentGrid)
+        return new MiniMap(this.player.playerController, this.currentGrid);
     }
 
     addActors(player, monsterManager) {
         this.player = player;
-        this.monsterManager = monsterManager
+        this.monsterManager = monsterManager;
     }
 
     initSound() {
@@ -263,15 +292,16 @@ class SceneLoader {
 
     loadSound() {
         // setup sound for the saferoom
-        if (this.currentScene.name == "maze1"
-            || this.currentScene.name == "maze2"
-            || this.currentScene.name == "maze3") {
+        if (
+            this.currentScene.name == "maze1" ||
+            this.currentScene.name == "maze2" ||
+            this.currentScene.name == "maze3"
+        ) {
             this.soundManagerGlobal = new SoundManagerGlobal(
                 this.player.playerController,
                 "assets/Sounds/ambience.mp3",
                 "assets/Sounds/walking.mp3"
             );
-
         } else {
             this.soundManagerGlobal = new SoundManagerGlobal(
                 this.player.playerController,
@@ -280,29 +310,20 @@ class SceneLoader {
             );
             this.soundManagerGlobal.setFootstepVol(1);
         }
-
     }
 
     updateCurrentScene(time) {
-        if (this.currentSceneName == "saferoom1")
-            this.saferoom1.update(time);
+        if (this.currentSceneName == "saferoom1") this.saferoom1.update(time);
     }
-
-    loadNewMinimap() {
-        return new MiniMap(this.player.playerController, this.currentGrid)
-    }
-
 
     async playLoadingVideo() {
-        const vp = document.getElementById("video_player")
-        vp.style.visibility = "visible"
-        vp.load()
-        vp.play()
+        const vp = document.getElementById("video_player");
+        vp.style.visibility = "visible";
+        vp.load();
+        vp.play();
         vp.addEventListener("ended", async () => {
-            vp.style.visibility = "hidden"
-
-        })
-
+            vp.style.visibility = "hidden";
+        });
     }
 }
 
