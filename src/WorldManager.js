@@ -19,33 +19,31 @@ let batteryCounter = 0;
 const ctx = document.getElementById("inventory").getContext("2d");
 
 class WorldManager {
-  constructor(scene, grid, player, clock) {
-    this.scene = scene;
+  constructor(player, grid) {
+    this.scene = null;
     this.player = player;
     this.grid = grid;
     this.batteries = [];
     this.gateKey = null;
-    this.torchLife = 100;
-    this.worldStates = {
-      monsterLevel: 1,
-      scene: "maze1",
-    };
     this.clock = new THREE.Clock();
-    this.numBatterys = Math.floor(grid.length / 10);
+    // this.numBatterys = Math.ceil(this.grid.length * 5 / 3);
+
+    this.hasSetObjects = false;
   }
 
-  async loadBattery(x, z) {
-    this.batteries.push(new Battery(x, z));
-    await this.batteries[this.batteries.length - 1].makeBattery(
-      this.scene,
-      x,
-      z
-    );
-  }
+  async updateScene(scene) {
+    this.scene = scene;
 
-  async loadKey(x, z) {
-    this.gateKey = new GateKey(x, z);
-    await this.gateKey.makeKey(this.scene, x, z);
+    if (!this.hasSetObjects) {
+      await this.setKey();
+      await this.setBatteries();
+
+      this.hasSetObjects = true;
+    }
+
+    for (let battery of this.batteries) {
+      battery.displayBattery(this.scene);
+    }
   }
 
   updateObjs() {
@@ -70,10 +68,21 @@ class WorldManager {
     }
   }
 
+  async loadBattery(x, z) {
+    this.batteries.push(new Battery(x, z));
+    await this.batteries[this.batteries.length - 1].makeBattery(x, z);
+  }
+
+  async loadKey(x, z) {
+    this.gateKey = new GateKey(x, z);
+    await this.gateKey.makeKey(this.scene, x, z);
+  }
+
   async setBatteries() {
     let numBats = 0;
     let iter = 0;
-    while (numBats < this.numBatterys && iter < 100) {
+    const totalNumBatteries = Math.ceil(this.grid.length / 10);
+    while (numBats < totalNumBatteries && iter < 100) {
       let randX =
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
       let randZ =
@@ -113,7 +122,9 @@ class WorldManager {
     }
   }
 
-  pickUpBattery(x, z) {
+  pickUpBattery(player) {
+    var x = player.playerController.playerObject.position.x;
+    var z = player.playerController.playerObject.position.z;
     for (let battery of this.batteries) {
       if (
         x <= battery.mesh.position.x + 10 &&
@@ -122,7 +133,7 @@ class WorldManager {
         z >= battery.mesh.position.z - 10
       ) {
         let index = this.batteries.indexOf(battery);
-        batteryCounter++;
+        player.batteryCount++;
         //this.updateBatteyLife();
         battery.mesh.visible = false;
         //battery.batteryPicked = true;
@@ -131,7 +142,9 @@ class WorldManager {
     }
   }
 
-  pickUpKey(x, z) {
+  pickUpKey(player) {
+    var x = player.playerController.playerObject.position.x;
+    var z = player.playerController.playerObject.position.z;
     if (
       x <= this.gateKey.mesh.position.x + 10 &&
       x >= this.gateKey.mesh.position.x - 10 &&
@@ -139,74 +152,53 @@ class WorldManager {
       z >= this.gateKey.mesh.position.z - 10
     ) {
       this.keyDisplay();
-      this.player.hasKey = true;
+      player.pickUpKey();
       this.gateKey.mesh.visible = false;
     }
   }
 
-  torchDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/torch2.png";
+  update(player) {
+    this.updateObjs(); //this needs to be just update for both battery and key
+    this.pickUpItems(player);
+    this.displayItems();
+  }
 
+  pickUpItems(player) {
+    this.pickUpBattery(player);
+    this.pickUpKey(player);
+  }
+
+  batteryDisplay() {
+    let img = document.getElementById("batteryPic");
+
+    //outputs the number of baatteries the player has.
     ctx.save();
-    ctx.scale(0.2, 0.2);
-    // ctx.translate(-10, 0)
-    ctx.drawImage(img, -150, 50);
-    this.lifeBar();
+    ctx.scale(0.2, 0.12);
+    ctx.drawImage(img, 10, 415);
     ctx.restore();
   }
 
   keyDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/key2.png";
+    let img = document.getElementById("keyPic");
+
     ctx.save();
     ctx.scale(0.1, 0.1);
     ctx.drawImage(img, -80, 900);
     ctx.restore();
   }
 
-  batteryDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/batteryFinal.png";
-    //outputs the number of baatteries the player has.
-    document.getElementById("numBats").innerHTML = "X" + batteryCounter;
-    ctx.save();
-    ctx.scale(0.2, 0.12);
-    ctx.drawImage(img, 10, 415);
+  torchDisplay() {
+    let img = document.getElementById("torchPic");
 
+    ctx.save();
+    ctx.scale(0.2, 0.2);
+    ctx.drawImage(img, -150, 50);
     ctx.restore();
   }
+
   displayItems() {
+    this.batteryDisplay();
     this.torchDisplay();
-    //this.keyDisplay();
-    this.batteryDisplay();
-  }
-
-  lifeBar(torchState) {
-    var delta = this.clock.getDelta();
-    //this decreases the torches life bar
-    if (torchState) {
-      if (this.torchLife >= 0) {
-        this.torchLife -= Constants.TORCH_DEPLETION_RATE * 100 * delta;
-      }
-    }
-    ctx.fillStyle = "#ffffffa0";
-    ctx.strokeStyle = "white";
-    ctx.clearRect(500, 100, 1000, 200);
-    ctx.rect(500, 100, 800, 100);
-    ctx.stroke();
-    ctx.fillRect(500, 100, (this.torchLife / 100) * 800, 100);
-    ctx.rect(500 + 800, 125, 30, 50);
-    ctx.stroke();
-  }
-
-  //refills the torch to full after the battery runs out
-  refillTorch() {
-    this.batteryDisplay();
-    if (Math.floor(this.torchLife) <= 0 && batteryCounter > 0) {
-      this.torchLife = 100;
-      batteryCounter--;
-    }
   }
 }
 

@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import Skybox from "./Skybox";
 import PlayerController from "./PlayerController.js";
-import MiniMap from "./MiniMapHandler";
 import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
@@ -10,12 +9,12 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import SoundManagerGlobal from "./SoundManagerGlobal.js";
 import SoundManager from "./SoundManager";
 import MonsterManager from "./MonsterManager";
-import DevMap from "./DevMap";
 import Player from "./Player";
 import SceneLoader from "./SceneLoader";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
+import SnowManager from "./SnowManager";
 
 let player,
   scene,
@@ -23,13 +22,12 @@ let player,
   physics,
   mMap,
   monsterManager,
-  snowParticles,
+  snowManager,
   stats,
   soundmanagerGlobal,
   worldManager,
   sceneLoader,
   composer;
-
 
 let devMap;
 
@@ -39,8 +37,6 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-
-
     // initializing physics
     await Ammo();
     physics = new Physics();
@@ -59,9 +55,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => {
-
-    });
+    removeLoadingScreen(() => {});
 
     setUpPostProcessing();
     //render();
@@ -69,7 +63,7 @@ class GameManager {
   }
 }
 
-// set up all the post processing needed 
+// set up all the post processing needed
 function setUpPostProcessing() {
   // initialization of post processing
   composer = new EffectComposer(renderer);
@@ -78,7 +72,11 @@ function setUpPostProcessing() {
   composer.addPass(renderPass);
 
   // setting up outlines and its parameters
-  const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, player.playerController.camera);
+  const outlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    player.playerController.camera
+  );
   outlinePass.hiddenEdgeColor.set("#000000");
   outlinePass.visibleEdgeColor.set("#888888");
   outlinePass.edgeStrength = Number(10);
@@ -130,60 +128,40 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-    player.playerController.update(deltaTime);
+    player.playerController.update(deltaTime, sceneLoader.currentScene);
     physics.updatePhysics(deltaTime);
 
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
-    player.updatePosition(player.playerController.camera.position, () => {
-      if (sceneLoader.currentScene.name == 'maze1')
-        monsterManager.updateMonsterPath();
+    player.update(deltaTime, player.playerController.camera.position, () => {
+      monsterManager.updateMonsterPath();
     });
 
+    worldManager.update(player);
 
+    snowManager.updateSnow(deltaTime);
 
-    worldManager.updateObjs(); //this needs to be just update for both battery and key
-    worldManager.pickUpBattery(
-      player.playerController.camera.position.x,
-      player.playerController.camera.position.z
-    );
-    worldManager.pickUpKey(
-      player.playerController.camera.position.x,
-      player.playerController.camera.position.z
-    );
-    worldManager.displayItems();
-    worldManager.lifeBar(player.playerController.torchOn);
-    worldManager.refillTorch();
-    if (worldManager.torchLife <= 0) {
-      player.playerController.torchOn = false;
-    }
-    worldManager.keyDisplay();
-
-
-    updateSnow(deltaTime);
-    //saferoom1.update(deltaTime);
     mMap.worldUpdate();
 
-    if (sceneLoader.currentScene.name == 'maze1') {
-      monsterManager.update();
-      monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
+    monsterManager.update();
+    monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
 
-    }
     devMap.update();
     devMap.drawBatterys(worldManager.batteries);
     devMap.drawKey(worldManager.gateKey);
 
-    document.getElementById("timer").innerHTML = new Date(clock.getElapsedTime() * 1000).toISOString().substr(11, 8);
+    document.getElementById("timer").innerHTML = new Date(
+      clock.getElapsedTime() * 1000
+    )
+      .toISOString()
+      .substr(11, 8);
 
     render();
     stats.update();
-    if (sceneLoader.currentScene.name == "saferoom1")
-      console.log(monsterManager)
     
+    sceneLoader.soundManagerGlobal.walking();
   }
-  soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
-
 }
 
 // initialises the game world
@@ -196,14 +174,7 @@ async function initWorld() {
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
-  sceneLoader = new SceneLoader(
-    physics,
-    scene,
-    loadingScreen,
-
-  );
-  //sceneLoader.initMaze1();
-  await sceneLoader.loadScene("maze1", false);
+  sceneLoader = new SceneLoader(physics, scene, loadingScreen);
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
@@ -213,47 +184,46 @@ async function initWorld() {
   );
   var playerController = new PlayerController(
     renderer.domElement,
-    sceneLoader.currentScene,
-    onInteractCB,
+    onInteractCB
   );
   physics.createPlayerRB(playerController.playerObject);
   await playerController.initCandle();
+
   player = new Player(playerPos, playerController);
-  monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
+  monsterManager = new MonsterManager(
+    sceneLoader.currentScene,
+    player,
+    sceneLoader.grid1,
+    clock
+  );
+
   sceneLoader.addActors(player, monsterManager);
+  sceneLoader.initSound();
 
-  mMap = sceneLoader.loadNewMinimap();
+  await sceneLoader.loadScene("maze1", false);
+  worldManager = sceneLoader.getWorldManager();
 
+  mMap = sceneLoader.getMiniMap();
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
   scene.add(sceneLoader.currentScene);
 
-
   setUpAmbientLight();
 
-  soundmanagerGlobal = new SoundManagerGlobal(
-    playerController,
-    "assets/Sounds/ambience.mp3",
-    "assets/Sounds/walking.mp3"
-  );
+  sceneLoader.createDevMap();
+  devMap = sceneLoader.getDevMap();
 
-
-
-  devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
-
-  worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock);
-  await worldManager.setKey();
-  await worldManager.setBatteries();
   //makeSnow(scene);
-  makeSnow(sceneLoader.currentScene);
-}
 
+  snowManager = new SnowManager(sceneLoader.currentScene, player);
+  //makeSnow(sceneLoader.currentScene);
+}
 
 function setUpGround() {
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
   var groundTexture = new THREE.TextureLoader().load(
-    "../assets/textures/snow_ground.jpg"
+    "assets/textures/snow_ground.jpg"
   );
   groundTexture.repeat.set(225, 225);
   groundTexture.wrapS = THREE.RepeatWrapping;
@@ -276,131 +246,7 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-
-function randomIntFromInterval(min, max) {
-  // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-function makeSnow(scene) {
-  const particleNum = 10000;
-  const max = 100;
-  const min = -100;
-  const textureSize = 64.0;
-
-  const drawRadialGradation = (ctx, canvasRadius, canvasW, canvasH) => {
-    ctx.save();
-    const gradient = ctx.createRadialGradient(
-      canvasRadius,
-      canvasRadius,
-      0,
-      canvasRadius,
-      canvasRadius,
-      canvasRadius
-    );
-    gradient.addColorStop(0, "rgba(255,255,255,1.0)");
-    gradient.addColorStop(0.5, "rgba(255,255,255,0.5)");
-    gradient.addColorStop(1, "rgba(255,255,255,0)");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvasW, canvasH);
-    ctx.restore();
-  };
-
-  const getTexture = () => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    const diameter = textureSize;
-    canvas.width = diameter;
-    canvas.height = diameter;
-    const canvasRadius = diameter / 2;
-
-    /* gradation circle
-    ------------------------ */
-    drawRadialGradation(ctx, canvasRadius, canvas.width, canvas.height);
-
-    /* snow crystal
-    ------------------------ */
-    // drawSnowCrystal(ctx, canvasRadius);
-
-    const texture = new THREE.Texture(canvas);
-    texture.minFilter = THREE.NearestFilter;
-    texture.type = THREE.FloatType;
-    texture.needsUpdate = true;
-    return texture;
-  };
-  const pointGeometry = new THREE.BufferGeometry();
-  var vertices = [];
-  var sizes = [];
-  for (let i = 0; i < particleNum; i++) {
-    vertices.push(randomIntFromInterval(min, max));
-    vertices.push(randomIntFromInterval(50, -10));
-    vertices.push(randomIntFromInterval(min, max));
-    sizes.push(8);
-  }
-  pointGeometry.setAttribute(
-    "position",
-    new THREE.Float32BufferAttribute(vertices, 3)
-  );
-  pointGeometry.setAttribute(
-    "size",
-    new THREE.Float32BufferAttribute(sizes, 1).setUsage(THREE.DynamicDrawUsage)
-  );
-
-  const pointMaterial = new THREE.PointsMaterial({
-    // size: 8,
-    color: 0xffffff,
-    opacity: 0.3,
-    vertexColors: false,
-    map: getTexture(),
-    transparent: true,
-    // opacity: 0.8,
-    // blending: THREE.AdditiveBlending,
-    fog: false,
-    depthTest: true,
-  });
-
-  const velocities = [];
-  for (let i = 0; i < particleNum; i++) {
-    const x = Math.floor(Math.random() * 6 - 3) * 0.5;
-    const y = Math.floor(Math.random() * 10 + 3) * -0.1;
-    const z = Math.floor(Math.random() * 6 - 3) * 0.5;
-    const particle = new THREE.Vector3(x, y, z);
-    velocities.push(particle);
-  }
-
-  let m = new THREE.Matrix4();
-  m.makeRotationX(THREE.MathUtils.degToRad(90));
-  m.scale(new THREE.Vector3(300, 300, 300));
-
-  snowParticles = new THREE.Points(pointGeometry, pointMaterial);
-  snowParticles.geometry.applyMatrix4(m);
-  // snowParticles.geometry.velocities = velocities;
-  scene.add(snowParticles);
-}
-
-function updateSnow(delta) {
-  var playerX = player.position.x;
-  var playerZ = player.position.z;
-  const posArr = snowParticles.geometry.getAttribute("position").array;
-
-  var offset = 100;
-
-  for (let i = 0; i < posArr.length; i += 3) {
-    var x = i;
-    var y = i + 1;
-    var z = i + 2;
-
-    posArr[y] += -15 * delta;
-    if (posArr[y] < 0) {
-      posArr[y] = randomIntFromInterval(-10, 50);
-      posArr[x] = randomIntFromInterval(playerX - offset, playerX + offset);
-      posArr[z] = randomIntFromInterval(playerZ - offset, playerZ + offset);
-    }
-  }
-
-  snowParticles.geometry.attributes.position.needsUpdate = true;
-}
-
+// callback to the player when interacting with and interactable object
 async function onInteractCB() {
   const interactingObject = player.playerController.intersect;
   if (interactingObject) {
@@ -408,26 +254,23 @@ async function onInteractCB() {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
-          soundmanagerGlobal = new SoundManagerGlobal(
-            player.playerController,
-            "assets/Sounds/ambience.mp3",
-            "assets/Sounds/footsteps.mp3"
-          );
-        
-          await sceneLoader.loadScene("saferoom1", true)
+          await sceneLoader.loadScene("saferoom1", true);
         }
-        soundmanagerGlobal.walkingVol(0.3);
+        break;
+      case "saferoom1entrance":
+        await sceneLoader.loadScene("maze1", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.getMiniMap();
+        mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
         break;
       case "saferoom1exit":
-        soundmanagerGlobal = new SoundManagerGlobal(
-          player.playerController,
-          "assets/Sounds/ambience.mp3",
-          "assets/Sounds/walking.mp3"
-        );
-        await sceneLoader.loadScene("maze2", true)
+        await sceneLoader.loadScene("maze2", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.getMiniMap();
+        mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
 
-        sound2.setVolume(0.01);
-        
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");
         // state.isPlaying = false;
@@ -436,6 +279,12 @@ async function onInteractCB() {
         // document.getElementById("restart-button-1").onclick = () => {
         //   location.reload();
         // };
+        break;
+      case "maze2entrance":
+        await sceneLoader.loadScene("saferoom1", true);
+        break;
+      case "maze2exit":
+        await sceneLoader.loadScene("saferoom1", true);
         break;
     }
   }
@@ -454,7 +303,6 @@ function onWindowResize() {
   renderer.domElement.style.height = innerHeight;
   mMap.updateFullScreenSizes();
 }
-
 
 function render() {
   composer.render();

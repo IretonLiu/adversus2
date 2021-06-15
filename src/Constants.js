@@ -54,6 +54,8 @@ let Constants = {
   //AMBIENT_INTENSITY: 1,
 
   ANTIALIAS: false,
+
+  NUM_BATTERIES: 3,
 };
 
 export default Constants;

@@ -13,14 +13,28 @@ class MonsterManager {
     this.scene = scene;
     this.grid = grid;
     this.monster = null;
-    this.soundmanager = null
+    this.soundmanager = null;
     // TODO: this clock can potentially cause problems
-    this.clock = clock;
+    this.clock = new THREE.Clock(); //clock;
 
     this.playerSpawnRadius = 4;
     this.minRadius = 2;
     this.percentageExplored = 0;
-    
+  }
+
+  setNewScene(scene, grid) {
+    // remove the monster
+    this.despawnMonster();
+
+    // update the active scene
+    this.scene = scene;
+
+    // update the active grid
+    this.grid = grid;
+
+    // reset parameters
+    this.fear = 0;
+    this.percentageExplored = 0;
   }
 
   fearDecision() {
@@ -43,7 +57,6 @@ class MonsterManager {
   }
 
   despawnMonster() {
-    console.log("this is called")
     if (this.monster) {
       this.monster.remove();
       this.monster.mesh = null;
@@ -62,12 +75,11 @@ class MonsterManager {
       playerPosition
       // new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
     );
-    this.soundmanager= new SoundManager(
+    this.soundmanager = new SoundManager(
       this.monster.Mesh,
       this.player.playerController,
       "assets/Sounds/JockeySounds.mp3"
-    )
-  
+    );
   }
 
   backtrackMonster() {
@@ -76,7 +88,7 @@ class MonsterManager {
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
-  update() {
+  update(deltaTime) {
     if (this.monster) {
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
@@ -115,8 +127,10 @@ class MonsterManager {
       this.monster.Mesh.position.setX(this.monster.position.x)
       this.monster.Mesh.position.setY(this.monster.position.y)
       this.monster.Mesh.position.setZ(this.monster.position.z)
+    
+
+      this.monster.update(deltaTime);
     }
-  
     this.fearDecision();
   }
 
@@ -163,8 +177,7 @@ class MonsterManager {
     }
   }
 
-   monsterSoundTracker()
-{
+  monsterSoundTracker() {
     if (this.monster != null) {
       console.log("hi")
       if (this.soundmanager == null) {

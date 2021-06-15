@@ -57,7 +57,7 @@ class Monster {
 
   initThreeObject() {
     const loader = new GLTFLoader();
-    loader.load("../assets/models/monster/scene.gltf", (gltf) => {
+    loader.load("assets/models/monster/scene.gltf", (gltf) => {
       // load custom model
       const model = gltf.scene;
 
