@@ -13,14 +13,28 @@ class MonsterManager {
     this.scene = scene;
     this.grid = grid;
     this.monster = null;
-    this.soundmanager = null
+    this.soundmanager = null;
     // TODO: this clock can potentially cause problems
-    this.clock = clock;
+    this.clock = new THREE.Clock(); //clock;
 
     this.playerSpawnRadius = 4;
     this.minRadius = 2;
     this.percentageExplored = 0;
+  }
 
+  setNewScene(scene, grid) {
+    // remove the monster
+    this.despawnMonster();
+
+    // update the active scene
+    this.scene = scene;
+
+    // update the active grid
+    this.grid = grid;
+
+    // reset parameters
+    this.fear = 0;
+    this.percentageExplored = 0;
   }
 
   fearDecision() {
@@ -64,8 +78,7 @@ class MonsterManager {
       this.monster.Mesh,
       this.player.playerController,
       "assets/Sounds/JockeySounds.mp3"
-    )
-
+    );
   }
 
   backtrackMonster() {
@@ -108,7 +121,7 @@ class MonsterManager {
       }
       this.monster.update(deltaTime);
     }
-    this.monsterSoundTracker()
+    this.monsterSoundTracker();
     this.fearDecision();
   }
 

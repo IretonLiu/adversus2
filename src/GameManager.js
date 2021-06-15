@@ -10,12 +10,11 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import SoundManagerGlobal from "./SoundManagerGlobal.js";
 import SoundManager from "./SoundManager";
 import MonsterManager from "./MonsterManager";
-import DevMap from "./DevMap";
 import Player from "./Player";
 import SceneLoader from "./SceneLoader";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { OutlinePass } from "three/examples/jsm/postprocessing/OutlinePass.js";
 import SnowManager from "./SnowManager";
 
 let player,
@@ -31,7 +30,6 @@ let player,
   sceneLoader,
   composer;
 
-
 let devMap;
 
 let loadingScreen;
@@ -40,8 +38,6 @@ const clock = new THREE.Clock();
 
 class GameManager {
   async init() {
-
-
     // initializing physics
     await Ammo();
     physics = new Physics();
@@ -60,9 +56,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => {
-
-    });
+    removeLoadingScreen(() => {});
 
     setUpPostProcessing();
     //render();
@@ -70,7 +64,7 @@ class GameManager {
   }
 }
 
-// set up all the post processing needed 
+// set up all the post processing needed
 function setUpPostProcessing() {
   // initialization of post processing
   composer = new EffectComposer(renderer);
@@ -79,7 +73,11 @@ function setUpPostProcessing() {
   composer.addPass(renderPass);
 
   // setting up outlines and its parameters
-  const outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, player.playerController.camera);
+  const outlinePass = new OutlinePass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    player.playerController.camera
+  );
   outlinePass.hiddenEdgeColor.set("#000000");
   outlinePass.visibleEdgeColor.set("#888888");
   outlinePass.edgeStrength = Number(10);
@@ -137,11 +135,9 @@ function animate() {
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
     player.updatePosition(player.playerController.camera.position, () => {
-      if (sceneLoader.currentScene.name == 'maze1')
-        monsterManager.updateMonsterPath();
+      // if (sceneLoader.currentScene.name == "maze1")
+      monsterManager.updateMonsterPath();
     });
-
-
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
     worldManager.pickUpItems(
@@ -156,28 +152,30 @@ function animate() {
     }
     // worldManager.keyDisplay();
 
-
     snowManager.updateSnow(deltaTime);
     //saferoom1.update(deltaTime);
     mMap.worldUpdate();
 
-    if (sceneLoader.currentScene.name == 'maze1') {
-      monsterManager.update();
-      monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
-    }
+    // if (sceneLoader.currentScene.name == 'maze1') {
+    monsterManager.update();
+    monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
+    // }
 
     devMap.update();
     devMap.drawBatterys(worldManager.batteries);
     devMap.drawKey(worldManager.gateKey);
 
-    document.getElementById("timer").innerHTML = new Date(clock.getElapsedTime() * 1000).toISOString().substr(11, 8);
+    document.getElementById("timer").innerHTML = new Date(
+      clock.getElapsedTime() * 1000
+    )
+      .toISOString()
+      .substr(11, 8);
 
     render();
     stats.update();
     sceneLoader.soundManagerGlobal.walking();
   }
   requestAnimationFrame(animate);
-
 }
 
 // initialises the game world
@@ -190,12 +188,7 @@ async function initWorld() {
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
-  sceneLoader = new SceneLoader(
-    physics,
-    scene,
-    loadingScreen,
-
-  );
+  sceneLoader = new SceneLoader(physics, scene, loadingScreen);
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1", false);
 
@@ -208,12 +201,17 @@ async function initWorld() {
   var playerController = new PlayerController(
     renderer.domElement,
     sceneLoader.currentScene,
-    onInteractCB,
+    onInteractCB
   );
   physics.createPlayerRB(playerController.playerObject);
   await playerController.initCandle();
   player = new Player(playerPos, playerController);
-  monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
+  monsterManager = new MonsterManager(
+    sceneLoader.currentScene,
+    player,
+    sceneLoader.grid1,
+    clock
+  );
   sceneLoader.addActors(player, monsterManager);
   sceneLoader.initSound();
 
@@ -224,17 +222,17 @@ async function initWorld() {
 
   setUpAmbientLight();
 
-  devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
+  sceneLoader.createDevMap();
+  devMap = sceneLoader.getDevMap();
 
-  worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock);
+  worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock); //new DevMap(sceneLoader.grid1, player, monsterManager);
   await worldManager.setKey();
   await worldManager.setBatteries();
   //makeSnow(scene);
 
-  snowManager = new SnowManager(sceneLoader.currentScene, player)
+  snowManager = new SnowManager(sceneLoader.currentScene, player);
   //makeSnow(sceneLoader.currentScene);
 }
-
 
 function setUpGround() {
   // set up the floor of the game
@@ -263,9 +261,6 @@ function setUpAmbientLight() {
   scene.add(light);
 }
 
-
-
-
 // callback to the player when interacting with and interactable object
 async function onInteractCB() {
   const interactingObject = player.playerController.intersect;
@@ -274,14 +269,21 @@ async function onInteractCB() {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
-          await sceneLoader.loadScene("saferoom1", true)
+          await sceneLoader.loadScene("saferoom1", true);
         }
         break;
       case "saferoom1entrance":
-        await sceneLoader.loadScene("maze1", true)
+        await sceneLoader.loadScene("maze1", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.loadNewMinimap();
+        mMap.showMap();
         break;
       case "saferoom1exit":
-        await sceneLoader.loadScene("maze2", true)
+        await sceneLoader.loadScene("maze2", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.loadNewMinimap();
+        mMap.showMap();
+
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");
         // state.isPlaying = false;
@@ -292,10 +294,10 @@ async function onInteractCB() {
         // };
         break;
       case "maze2entrance":
-        await sceneLoader.loadScene("saferoom1", true)
+        await sceneLoader.loadScene("saferoom1", true);
         break;
       case "maze2exit":
-        await sceneLoader.loadScene("saferoom1", true)
+        await sceneLoader.loadScene("saferoom1", true);
         break;
     }
   }
@@ -314,7 +316,6 @@ function onWindowResize() {
   renderer.domElement.style.height = innerHeight;
   mMap.updateFullScreenSizes();
 }
-
 
 function render() {
   composer.render();
