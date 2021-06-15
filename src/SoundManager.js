@@ -6,10 +6,9 @@ class SoundManager {
         this.playerController = playerController;
         this.obj = obj;
         const listener = new THREE.AudioListener();
+        this.listener = listener
         playerController.camera.add(listener);
         const sound = new THREE.PositionalAudio(listener);
-        this.sound = sound
-        this.obj.add(this.sound)
         // load a sound and set it as the Audio object's buffer
         const audioLoader = new THREE.AudioLoader();
         audioLoader.load(soundPath, function (buffer) {
@@ -21,6 +20,7 @@ class SoundManager {
 
         })
         sound.setRefDistance(2);
+        this.sound = sound
 
     }
 
@@ -61,8 +61,9 @@ class SoundManager {
     }
 
     bind(mesh) {
-        
+        this.obj.add(this.sound)
         mesh.add(this.sound);
+        this.sound.position.set(mesh.position)
         this.sound.panner.position= this.obj.position
     }
 }

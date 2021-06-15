@@ -3,7 +3,7 @@ import Constants from "./Constants";
 import Monster from "./Monster";
 import SoundManager from "./SoundManager";
 import * as THREE from "three";
-import { StaticReadUsage } from "three";
+import { Mesh, StaticReadUsage } from "three";
 import state from "./State";
 
 class MonsterManager {
@@ -46,6 +46,7 @@ class MonsterManager {
     console.log("this is called")
     if (this.monster) {
       this.monster.remove();
+      this.monster.mesh = null;
       this.monster = null;
     }
   }
@@ -86,6 +87,7 @@ class MonsterManager {
         )
       ) {
         state.isPlaying = false;
+        this.soundmanager.pa
         var loseScreen = document.getElementById("lose-screen");
         loseScreen.classList.remove("hidden");
         state.gameover = true;
@@ -107,9 +109,14 @@ class MonsterManager {
         this.backtrackMonster();
         return;
       }
+     // this.monsterSoundTracker()
       this.monster.update();
+      this.soundmanager.bind(this.monster.Mesh)
+      this.monster.Mesh.position.setX(this.monster.position.x)
+      this.monster.Mesh.position.setY(this.monster.position.y)
+      this.monster.Mesh.position.setZ(this.monster.position.z)
     }
-    this.monsterSoundTracker()
+  
     this.fearDecision();
   }
 
@@ -159,14 +166,15 @@ class MonsterManager {
    monsterSoundTracker()
 {
     if (this.monster != null) {
+      console.log("hi")
       if (this.soundmanager == null) {
         this.soundmanager = new SoundManager(
-          this.monster.Mesh,
+          this.monster,
           player.playerController,
           "assets/Sounds/monster.mp3"
         );
       } else {
-        if (this.monster.Mesh != null) {
+        if (this.monster != null) {
           this.soundmanager.bind(this.monster.Mesh);
         } else {
           this.soundmanager.pause();
@@ -175,8 +183,8 @@ class MonsterManager {
     } else {
       if (this.soundmanager != null) {
         this.soundmanager.pause();
+        this.soundmanager = null;
       }
-      this.soundmanager = null;
     }
   }
 }

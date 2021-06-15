@@ -179,6 +179,7 @@ function animate() {
     stats.update();
     if (sceneLoader.currentScene.name == "saferoom1")
       console.log(monsterManager)
+    
   }
   soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
