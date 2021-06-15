@@ -135,24 +135,16 @@ function animate() {
 
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
-    player.updatePosition(player.playerController.camera.position, () => {
+    player.update(deltaTime, player.playerController.camera.position, () => {
       if (sceneLoader.currentScene.name == 'maze1')
         monsterManager.updateMonsterPath();
     });
 
 
 
-    worldManager.updateObjs(); //this needs to be just update for both battery and key
-    worldManager.pickUpItems(
-      player.playerController.camera.position.x,
-      player.playerController.camera.position.z
-    );
-    worldManager.displayItems(player.playerController.torchOn);
-    // worldManager.lifeBar(player.playerController.torchOn);
-    worldManager.refillTorch();
-    if (worldManager.torchLife <= 0) {
-      player.playerController.turnTorchOff();
-    }
+    worldManager.update(player);
+
+
     // worldManager.keyDisplay();
 
 
@@ -191,6 +183,8 @@ async function initWorld() {
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
+  worldManager = new WorldManager();
+
   sceneLoader = new SceneLoader(
     physics,
     scene,
@@ -198,7 +192,7 @@ async function initWorld() {
 
   );
   //sceneLoader.initMaze1();
-  await sceneLoader.loadScene("maze1", false);
+  await sceneLoader.loadScene("maze1", false, worldManager);
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
@@ -236,7 +230,7 @@ async function initWorld() {
 
   devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
 
-  worldManager = new WorldManager(scene, sceneLoader.grid1, player, clock);
+
   await worldManager.setKey();
   await worldManager.setBatteries();
   //makeSnow(scene);

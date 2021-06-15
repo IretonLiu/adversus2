@@ -34,7 +34,7 @@ class SceneLoader {
     }
 
 
-    async loadScene(nextSceneName, playVideo) {
+    async loadScene(nextSceneName, playVideo, worldManager) {
         if (playVideo) {
             this.playLoadingVideo()
         }
@@ -98,8 +98,10 @@ class SceneLoader {
             this.loadSound();
 
         this.scene.add(this.currentScene);
+        worldManager.loadWorld(this.currentScene, this.player, this.currentGrid);
         this.loadingScreen.classList.add("fade-out");
         state.isPlaying = true;
+
     }
 
     clearScene() {
