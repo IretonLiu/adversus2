@@ -56,7 +56,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => { });
+    removeLoadingScreen(() => {});
 
     setUpPostProcessing();
     //render();
@@ -135,17 +135,10 @@ function animate() {
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
     player.update(deltaTime, player.playerController.camera.position, () => {
-      if (sceneLoader.currentScene.name == 'maze1')
-        monsterManager.updateMonsterPath();
-    });
-
-    worldManager.update(player);
-
-    player.updatePosition(player.playerController.camera.position, () => {
-
       monsterManager.updateMonsterPath();
     });
 
+    worldManager.update(player);
 
     snowManager.updateSnow(deltaTime);
 
@@ -185,7 +178,6 @@ async function initWorld() {
   //sceneLoader.initMaze1();
   worldManager = new WorldManager();
   await sceneLoader.loadScene("maze1", false, worldManager);
-
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
