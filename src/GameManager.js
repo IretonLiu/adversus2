@@ -240,7 +240,7 @@ function setUpGround() {
   // set up the floor of the game
   const floorGeometry = new THREE.PlaneGeometry(10000, 10000, 1, 1);
   var groundTexture = new THREE.TextureLoader().load(
-    "../assets/textures/snow_ground.jpg"
+    "assets/textures/snow_ground.jpg"
   );
   groundTexture.repeat.set(225, 225);
   groundTexture.wrapS = THREE.RepeatWrapping;
