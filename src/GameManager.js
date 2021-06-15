@@ -55,7 +55,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => {});
+    removeLoadingScreen(() => { });
 
     setUpPostProcessing();
     //render();
@@ -158,7 +158,7 @@ function animate() {
 
     render();
     stats.update();
-    sceneLoader.soundManagerGlobal.walking();
+    //sceneLoader.soundManagerGlobal.walking();
   }
   requestAnimationFrame(animate);
 }
@@ -214,7 +214,7 @@ async function initWorld() {
 
   //makeSnow(scene);
 
-  snowManager = new SnowManager(sceneLoader.currentScene, player);
+  snowManager = new SnowManager(scene, player);
   //makeSnow(sceneLoader.currentScene);
 }
 
@@ -248,11 +248,14 @@ function setUpAmbientLight() {
 // callback to the player when interacting with and interactable object
 async function onInteractCB() {
   const interactingObject = player.playerController.intersect;
+
+  // checks the name of the object the player is interacting with
   if (interactingObject) {
     switch (interactingObject.name) {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
+          snowManager.hideSnow();
           await sceneLoader.loadScene("saferoom1", true);
         }
         break;
@@ -262,6 +265,7 @@ async function onInteractCB() {
         mMap = sceneLoader.getMiniMap();
         mMap.showMap();
         worldManager = sceneLoader.getWorldManager();
+        snowManager.showSnow();
         break;
       case "saferoom1exit":
         await sceneLoader.loadScene("maze2", true);
@@ -269,7 +273,7 @@ async function onInteractCB() {
         mMap = sceneLoader.getMiniMap();
         mMap.showMap();
         worldManager = sceneLoader.getWorldManager();
-
+        snowManager.showSnow();
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");
         // state.isPlaying = false;
@@ -281,14 +285,26 @@ async function onInteractCB() {
         break;
       case "maze2entrance":
         await sceneLoader.loadScene("saferoom1", true);
+        snowManager.hideSnow();
         break;
+
       case "maze2exit":
-        await sceneLoader.loadScene("saferoom1", true);
+        await sceneLoader.loadScene("saferoom2", true);
+        snowManager.hideSnow();
+        break;
+      case "saferoom2entrance":
+        await sceneLoader.loadScene("maze2", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.getMiniMap();
+        mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
+        snowManager.showSnow();
         break;
     }
   }
 }
 
+// resize the game 
 function onWindowResize() {
   player.playerController.camera.aspect =
     window.innerWidth / window.innerHeight;

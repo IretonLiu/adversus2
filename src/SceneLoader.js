@@ -19,6 +19,9 @@ class SceneLoader {
     // this.monsterManager = monsterManager;
     // this.minimap = minimap;
 
+
+    // information of each level held by the scene loader for loading
+    // each hold separate information about different levels
     this.maze1 = null;
     this.grid1 = null;
     this.worldManager1 = null;
@@ -29,6 +32,11 @@ class SceneLoader {
     this.worldManager2 = null;
     this.miniMap2 = null;
 
+    this.maze3 = null;
+    this.grid3 = null;
+    this.worldManager3 = null;
+    this.miniMap3 = null;
+
     this.currentMaze = null;
     this.currentGrid = null;
     this.currentScene = null;
@@ -36,6 +44,7 @@ class SceneLoader {
     this.currentMiniMap = null;
 
     this.saferoom1 = null;
+    this.saferoom2 = null;
 
     this.soundManagerGlobal = null;
     // this.player.playerController.onInteractCB = this.onInteractCB;
@@ -132,6 +141,9 @@ class SceneLoader {
     } else if (nextSceneName == "saferoom1") {
       await this.loadRoom1();
       this.saferoom1.setupColliders(this.physics);
+    } else if (nextSceneName == "saferoom2") {
+      await this.loadRoom2();
+      this.saferoom2.setupColliders(this.physics);
     }
     if (this.player) {
       this.physics.createPlayerRB(this.player.playerController.playerObject);
@@ -221,6 +233,22 @@ class SceneLoader {
     this.worldManager2 = new WorldManager(this.player, this.grid2);
     this.miniMap2 = new MiniMap(this.player.playerController, this.grid2);
   }
+
+  initMaze3() {
+    this.maze3 = new Maze(
+      Constants.MAP3_SIZE,
+      Constants.MAP3_SIZE,
+      Constants.PROBABILITY_WALLS_REMOVED
+    );
+    this.maze3.growingTree();
+    this.grid3 = this.maze2.getThickGrid();
+    this.grid3[1][0] = false;
+
+    this.grid3[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
+
+    this.worldManager3 = new WorldManager(this.player, this.grid3);
+    this.miniMap3 = new MiniMap(this.player.playerController, this.grid3);
+  }
   // render and add the maze to the scene
 
   async loadMaze(name, maze, grid) {
@@ -299,6 +327,14 @@ class SceneLoader {
 
     // model contains the scene name
     this.currentScene = this.saferoom1.model;
+    //this.currentScene.name = "saferoom1"
+  }
+  async loadRoom2() {
+    this.saferoom2 = new SafeRoom("saferoom1");
+    await this.saferoom2.loadModel("SafeRoom1", this.physics);
+
+    // model contains the scene name
+    this.currentScene = this.saferoom2.model;
     //this.currentScene.name = "saferoom1"
   }
 
