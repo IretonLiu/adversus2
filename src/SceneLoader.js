@@ -57,9 +57,6 @@ class SceneLoader {
             if (!this.maze1) {
                 this.initMaze1();
             }
-            await this.loadMaze("maze1", this.maze1, this.grid1);
-            this.currentMaze = this.maze1;
-            this.currentGrid = this.grid1;
 
             // checks if the player just returned to the previous maze
             // and set the players position accordingly
@@ -69,20 +66,25 @@ class SceneLoader {
                 this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
             }
 
+            // load the actual maze
+            await this.loadMaze("maze1", this.maze1, this.grid1);
+            this.currentMaze = this.maze1;
+            this.currentGrid = this.grid1;
+
+
         } else if (nextSceneName == "maze2") {
             if (!this.maze2) {
                 this.initMaze2();
             }
-            await this.loadMaze("maze2", this.maze2, this.grid2);
-            this.currentMaze = this.maze2;
-            this.currentGrid = this.grid2;
 
             if (this.currentScene && this.currentScene.name == "saferoom2") {
                 const exitPos2D = this.maze2.getGridExitPosition();
                 this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
             }
 
-
+            await this.loadMaze("maze2", this.maze2, this.grid2);
+            this.currentMaze = this.maze2;
+            this.currentGrid = this.grid2;
         } else if (nextSceneName == "saferoom1") {
             await this.loadRoom1();
             this.saferoom1.setupColliders(this.physics);
@@ -94,7 +96,7 @@ class SceneLoader {
 
         // checks if there is already a soundManagerGlobal
         // otherwise it is going to be initialised after the player is initialised.
-        if (this.SoundManagerGlobal)
+        if (this.soundManagerGlobal)
             this.loadSound();
 
         this.scene.add(this.currentScene);
@@ -163,16 +165,12 @@ class SceneLoader {
     // render and add the maze to the scene
 
     async loadMaze(name, maze, grid) {
-
-
-
         const wallHeight = 25;
         const wallWidth = 30;
-
         const wallGenerator = new WallGenerator(wallWidth, wallHeight);
-
         const mazeGroup = new THREE.Group();
 
+        // loads the 3D objects based on the generated maze 
         for (var y = 0; y < 2 * maze.height + 1; y++) {
             for (var x = 0; x < 2 * maze.width + 1; x++) {
                 if (grid[y][x]) {
@@ -280,7 +278,7 @@ class SceneLoader {
                 "assets/Sounds/ambience.mp3",
                 "assets/Sounds/footsteps.mp3"
             );
-            this.soundManagerGlobal.setFootstepVol(0.3);
+            this.soundManagerGlobal.setFootstepVol(1);
         }
 
     }

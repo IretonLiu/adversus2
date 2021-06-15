@@ -24,7 +24,7 @@ class SafeRoom {
         this.name = name;
     }
 
-    loadModel(filename, physics) {
+    loadModel(filename) {
 
         const loader = new GLTFLoader();
         const path = "./assets/models/saferoom/"
