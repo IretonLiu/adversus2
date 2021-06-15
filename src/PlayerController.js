@@ -254,6 +254,10 @@ class PlayerController {
 
     this.torchOn = !this.torchOn;
   }
+  turnTorchOff() {
+    this.torchOn = false;
+    this.torch.intensity = 0;
+  }
 
   update(time) {
     this.handleMovement();
