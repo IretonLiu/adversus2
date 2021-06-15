@@ -22,15 +22,19 @@ class SceneLoader {
     this.maze1 = null;
     this.grid1 = null;
     this.worldManager1 = null;
+    this.miniMap1 = null;
 
     this.maze2 = null;
     this.grid2 = null;
     this.worldManager2 = null;
+    this.miniMap2 = null;
 
     this.currentMaze = null;
     this.currentGrid = null;
     this.currentScene = null;
     this.currentWorldManager = null;
+    this.currentMiniMap = null;
+
     this.saferoom1 = null;
 
     this.soundManagerGlobal = null;
@@ -55,6 +59,11 @@ class SceneLoader {
 
   getWorldManager() {
     return this.currentWorldManager;
+  }
+
+  getMiniMap() {
+    // return current mini map
+    return this.currentMiniMap;
   }
 
   async loadScene(nextSceneName, playVideo) {
@@ -99,6 +108,7 @@ class SceneLoader {
       this.currentMaze = this.maze1;
       this.currentGrid = this.grid1;
       this.currentWorldManager = this.worldManager1;
+      this.currentMiniMap = this.miniMap1;
     } else if (nextSceneName == "maze2") {
       if (!this.maze2) {
         this.initMaze2();
@@ -118,6 +128,7 @@ class SceneLoader {
       this.currentMaze = this.maze2;
       this.currentGrid = this.grid2;
       this.currentWorldManager = this.worldManager2;
+      this.currentMiniMap = this.miniMap2;
     } else if (nextSceneName == "saferoom1") {
       await this.loadRoom1();
       this.saferoom1.setupColliders(this.physics);
@@ -192,6 +203,7 @@ class SceneLoader {
     this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
 
     this.worldManager1 = new WorldManager(this.player, this.grid1);
+    this.miniMap1 = new MiniMap(this.player.playerController, this.grid1);
   }
 
   initMaze2() {
@@ -207,6 +219,7 @@ class SceneLoader {
     this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     this.worldManager2 = new WorldManager(this.player, this.grid2);
+    this.miniMap2 = new MiniMap(this.player.playerController, this.grid2);
   }
   // render and add the maze to the scene
 
@@ -289,9 +302,9 @@ class SceneLoader {
     //this.currentScene.name = "saferoom1"
   }
 
-  loadNewMinimap() {
-    return new MiniMap(this.player.playerController, this.currentGrid);
-  }
+  // loadNewMinimap() {
+  //   return new MiniMap(this.player.playerController, this.currentGrid);
+  // }
 
   addActors(player, monsterManager) {
     this.player = player;

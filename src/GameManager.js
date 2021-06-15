@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import Skybox from "./Skybox";
 import PlayerController from "./PlayerController.js";
-import MiniMap from "./MiniMapHandler";
 import Physics from "./lib/Physics.js";
 import WorldManager from "./WorldManager.js";
 import Constants from "./Constants.js";
@@ -129,7 +128,7 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
-    player.playerController.update(deltaTime);
+    player.playerController.update(deltaTime, sceneLoader.currentScene);
     physics.updatePhysics(deltaTime);
 
     // TODO: potentially refactor the player update logic
@@ -175,9 +174,6 @@ async function initWorld() {
   setUpGround();
 
   sceneLoader = new SceneLoader(physics, scene, loadingScreen);
-  await sceneLoader.loadScene("maze1", false);
-
-  worldManager = sceneLoader.getWorldManager();
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
@@ -187,11 +183,11 @@ async function initWorld() {
   );
   var playerController = new PlayerController(
     renderer.domElement,
-    sceneLoader.currentScene,
     onInteractCB
   );
   physics.createPlayerRB(playerController.playerObject);
   await playerController.initCandle();
+
   player = new Player(playerPos, playerController);
   monsterManager = new MonsterManager(
     sceneLoader.currentScene,
@@ -199,10 +195,14 @@ async function initWorld() {
     sceneLoader.grid1,
     clock
   );
+
   sceneLoader.addActors(player, monsterManager);
   sceneLoader.initSound();
 
-  mMap = sceneLoader.loadNewMinimap();
+  await sceneLoader.loadScene("maze1", false);
+  worldManager = sceneLoader.getWorldManager();
+
+  mMap = sceneLoader.getMiniMap();
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
   scene.add(sceneLoader.currentScene);
@@ -259,14 +259,14 @@ async function onInteractCB() {
       case "saferoom1entrance":
         await sceneLoader.loadScene("maze1", true);
         devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.loadNewMinimap();
+        mMap = sceneLoader.getMiniMap();
         mMap.showMap();
         worldManager = sceneLoader.getWorldManager();
         break;
       case "saferoom1exit":
         await sceneLoader.loadScene("maze2", true);
         devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.loadNewMinimap();
+        mMap = sceneLoader.getMiniMap();
         mMap.showMap();
         worldManager = sceneLoader.getWorldManager();
 

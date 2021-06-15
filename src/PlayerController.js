@@ -11,7 +11,7 @@ import state from "./State";
 import Candle from "./Candle";
 
 class PlayerController {
-  constructor(domElement, scene, onInteractCB) {
+  constructor(domElement, onInteractCB) {
     // setup player object for ammo
     const playerPos = Constants.PLAYER_INITIAL_POS;
     this.playerObject = new Object3D();
@@ -58,9 +58,13 @@ class PlayerController {
     this.raycaster.near = 0.1;
     this.raycaster.far = 20;
     this.intersect = null;
-    this.scene = scene;
+    // this.scene = null;
     this.onInteractCB = onInteractCB;
   }
+
+  // setScene(scene) {
+  //   this.scene = scene;
+  // }
 
   // reset the player position to the initial position
   // this is used when scene changing takes player
@@ -75,10 +79,17 @@ class PlayerController {
   // set the player's position to anywhere in the world
   // sets where the camera should look at
   setPosition(x, z, lx, lz) {
-
-    console.log(x, z, lx, lz)
-    this.playerObject.position.set(x * Constants.WALL_SIZE, this.playerObject.position.y, z * Constants.WALL_SIZE);
-    this.camera.position.set(x * Constants.WALL_SIZE, this.camera.position.y, z * Constants.WALL_SIZE);
+    console.log(x, z, lx, lz);
+    this.playerObject.position.set(
+      x * Constants.WALL_SIZE,
+      this.playerObject.position.y,
+      z * Constants.WALL_SIZE
+    );
+    this.camera.position.set(
+      x * Constants.WALL_SIZE,
+      this.camera.position.y,
+      z * Constants.WALL_SIZE
+    );
     this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 
@@ -88,8 +99,7 @@ class PlayerController {
     controls.maxPolarAngle = (29 * Math.PI) / 30;
     controls.minPolarAngle = (1 * Math.PI) / 30;
     controls.addEventListener("unlock", () => {
-      if (!state.gameover)
-        this.openPauseMenu();
+      if (!state.gameover) this.openPauseMenu();
     });
     return controls;
   }
@@ -204,7 +214,6 @@ class PlayerController {
         case "KeyF":
           this.toggleTorch();
           break;
-
       }
     };
 
@@ -239,17 +248,15 @@ class PlayerController {
           await this.onInteractCB();
           break;
       }
-    }
+    };
     document.addEventListener("keyup", onKeyUp);
-
   }
 
   // changes the intensity of the torch
   // to give the effect that the torch is being turned on and off
   // visibility is chosen instead of visibility because of performance reasons
   toggleTorch() {
-    if (this.torchOn)
-      this.torch.intensity = 0;
+    if (this.torchOn) this.torch.intensity = 0;
     else this.torch.intensity = 1.5;
 
     this.torchOn = !this.torchOn;
@@ -259,9 +266,9 @@ class PlayerController {
     this.torch.intensity = 0;
   }
 
-  update(time) {
+  update(time, scene) {
     this.handleMovement();
-    this.raycasterForward();
+    this.raycasterForward(scene);
     this.handleTorch();
     this.candle.update(time);
   }
@@ -385,16 +392,13 @@ class PlayerController {
     this.prevTime = time;
   }
 
-  raycasterForward() {
+  raycasterForward(scene) {
     this.raycaster.set(
       this.controls.getObject().position,
       this.camera.getWorldDirection(new Vector3(0, 0, 0))
     );
 
-    const intersects = this.raycaster.intersectObjects(
-      this.scene.children,
-      true
-    );
+    const intersects = this.raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
       this.intersect = intersects[0].object;
     } else {
