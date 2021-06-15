@@ -189,7 +189,6 @@ class WorldManager {
     this.batteryDisplay();
     this.torchDisplay();
     this.lifeBar(torchState);
-    console.log("BITCH BLADDY: ", torchState);
   }
 
   lifeBar(torchState) {
