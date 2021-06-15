@@ -403,7 +403,7 @@ async function onInteractCB() {
             "assets/Sounds/footsteps.mp3"
           );
 
-          await sceneLoader.loadScene("saferoom1", true)
+          await sceneLoader.loadScene("saferoom1", true, worldManager)
         }
         soundmanagerGlobal.walkingVol(0.3);
         break;
@@ -413,7 +413,7 @@ async function onInteractCB() {
           "assets/Sounds/ambience.mp3",
           "assets/Sounds/walking.mp3"
         );
-        await sceneLoader.loadScene("maze2", true)
+        await sceneLoader.loadScene("maze2", true, worldManager)
 
         sound2.setVolume(0.01);
 

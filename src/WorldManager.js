@@ -135,13 +135,14 @@ class WorldManager {
         z >= battery.mesh.position.z - 10
       ) {
         let index = this.batteries.indexOf(battery);
-        player.batterCount++;
+        player.batteryCount++;
         //this.updateBatteyLife();
         battery.mesh.visible = false;
         //battery.batteryPicked = true;
         this.batteries.splice(index, 1);
       }
     }
+
   }
 
   pickUpKey(player) {
@@ -163,7 +164,6 @@ class WorldManager {
     this.updateObjs(); //this needs to be just update for both battery and key
     this.pickUpItems(player);
     this.displayItems();
-    // worldManager.lifeBar(player.playerController.torchOn);
 
   }
 

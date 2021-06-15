@@ -23,12 +23,7 @@ class Player {
     this.hasKey = true;
   }
 
-  //refills the torch to full after the battery runs out
-  refillTorch() {
-    this.torchLife = 100;
-    this.batteryCount--;
 
-  }
 
   updatePosition(position, positionChangeCallback) {
     // take in world coordinates
@@ -54,35 +49,40 @@ class Player {
 
   updateTorchLife(deltaTime) {
     const ctx = document.getElementById("inventory").getContext("2d");
-
+    document.getElementById("numBats").innerHTML = "X" + this.batteryCount;
 
     //this decreases the torches life bar
     if (this.playerController.torchOn) {
       if (this.torchLife >= 0) {
-        this.torchLife -= Constants.TORCH_DEPLETION_RATE * 100 * deltaTime;
+        this.torchLife -= Constants.TORCH_DEPLETION_RATE * deltaTime;
       }
     }
 
     if (Math.floor(this.torchLife) <= 0) {
       if (this.batteryCount > 0) {
         this.refillTorch();
-        document.getElementById("numBats").innerHTML = "X" + this.batteryCount;
+
       }
       else {
         this.playerController.turnTorchOff();
       }
-
-
     }
 
     ctx.fillStyle = "#ffffffa0";
     ctx.strokeStyle = "white";
-    ctx.clearRect(500, 100, 1000, 200);
-    ctx.rect(500, 100, 800, 100);
+    ctx.clearRect(100, 20, 200, 40);
+    ctx.rect(100, 20, 160, 20);
     ctx.stroke();
-    ctx.fillRect(500, 100, (this.torchLife / 100) * 800, 100);
-    ctx.rect(500 + 800, 125, 30, 50);
+    ctx.fillRect(100, 20, (this.torchLife / 20) * 160, 20);
+    ctx.rect(100 + 160, 25, 6, 10);
     ctx.stroke();
+  }
+
+  //refills the torch to full after the battery runs out
+  refillTorch() {
+    this.torchLife = 100;
+    this.batteryCount--;
+
   }
 
 }
