@@ -142,25 +142,21 @@ function animate() {
         monsterManager.updateMonsterPath();
     });
 
-monsterSoundTracker()
+    monsterSoundTracker()
 
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
-    worldManager.pickUpBattery(
+    worldManager.pickUpItems(
       player.playerController.camera.position.x,
       player.playerController.camera.position.z
     );
-    worldManager.pickUpKey(
-      player.playerController.camera.position.x,
-      player.playerController.camera.position.z
-    );
-    worldManager.displayItems();
-    worldManager.lifeBar(player.playerController.torchOn);
+    worldManager.displayItems(player.playerController.torchOn);
+    // worldManager.lifeBar(player.playerController.torchOn);
     worldManager.refillTorch();
     if (worldManager.torchLife <= 0) {
-      player.playerController.torchOn = false;
+      player.playerController.turnTorchOff();
     }
-    worldManager.keyDisplay();
+    // worldManager.keyDisplay();
 
 
     updateSnow(deltaTime);
@@ -415,7 +411,7 @@ async function onInteractCB() {
             "assets/Sounds/ambience.mp3",
             "assets/Sounds/footsteps.mp3"
           );
-        
+
           await sceneLoader.loadScene("saferoom1", true)
         }
         soundmanagerGlobal.walkingVol(0.3);
@@ -429,7 +425,7 @@ async function onInteractCB() {
         await sceneLoader.loadScene("maze2", true)
 
         sound2.setVolume(0.01);
-        
+
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");
         // state.isPlaying = false;
@@ -457,29 +453,28 @@ function onWindowResize() {
   mMap.updateFullScreenSizes();
 }
 
-function monsterSoundTracker()
-{
-    if (monsterManager.monster != null) {
-      if (soundmanager == null) {
-        soundmanager = new SoundManager(
-          monsterManager.monster.Mesh,
-          player.playerController,
-          "assets/Sounds/monster.mp3"
-        );
-      } else {
-        if (monsterManager.monster.Mesh != null) {
-          soundmanager.bind(monsterManager.monster.Mesh);
-        } else {
-          soundmanager.pause();
-        }
-      }
+function monsterSoundTracker() {
+  if (monsterManager.monster != null) {
+    if (soundmanager == null) {
+      soundmanager = new SoundManager(
+        monsterManager.monster.Mesh,
+        player.playerController,
+        "assets/Sounds/monster.mp3"
+      );
     } else {
-      if (soundmanager != null) {
+      if (monsterManager.monster.Mesh != null) {
+        soundmanager.bind(monsterManager.monster.Mesh);
+      } else {
         soundmanager.pause();
       }
-      soundmanager = null;
     }
+  } else {
+    if (soundmanager != null) {
+      soundmanager.pause();
+    }
+    soundmanager = null;
   }
+}
 
 function render() {
   composer.render();
