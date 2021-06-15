@@ -19,29 +19,31 @@ let batteryCounter = 0;
 const ctx = document.getElementById("inventory").getContext("2d");
 
 class WorldManager {
-  constructor() {
+  constructor(player, grid) {
     this.scene = null;
-    this.player = null;
-    this.grid = null;
+    this.player = player;
+    this.grid = grid;
     this.batteries = [];
-    this.maze1 = [];
-    this.maze2 = [];
-    this.maze3 = [];
     this.gateKey = null;
     this.clock = new THREE.Clock();
-    //this.numBatterys = Constants.NUM_BATTERIES;
+    // this.numBatterys = Math.ceil(this.grid.length * 5 / 3);
+
+    this.hasSetObjects = false;
   }
 
-  loadWorld(currScene, player, grid) {
-    this.scene = currScene;
-    this.player = player;
-    if (grid) {
-      this.grid = grid;
-    }
-    this.numBatterys = Constants.NUM_BATTERIES;
-    //check what current scene is
-    //check if the array has been created if not created init, if it is put it in the world
+  async updateScene(scene) {
+    this.scene = scene;
 
+    if (!this.hasSetObjects) {
+      await this.setKey();
+      await this.setBatteries();
+
+      this.hasSetObjects = true;
+    }
+
+    for (let battery of this.batteries) {
+      battery.displayBattery(this.scene);
+    }
   }
 
   updateObjs() {
@@ -68,11 +70,7 @@ class WorldManager {
 
   async loadBattery(x, z) {
     this.batteries.push(new Battery(x, z));
-    await this.batteries[this.batteries.length - 1].makeBattery(
-      this.scene,
-      x,
-      z
-    );
+    await this.batteries[this.batteries.length - 1].makeBattery(x, z);
   }
 
   async loadKey(x, z) {
@@ -80,11 +78,11 @@ class WorldManager {
     await this.gateKey.makeKey(this.scene, x, z);
   }
 
-
   async setBatteries() {
     let numBats = 0;
     let iter = 0;
-    while (numBats < this.numBatterys && iter < 100) {
+    const totalNumBatteries = Math.ceil(this.grid.length / 10);
+    while (numBats < totalNumBatteries && iter < 100) {
       let randX =
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
       let randZ =
@@ -125,8 +123,8 @@ class WorldManager {
   }
 
   pickUpBattery(player) {
-    var x = player.playerController.playerObject.position.x
-    var z = player.playerController.playerObject.position.z
+    var x = player.playerController.playerObject.position.x;
+    var z = player.playerController.playerObject.position.z;
     for (let battery of this.batteries) {
       if (
         x <= battery.mesh.position.x + 10 &&
@@ -142,12 +140,11 @@ class WorldManager {
         this.batteries.splice(index, 1);
       }
     }
-
   }
 
   pickUpKey(player) {
-    var x = player.playerController.playerObject.position.x
-    var z = player.playerController.playerObject.position.z
+    var x = player.playerController.playerObject.position.x;
+    var z = player.playerController.playerObject.position.z;
     if (
       x <= this.gateKey.mesh.position.x + 10 &&
       x >= this.gateKey.mesh.position.x - 10 &&
@@ -164,7 +161,6 @@ class WorldManager {
     this.updateObjs(); //this needs to be just update for both battery and key
     this.pickUpItems(player);
     this.displayItems();
-
   }
 
   pickUpItems(player) {
@@ -180,8 +176,8 @@ class WorldManager {
     ctx.scale(0.2, 0.12);
     ctx.drawImage(img, 10, 415);
     ctx.restore();
-
   }
+
   keyDisplay() {
     let img = document.getElementById("keyPic");
 
@@ -192,7 +188,6 @@ class WorldManager {
   }
 
   torchDisplay() {
-
     let img = document.getElementById("torchPic");
 
     ctx.save();
@@ -201,16 +196,10 @@ class WorldManager {
     ctx.restore();
   }
 
-
   displayItems() {
     this.batteryDisplay();
     this.torchDisplay();
-
   }
-
-
-
-
 }
 
 export default WorldManager;

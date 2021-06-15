@@ -175,9 +175,9 @@ async function initWorld() {
   setUpGround();
 
   sceneLoader = new SceneLoader(physics, scene, loadingScreen);
-  //sceneLoader.initMaze1();
-  worldManager = new WorldManager();
-  await sceneLoader.loadScene("maze1", false, worldManager);
+  await sceneLoader.loadScene("maze1", false);
+
+  worldManager = sceneLoader.getWorldManager();
 
   // TODO: there is quite a bit of circular dependency here
   var playerPos = new THREE.Vector3(
@@ -212,9 +212,6 @@ async function initWorld() {
   sceneLoader.createDevMap();
   devMap = sceneLoader.getDevMap();
 
-  //new DevMap(sceneLoader.grid1, player, monsterManager);
-  await worldManager.setKey();
-  await worldManager.setBatteries();
   //makeSnow(scene);
 
   snowManager = new SnowManager(sceneLoader.currentScene, player);
@@ -260,16 +257,18 @@ async function onInteractCB() {
         }
         break;
       case "saferoom1entrance":
-        await sceneLoader.loadScene("maze1", true, worldManager);
+        await sceneLoader.loadScene("maze1", true);
         devMap = sceneLoader.getDevMap();
         mMap = sceneLoader.loadNewMinimap();
         mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
         break;
       case "saferoom1exit":
-        await sceneLoader.loadScene("maze2", true, worldManager);
+        await sceneLoader.loadScene("maze2", true);
         devMap = sceneLoader.getDevMap();
         mMap = sceneLoader.loadNewMinimap();
         mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
 
         // var winScreen = document.getElementById("win-screen");
         // winScreen.classList.remove("hidden");

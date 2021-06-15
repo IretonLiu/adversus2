@@ -22,9 +22,10 @@ class Battery extends PickUps {
     this.x = x;
     this.z = z;
 
+    // this.mesh = null;
   }
 
-  makeBattery(scene, x, z) {
+  makeBattery(x, z) {
     return new Promise((resolve, reject) => {
       //loader.load(url, data => resolve(data), null, reject);
       loader.load(
@@ -36,7 +37,7 @@ class Battery extends PickUps {
 
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
-          scene.add(this.mesh);
+
           resolve("success");
         },
         (xhr) => {
@@ -47,6 +48,10 @@ class Battery extends PickUps {
         reject
       );
     });
+  }
+
+  displayBattery(scene) {
+    scene.add(this.mesh);
   }
 }
 
