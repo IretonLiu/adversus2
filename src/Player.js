@@ -14,7 +14,9 @@ class Player {
     this.prevGridCoordinates = this.position;
   }
 
-
+  getPosition() {
+    return this.playerController.playerObject.position;
+  }
 
   updatePosition(position, positionChangeCallback) {
     // take in world coordinates

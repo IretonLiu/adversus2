@@ -20,7 +20,7 @@ class MonsterManager {
     this.playerSpawnRadius = 4;
     this.minRadius = 2;
     this.percentageExplored = 0;
-    
+
   }
 
   fearDecision() {
@@ -43,7 +43,6 @@ class MonsterManager {
   }
 
   despawnMonster() {
-    console.log("this is called")
     if (this.monster) {
       this.monster.remove();
       this.monster = null;
@@ -61,12 +60,12 @@ class MonsterManager {
       playerPosition
       // new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
     );
-    this.soundmanager= new SoundManager(
+    this.soundmanager = new SoundManager(
       this.monster.Mesh,
       this.player.playerController,
       "assets/Sounds/JockeySounds.mp3"
     )
-  
+
   }
 
   backtrackMonster() {
@@ -75,7 +74,7 @@ class MonsterManager {
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
-  update() {
+  update(deltaTime) {
     if (this.monster) {
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
@@ -107,7 +106,7 @@ class MonsterManager {
         this.backtrackMonster();
         return;
       }
-      this.monster.update();
+      this.monster.update(deltaTime);
     }
     this.monsterSoundTracker()
     this.fearDecision();
@@ -156,8 +155,7 @@ class MonsterManager {
     }
   }
 
-   monsterSoundTracker()
-{
+  monsterSoundTracker() {
     if (this.monster != null) {
       if (this.soundmanager == null) {
         this.soundmanager = new SoundManager(

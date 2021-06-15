@@ -20,11 +20,11 @@ class SoundManagerGlobal {
 
         const sound2 = new THREE.Audio(listener);
         this.sound2 = sound2
-        const audioLoader2 = new THREE.AudioLoader();
+        //const audioLoader2 = new THREE.AudioLoader();
         audioLoader.load(footstep, function (buffer) {
             sound2.setBuffer(buffer);
             sound2.setLoop(true);
-            sound2.setVolume(0.01);
+            sound2.setVolume(0.1);
         })
         sound2.hasPlaybackControl = true;
 
@@ -32,9 +32,9 @@ class SoundManagerGlobal {
 
     }
 
-    getSound() {
-        return this.sound
-    }
+    // getSound() {
+    //     return this.sound
+    // }
 
     //updateVolume()
     //{
