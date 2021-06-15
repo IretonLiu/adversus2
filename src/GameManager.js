@@ -26,7 +26,6 @@ let player,
   snowParticles,
   stats,
   soundmanagerGlobal,
-  soundmanager,
   worldManager,
   sceneLoader,
   composer;
@@ -63,7 +62,6 @@ class GameManager {
     removeLoadingScreen(() => {
 
     });
-    soundmanager = null;
 
     setUpPostProcessing();
     //render();
@@ -142,7 +140,6 @@ function animate() {
         monsterManager.updateMonsterPath();
     });
 
-    monsterSoundTracker()
 
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
@@ -453,28 +450,6 @@ function onWindowResize() {
   mMap.updateFullScreenSizes();
 }
 
-function monsterSoundTracker() {
-  if (monsterManager.monster != null) {
-    if (soundmanager == null) {
-      soundmanager = new SoundManager(
-        monsterManager.monster.Mesh,
-        player.playerController,
-        "assets/Sounds/monster.mp3"
-      );
-    } else {
-      if (monsterManager.monster.Mesh != null) {
-        soundmanager.bind(monsterManager.monster.Mesh);
-      } else {
-        soundmanager.pause();
-      }
-    }
-  } else {
-    if (soundmanager != null) {
-      soundmanager.pause();
-    }
-    soundmanager = null;
-  }
-}
 
 function render() {
   composer.render();

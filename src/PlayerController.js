@@ -76,10 +76,9 @@ class PlayerController {
   // sets where the camera should look at
   setPosition(x, z, lx, lz) {
 
-    this.playerObject.position.x = x * Constants.WALL_SIZE;
-    this.playerObject.position.z = z * Constants.WALL_SIZE;
-    this.camera.position.x = x * Constants.WALL_SIZE;
-    this.camera.position.z = z * Constants.WALL_SIZE;
+    console.log(x, z, lx, lz)
+    this.playerObject.position.set(x * Constants.WALL_SIZE, this.playerObject.position.y, z * Constants.WALL_SIZE);
+    this.camera.position.set(x * Constants.WALL_SIZE, this.camera.position.y, z * Constants.WALL_SIZE);
     this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 
@@ -203,7 +202,7 @@ class PlayerController {
           self.velocity.y = 0;
           break;
         case "KeyF":
-          this.turnTorchOff();
+          this.toggleTorch();
           break;
 
       }
@@ -216,11 +215,12 @@ class PlayerController {
         //   self.controls.lock();
         //   break;
         case 2:
-          this.turnTorchOff();
+          this.toggleTorch();
           break;
       }
     };
 
+    // what does this do?
     const onRightClick = (event) => {
       if (!state.isPlaying) return;
       this.turnTorchOff();
@@ -247,7 +247,7 @@ class PlayerController {
   // changes the intensity of the torch
   // to give the effect that the torch is being turned on and off
   // visibility is chosen instead of visibility because of performance reasons
-  turnTorchOff() {
+  toggleTorch() {
     if (this.torchOn)
       this.torch.intensity = 0;
     else this.torch.intensity = 1.5;

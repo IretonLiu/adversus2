@@ -10,7 +10,7 @@ class Door {
     }
 
     // loads the door model
-    loadModel(filename) {
+    loadModel(filename, boundingBoxSize) {
         const loader = new GLTFLoader();
         const path = "./assets/models/saferoom/"
         const extension = ".glb"
@@ -23,22 +23,23 @@ class Door {
                         child.material.metalness = 0;
                     }
                 });
+                scene.scale.x = 6;
+                scene.scale.y = 6;
+                scene.scale.z = 6;
                 this.model.add(scene);
 
                 // this.model.name = this.name;
-                this.model.scale.x = 6;
-                this.model.scale.y = 6;
-                this.model.scale.z = 6;
+
 
                 // sets the bounding box for user interaction
-                const exitBoundingBoxGeometry = new BoxGeometry(1, 3, 3);
-                const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
-                exitBoundingBoxMaterial.visible = false;
-                const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
-                exitBoundingBoxMesh.position.y = 2.8;
-                exitBoundingBoxMesh.name = this.name;
+                const doorBoundingBoxGeometry = new BoxGeometry(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
+                const doorBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
+                doorBoundingBoxMaterial.visible = false;
+                const doorBoundingBoxMesh = new Mesh(doorBoundingBoxGeometry, doorBoundingBoxMaterial);
+                doorBoundingBoxMesh.position.y = 15;
+                doorBoundingBoxMesh.name = this.name;
 
-                this.model.add(exitBoundingBoxMesh);
+                this.model.add(doorBoundingBoxMesh);
 
                 console.log(this.model);
                 resolve("success");

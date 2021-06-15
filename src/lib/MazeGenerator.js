@@ -224,7 +224,7 @@ class Maze {
   }
 
   getGridExitPosition() {
-    exit = {
+    const exit = {
       x: 2 * this.height - 1,
       z: 2 * this.width - 1
     }

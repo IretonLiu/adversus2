@@ -97,45 +97,57 @@ class SafeRoom {
             y: 48,
             z: 150
         }
-        const wallGeometry = new BoxGeometry(wallColliderSize.x, wallColliderSize.y, wallColliderSize.z);
-        const wallMaterial = new MeshStandardMaterial({ color: 0xffffff });
+
         //exitBoundingBoxMaterial.visible = false;
         const frontWall = new Object3D();
         frontWall.position.x = 60;
         frontWall.position.z = 15;
         this.model.add(frontWall);
-        physics.createBoxRB(this.model, frontWall, wallColliderSize);
+        physics.createRoomRB(this.model, frontWall, wallColliderSize);
 
         const backWall = new Object3D();
         backWall.position.x = -60;
         backWall.position.z = 15;
         this.model.add(backWall);
-        physics.createBoxRB(this.model, backWall, wallColliderSize);
+        physics.createRoomRB(this.model, backWall, wallColliderSize);
 
         const leftWall = new Object3D();
         leftWall.rotateY(Math.PI / 2)
         leftWall.position.z = 83;
         this.model.add(leftWall);
-        physics.createBoxRB(this.model, leftWall, wallColliderSize);
+        physics.createRoomRB(this.model, leftWall, wallColliderSize);
 
         const rightWall = new Object3D();
         rightWall.rotateY(Math.PI / 2)
         rightWall.position.z = -62;
         this.model.add(rightWall);
-        physics.createBoxRB(this.model, rightWall, wallColliderSize);
+        physics.createRoomRB(this.model, rightWall, wallColliderSize);
     }
 
     setupDoors() {
-        const exitBoundingBoxGeometry = new BoxGeometry(5, 18, 18,);
-        const exitBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
-        exitBoundingBoxMaterial.visible = true;
-        const exitBoundingBoxMesh = new Mesh(exitBoundingBoxGeometry, exitBoundingBoxMaterial);
 
+        // set up the bounding box geometry for the entrance and exit doors
+        const doorBoundingBoxGeometry = new BoxGeometry(5, 18, 18,);
+        const doorBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
+        doorBoundingBoxMaterial.visible = true;
+
+        // set up the exit bounding box
+        const exitBoundingBoxMesh = new Mesh(doorBoundingBoxGeometry, doorBoundingBoxMaterial);
         exitBoundingBoxMesh.name = this.name + "exit";
         exitBoundingBoxMesh.position.x = 60;
         exitBoundingBoxMesh.position.z = 70;
         exitBoundingBoxMesh.position.y = 10.5;
         this.model.add(exitBoundingBoxMesh)
+
+        // set up the entrance bounding box
+        const entranceBoundingBoxMesh = new Mesh(doorBoundingBoxGeometry, doorBoundingBoxMaterial);
+        entranceBoundingBoxMesh.name = this.name + "entrance";
+        entranceBoundingBoxMesh.position.x = -60;
+        entranceBoundingBoxMesh.position.z = -45;
+        entranceBoundingBoxMesh.position.y = 10.5;
+        this.model.add(entranceBoundingBoxMesh)
+
+
     }
 
     createCandleLight() {

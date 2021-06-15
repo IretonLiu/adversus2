@@ -6,14 +6,16 @@ import Maze from "./lib/MazeGenerator";
 import SafeRoom from "./SafeRoom";
 import MiniMap from "./MiniMapHandler";
 import state from "./State";
+import SoundManagerGlobal from "./SoundManagerGlobal";
 class SceneLoader {
-    constructor(physics, scene, loadingScreen, monsterManager) {
+    constructor(physics, scene, loadingScreen) {
         this.physics = physics;
         this.scene = scene;
         this.loadingScreen = loadingScreen;
 
+
         this.player = null;
-        this.monsterManager = monsterManager;
+        // this.monsterManager = monsterManager;
         // this.minimap = minimap;
 
         this.maze1 = null;
@@ -24,20 +26,17 @@ class SceneLoader {
 
         this.currentMaze = null;
         this.currentGrid = null;
-        // this.room1 = null;
         this.currentScene = null;
-        this.currentSceneName = null;
-
         this.saferoom1 = null;
 
+        this.soundManagerGlobal = null;
         // this.player.playerController.onInteractCB = this.onInteractCB;
     }
 
 
     async loadScene(nextSceneName, playVideo) {
-        if(playVideo)
-        {
-           this.playLoadingVideo() 
+        if (playVideo) {
+            this.playLoadingVideo()
         }
         state.isPlaying = false
         this.loadingScreen.classList.remove("fade-out");
@@ -49,7 +48,9 @@ class SceneLoader {
         }
 
         // reinitialize the player and monster if they exist
-
+        if (this.player) {
+            this.player.playerController.reset();
+        }
 
         // load another scene based on the scene name
         if (nextSceneName == "maze1") {
@@ -60,12 +61,14 @@ class SceneLoader {
             this.currentMaze = this.maze1;
             this.currentGrid = this.grid1;
 
-            // checks if the player just left the exit
+            // checks if the player just returned to the previous maze
             // and set the players position accordingly
             if (this.currentScene && this.currentScene.name == "saferoom1") {
+                console.log("from saferoom")
                 const exitPos2D = this.maze1.getGridExitPosition();
                 this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
             }
+
         } else if (nextSceneName == "maze2") {
             if (!this.maze2) {
                 this.initMaze2();
@@ -78,17 +81,22 @@ class SceneLoader {
                 const exitPos2D = this.maze2.getGridExitPosition();
                 this.player.playerController.setPosition(exitPos2D.x, exitPos2D.z, exitPos2D.x - 1, exitPos2D.z)
             }
+
+
         } else if (nextSceneName == "saferoom1") {
             await this.loadRoom1();
             this.saferoom1.setupColliders(this.physics);
         }
-
         if (this.player) {
-            this.player.playerController.reset();
             this.physics.createPlayerRB(this.player.playerController.playerObject);
             this.player.playerController.scene = this.currentScene;
-
         }
+
+        // checks if there is already a soundManagerGlobal
+        // otherwise it is going to be initialised after the player is initialised.
+        if (this.SoundManagerGlobal)
+            this.loadSound();
+
         this.scene.add(this.currentScene);
         this.loadingScreen.classList.add("fade-out");
         state.isPlaying = true;
@@ -145,6 +153,8 @@ class SceneLoader {
         );
         this.maze2.growingTree();
         this.grid2 = this.maze2.getThickGrid();
+        this.grid2[1][0] = false;
+
         this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     }
@@ -186,18 +196,39 @@ class SceneLoader {
                 }
             }
         }
+        const doorBoundingBoxSize = {
+            x: 6,
+            y: 20,
+            z: 30
+        }
 
         // add the door to the end of the maze
-        const door = new Door("maze1exit");
-        await door.loadModel("Door");
-        this.scene.add(door.model);
-        door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
-        door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width - 0.5));
-        door.model.position.y -= wallHeight / 2;
-        mazeGroup.add(door.model);
+        if (!grid[2 * maze.width - 1][2 * maze.height]) {
+            const door = new Door(name + "exit");
+            await door.loadModel("Door", doorBoundingBoxSize);
+            this.scene.add(door.model);
+            door.model.position.x = Constants.WALL_SIZE * (2 * maze.height);
+            door.model.position.z = Constants.WALL_SIZE * (2 * (maze.width) - 1);
+            door.model.position.y -= wallHeight / 2;
 
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            mazeGroup.add(door.model);
+        }
+        if (!grid[1][0]) {
+            const door = new Door(name + "entrance");
+            await door.loadModel("Door", doorBoundingBoxSize);
+            this.scene.add(door.model);
+            door.model.position.x = Constants.WALL_SIZE * 0;
+            door.model.position.z = Constants.WALL_SIZE * 1;
+            door.model.position.y -= wallHeight / 2;
+
+            this.physics.createBoxRB(door.model, doorBoundingBoxSize)
+            mazeGroup.add(door.model);
+        }
+
+        // sets the name for a maze group
         mazeGroup.name = name;
-        this.currentSceneName = name;
+        //this.currentSceneName = name;
 
         this.currentScene = mazeGroup;
         // this.scene.add(this.currentScene);
@@ -207,8 +238,10 @@ class SceneLoader {
     async loadRoom1() {
         this.saferoom1 = new SafeRoom("saferoom1");
         await this.saferoom1.loadModel("SafeRoom1", this.physics)
+
+        // model contains the scene name
         this.currentScene = this.saferoom1.model;
-        this.currentSceneName = "saferoom1";
+        //this.currentScene.name = "saferoom1"
     }
 
     loadNewMinimap() {
@@ -220,6 +253,35 @@ class SceneLoader {
         this.monsterManager = monsterManager
     }
 
+    initSound() {
+        this.soundManagerGlobal = new SoundManagerGlobal(
+            this.player.playerController,
+            "assets/Sounds/ambience.mp3",
+            "assets/Sounds/walking.mp3"
+        );
+    }
+
+    loadSound() {
+        // setup sound for the saferoom
+        if (this.currentScene.name == "maze1"
+            || this.currentScene.name == "maze2"
+            || this.currentScene.name == "maze3") {
+            this.soundManagerGlobal = new SoundManagerGlobal(
+                this.player.playerController,
+                "assets/Sounds/ambience.mp3",
+                "assets/Sounds/walking.mp3"
+            );
+
+        } else {
+            this.soundManagerGlobal = new SoundManagerGlobal(
+                this.player.playerController,
+                "assets/Sounds/ambience.mp3",
+                "assets/Sounds/footsteps.mp3"
+            );
+            this.soundManagerGlobal.setFootstepVol(0.3);
+        }
+
+    }
 
     updateCurrentScene(time) {
         if (this.currentSceneName == "saferoom1")
@@ -231,17 +293,16 @@ class SceneLoader {
     }
 
 
-     async playLoadingVideo(){
+    async playLoadingVideo() {
         const vp = document.getElementById("video_player")
         vp.style.visibility = "visible"
         vp.load()
         vp.play()
-        vp.addEventListener("ended",  async ()=>
-        {
+        vp.addEventListener("ended", async () => {
             vp.style.visibility = "hidden"
-            
+
         })
-        
+
     }
 }
 
