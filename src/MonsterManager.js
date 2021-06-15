@@ -127,7 +127,9 @@ class MonsterManager {
       this.monster.Mesh.position.setX(this.monster.position.x)
       this.monster.Mesh.position.setY(this.monster.position.y)
       this.monster.Mesh.position.setZ(this.monster.position.z)
-    
+      this.soundmanager.listener.position.setX(this.monster.Mesh.position.x)
+      this.soundmanager.listener.position.setY(this.monster.Mesh.position.y)
+      this.soundmanager.listener.position.setZ(this.monster.Mesh.position.z)
 
       this.monster.update(deltaTime);
     }
