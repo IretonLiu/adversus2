@@ -24,6 +24,9 @@ class WorldManager {
     this.player = player;
     this.grid = grid;
     this.batteries = [];
+    this.mazeOne = [];
+    this.mazeTwo = [];
+    this.mazeThree = [];
     this.gateKey = null;
     this.torchLife = 100;
     this.worldStates = {
@@ -32,20 +35,6 @@ class WorldManager {
     };
     this.clock = new THREE.Clock();
     this.numBatterys = Math.floor(grid.length / 10);
-  }
-
-  async loadBattery(x, z) {
-    this.batteries.push(new Battery(x, z));
-    await this.batteries[this.batteries.length - 1].makeBattery(
-      this.scene,
-      x,
-      z
-    );
-  }
-
-  async loadKey(x, z) {
-    this.gateKey = new GateKey(x, z);
-    await this.gateKey.makeKey(this.scene, x, z);
   }
 
   updateObjs() {
@@ -69,6 +58,21 @@ class WorldManager {
       animateHelper = 0;
     }
   }
+
+  async loadBattery(x, z) {
+    this.batteries.push(new Battery(x, z));
+    await this.batteries[this.batteries.length - 1].makeBattery(
+      this.scene,
+      x,
+      z
+    );
+  }
+
+  async loadKey(x, z) {
+    this.gateKey = new GateKey(x, z);
+    await this.gateKey.makeKey(this.scene, x, z);
+  }
+
 
   async setBatteries() {
     let numBats = 0;
@@ -144,9 +148,33 @@ class WorldManager {
     }
   }
 
+  pickUpItems(x, z) {
+    this.pickUpBattery(x, z);
+    this.pickUpKey(x, z);
+  }
+
+  batteryDisplay() {
+    let img = document.getElementById("batteryPic");
+
+    //outputs the number of baatteries the player has.
+
+    ctx.save();
+    ctx.scale(0.2, 0.12);
+    ctx.drawImage(img, 10, 415);
+
+    ctx.restore();
+  }
+  keyDisplay() {
+    let img = document.getElementById("keyPic");
+
+    ctx.save();
+    ctx.scale(0.1, 0.1);
+    ctx.drawImage(img, -80, 900);
+    ctx.restore();
+  }
+
   torchDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/torch2.png";
+    let img = document.getElementById("torchPic");
 
     ctx.save();
     ctx.scale(0.2, 0.2);
@@ -156,34 +184,20 @@ class WorldManager {
     ctx.restore();
   }
 
-  keyDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/key2.png";
-    ctx.save();
-    ctx.scale(0.1, 0.1);
-    ctx.drawImage(img, -80, 900);
-    ctx.restore();
-  }
 
-  batteryDisplay() {
-    let img = document.createElement("img");
-    img.src = "./assets/itemPics/batteryFinal.png";
-    //outputs the number of baatteries the player has.
-    document.getElementById("numBats").innerHTML = "X" + batteryCounter;
-    ctx.save();
-    ctx.scale(0.2, 0.12);
-    ctx.drawImage(img, 10, 415);
-
-    ctx.restore();
-  }
-  displayItems() {
-    this.torchDisplay();
-    //this.keyDisplay();
+  displayItems(torchState) {
     this.batteryDisplay();
+    this.torchDisplay();
+    this.lifeBar(torchState);
   }
 
   lifeBar(torchState) {
     var delta = this.clock.getDelta();
+
+    if (Math.floor(this.torchLife) <= 0 && batteryCounter > 0) {
+      this.refillTorch();
+      document.getElementById("numBats").innerHTML = "X" + batteryCounter;
+    }
     //this decreases the torches life bar
     if (torchState) {
       if (this.torchLife >= 0) {
@@ -202,11 +216,9 @@ class WorldManager {
 
   //refills the torch to full after the battery runs out
   refillTorch() {
-    this.batteryDisplay();
-    if (Math.floor(this.torchLife) <= 0 && batteryCounter > 0) {
-      this.torchLife = 100;
-      batteryCounter--;
-    }
+    this.torchLife = 100;
+    batteryCounter--;
+
   }
 }
 

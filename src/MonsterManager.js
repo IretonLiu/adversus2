@@ -1,7 +1,7 @@
 import Utils from "./Utils";
 import Constants from "./Constants";
 import Monster from "./Monster";
-
+import SoundManager from "./SoundManager";
 import * as THREE from "three";
 import { StaticReadUsage } from "three";
 import state from "./State";
@@ -13,13 +13,14 @@ class MonsterManager {
     this.scene = scene;
     this.grid = grid;
     this.monster = null;
-
+    this.soundmanager = null
     // TODO: this clock can potentially cause problems
     this.clock = clock;
 
     this.playerSpawnRadius = 4;
     this.minRadius = 2;
     this.percentageExplored = 0;
+    
   }
 
   fearDecision() {
@@ -60,6 +61,12 @@ class MonsterManager {
       playerPosition
       // new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
     );
+    this.soundmanager= new SoundManager(
+      this.monster.Mesh,
+      this.player.playerController,
+      "assets/Sounds/JockeySounds.mp3"
+    )
+  
   }
 
   backtrackMonster() {
@@ -102,7 +109,7 @@ class MonsterManager {
       }
       this.monster.update();
     }
-
+    this.monsterSoundTracker()
     this.fearDecision();
   }
 
@@ -146,6 +153,30 @@ class MonsterManager {
         Utils.convertWorldToThickGrid(this.player.position)
       );
       this.monster.getAstarPath(this.grid, playerPosition);
+    }
+  }
+
+   monsterSoundTracker()
+{
+    if (this.monster != null) {
+      if (this.soundmanager == null) {
+        this.soundmanager = new SoundManager(
+          this.monster.Mesh,
+          player.playerController,
+          "assets/Sounds/monster.mp3"
+        );
+      } else {
+        if (this.monster.Mesh != null) {
+          this.soundmanager.bind(this.monster.Mesh);
+        } else {
+          this.soundmanager.pause();
+        }
+      }
+    } else {
+      if (this.soundmanager != null) {
+        this.soundmanager.pause();
+      }
+      this.soundmanager = null;
     }
   }
 }

@@ -1,7 +1,8 @@
 import * as THREE from "three";
 import state from "./State";
 class SoundManager {
-    constructor(obj, playerController, soundPath) {
+    constructor(obj, playerController, soundPath, monstermanager) {
+        this.monstermanager = monstermanager
         this.playerController = playerController;
         this.obj = obj;
         const listener = new THREE.AudioListener();
@@ -26,7 +27,24 @@ class SoundManager {
     getSound() {
         return this.sound
     }
-
+     monsterSoundTracker() {
+        if (monsterManager.monster != null) {
+          if (sound == null) {
+             sound = new THREE.PositionalAudio(listener);
+          } else {
+            if (monsterManager.monster.Mesh != null) {
+              bind(monsterManager.monster.Mesh);
+            } else {
+              sound.pause();
+            }
+          }
+        } else {
+          if (sound != null) {
+            sound.pause();
+          }
+          sound = null;
+        }
+      }
     //updateVolume()
     //{
     //this.sound.setRefDistance()

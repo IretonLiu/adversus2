@@ -25,7 +25,7 @@ let player,
   monsterManager,
   snowParticles,
   stats,
-  soundmanager,
+  soundmanagerGlobal,
   worldManager,
   sceneLoader,
   composer;
@@ -62,7 +62,6 @@ class GameManager {
     removeLoadingScreen(() => {
 
     });
-    soundmanager = null;
 
     setUpPostProcessing();
     //render();
@@ -141,25 +140,20 @@ function animate() {
         monsterManager.updateMonsterPath();
     });
 
-    monsterSoundTracker()
 
 
     worldManager.updateObjs(); //this needs to be just update for both battery and key
-    worldManager.pickUpBattery(
+    worldManager.pickUpItems(
       player.playerController.camera.position.x,
       player.playerController.camera.position.z
     );
-    worldManager.pickUpKey(
-      player.playerController.camera.position.x,
-      player.playerController.camera.position.z
-    );
-    worldManager.displayItems();
-    worldManager.lifeBar(player.playerController.torchOn);
+    worldManager.displayItems(player.playerController.torchOn);
+    // worldManager.lifeBar(player.playerController.torchOn);
     worldManager.refillTorch();
     if (worldManager.torchLife <= 0) {
-      player.playerController.torchOn = false;
+      player.playerController.turnTorchOff();
     }
-    worldManager.keyDisplay();
+    // worldManager.keyDisplay();
 
 
     updateSnow(deltaTime);
@@ -179,9 +173,10 @@ function animate() {
 
     render();
     stats.update();
-    sceneLoader.soundManagerGlobal.walking();
-
+    if (sceneLoader.currentScene.name == "saferoom1")
+      console.log(monsterManager)
   }
+  soundmanagerGlobal.walking();
   requestAnimationFrame(animate);
 
 }
@@ -200,6 +195,7 @@ async function initWorld() {
     physics,
     scene,
     loadingScreen,
+
   );
   //sceneLoader.initMaze1();
   await sceneLoader.loadScene("maze1", false);
@@ -220,7 +216,7 @@ async function initWorld() {
   player = new Player(playerPos, playerController);
   monsterManager = new MonsterManager(sceneLoader.currentScene, player, sceneLoader.grid1, clock);
   sceneLoader.addActors(player, monsterManager);
-  sceneLoader.initSound();
+
   mMap = sceneLoader.loadNewMinimap();
 
   scene.add(playerController.controls.getObject());
@@ -229,6 +225,14 @@ async function initWorld() {
 
 
   setUpAmbientLight();
+
+  soundmanagerGlobal = new SoundManagerGlobal(
+    playerController,
+    "assets/Sounds/ambience.mp3",
+    "assets/Sounds/walking.mp3"
+  );
+
+
 
   devMap = new DevMap(sceneLoader.grid1, player, monsterManager);
 
@@ -399,27 +403,35 @@ async function onInteractCB() {
       case "maze1exit":
         if (player.hasKey) {
           mMap.hideMap();
+          soundmanagerGlobal = new SoundManagerGlobal(
+            player.playerController,
+            "assets/Sounds/ambience.mp3",
+            "assets/Sounds/footsteps.mp3"
+          );
+
           await sceneLoader.loadScene("saferoom1", true)
         }
-        break;
-      case "saferoom1entrance":
-        mMap.showMap();
-        await sceneLoader.loadScene("maze1");
+        soundmanagerGlobal.walkingVol(0.3);
         break;
       case "saferoom1exit":
+        soundmanagerGlobal = new SoundManagerGlobal(
+          player.playerController,
+          "assets/Sounds/ambience.mp3",
+          "assets/Sounds/walking.mp3"
+        );
         await sceneLoader.loadScene("maze2", true)
-        break;
-      case "maze2entrance":
-        await sceneLoader.loadScene("saferoom1")
 
-      // var winScreen = document.getElementById("win-screen");
-      // winScreen.classList.remove("hidden");
-      // state.isPlaying = false;
-      // state.gameover = true;
-      // player.playerController.controls.unlock();
-      // document.getElementById("restart-button-1").onclick = () => {
-      //   location.reload();
-      // };
+        sound2.setVolume(0.01);
+
+        // var winScreen = document.getElementById("win-screen");
+        // winScreen.classList.remove("hidden");
+        // state.isPlaying = false;
+        // state.gameover = true;
+        // player.playerController.controls.unlock();
+        // document.getElementById("restart-button-1").onclick = () => {
+        //   location.reload();
+        // };
+        break;
     }
   }
 }
@@ -438,28 +450,6 @@ function onWindowResize() {
   mMap.updateFullScreenSizes();
 }
 
-function monsterSoundTracker() {
-  if (monsterManager.monster != null) {
-    if (soundmanager == null) {
-      soundmanager = new SoundManager(
-        monsterManager.monster.Mesh,
-        player.playerController,
-        "assets/Sounds/JockeySounds.mp3"
-      );
-    } else {
-      if (monsterManager.monster.Mesh != null) {
-        soundmanager.bind(monsterManager.monster.Mesh);
-      } else {
-        soundmanager.pause();
-      }
-    }
-  } else {
-    if (soundmanager != null) {
-      soundmanager.pause();
-    }
-    soundmanager = null;
-  }
-}
 
 function render() {
   composer.render();
