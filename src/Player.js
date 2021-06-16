@@ -76,7 +76,7 @@ class Player {
     ctx.clearRect(100, 20, 200, 40);
     ctx.rect(100, 20, 160, 20);
     ctx.stroke();
-    ctx.fillRect(100, 20, (this.torchLife / 20) * 160, 20);
+    ctx.fillRect(100, 20, (this.torchLife / 20) * 32, 20);
     ctx.rect(100 + 160, 25, 6, 10);
     ctx.stroke();
   }
