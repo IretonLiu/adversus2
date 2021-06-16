@@ -8,8 +8,10 @@ import {
 } from "three";
 
 class Skybox {
-  constructor(filename) {
+  constructor(filename, mapLength) {
     this.filename = filename;
+    this.mesh = this.createSkybox(mapLength);
+
   }
 
   createPathStrings() {
@@ -43,6 +45,10 @@ class Skybox {
     const geo = new BoxGeometry(size, size, size);
     const skybox = new Mesh(geo, material);
     return skybox;
+  }
+
+  update(deltaTime) {
+    this.mesh.rotateX(deltaTime / 30);
   }
 }
 
