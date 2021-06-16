@@ -70,7 +70,7 @@ class Physics {
     const mass = 1;
     let transform = new Ammo.btTransform();
     transform.setIdentity();
-    transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
+    transform.setOrigin(new Ammo.btVector3(pos.x, pos.y - 3, pos.z));
     transform.setRotation(
       new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w)
     );

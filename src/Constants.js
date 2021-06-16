@@ -20,8 +20,8 @@ let Constants = {
 
   // map size
   MAP1_SIZE: 5,
-  MAP2_SIZE: 10,
-  MAP3_SIZE: 15,
+  MAP2_SIZE: 5,
+  MAP3_SIZE: 5,
 
   // percentage of walls removed
   PROBABILITY_WALLS_REMOVED: 0.75,
@@ -35,7 +35,7 @@ let Constants = {
   PLAYER_MOVE_SPEED: 100,
   PLAYER_INITIAL_POS: {
     x: 30,
-    y: 10,
+    y: 12,
     z: 30,
   },
 

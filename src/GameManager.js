@@ -300,6 +300,14 @@ async function onInteractCB() {
         worldManager = sceneLoader.getWorldManager();
         snowManager.showSnow();
         break;
+      case "saferoom2exit":
+        await sceneLoader.loadScene("maze3", true);
+        devMap = sceneLoader.getDevMap();
+        mMap = sceneLoader.getMiniMap();
+        mMap.showMap();
+        worldManager = sceneLoader.getWorldManager();
+        snowManager.showSnow();
+        break;
     }
   }
 }
