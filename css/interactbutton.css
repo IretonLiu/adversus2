@@ -1,0 +1,25 @@
+
+#e-button{
+    position: absolute;
+    z-index: 100;
+    background-color: #000;
+    color: #ffffff;
+    padding: 0.6em;
+    display: inline-block;
+    font-size: 2em;
+    border-radius: 10px;
+    width: min-content;
+    letter-spacing: 3px;
+    top: 50%;
+    left: 50%;
+    visibility: hidden;
+
+  }
+/*   
+  .button:hover{
+    cursor: pointer;
+    transform: scale(1.02) translateY(-3px);
+    color: #ffffff;
+    background-color: #121212;
+    outline: 2px solid white;
+  } */
