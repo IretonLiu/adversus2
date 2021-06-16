@@ -173,7 +173,7 @@ class WorldManager {
 
     //outputs the number of baatteries the player has.
     ctx.save();
-    ctx.scale(0.2, 0.12);
+    ctx.scale(0.23, 0.12);
     ctx.drawImage(img, 10, 415);
     ctx.restore();
   }
@@ -182,8 +182,8 @@ class WorldManager {
     let img = document.getElementById("keyPic");
 
     ctx.save();
-    ctx.scale(0.1, 0.1);
-    ctx.drawImage(img, -80, 900);
+    ctx.scale(0.1, 0.07);
+    ctx.drawImage(img, -80, 1300);
     ctx.restore();
   }
 
@@ -191,7 +191,7 @@ class WorldManager {
     let img = document.getElementById("torchPic");
 
     ctx.save();
-    ctx.scale(0.2, 0.2);
+    ctx.scale(0.21, 0.2);
     ctx.drawImage(img, -150, 50);
     ctx.restore();
   }
@@ -199,6 +199,7 @@ class WorldManager {
   displayItems() {
     this.batteryDisplay();
     this.torchDisplay();
+    this.keyDisplay();
   }
 }
 

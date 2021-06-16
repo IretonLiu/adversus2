@@ -107,8 +107,10 @@ class MonsterManager {
         document.getElementById("restart-button-2").onclick = () => {
           location.reload();
         };
+
         return;
       }
+      
       if (this.monster.path == "") {
         this.despawnMonster();
         this.fear -= 15;
@@ -130,8 +132,6 @@ class MonsterManager {
       this.soundmanager.listener.position.setX(this.monster.Mesh.position.x)
       this.soundmanager.listener.position.setY(this.monster.Mesh.position.y)
       this.soundmanager.listener.position.setZ(this.monster.Mesh.position.z)
-
-      this.monster.update(deltaTime);
     }
     this.fearDecision();
   }
