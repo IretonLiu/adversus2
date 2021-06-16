@@ -138,6 +138,26 @@ class SceneLoader {
       this.currentGrid = this.grid2;
       this.currentWorldManager = this.worldManager2;
       this.currentMiniMap = this.miniMap2;
+    } else if (nextSceneName == "maze3") {
+      if (!this.maze3) {
+        this.initMaze3();
+      }
+
+      if (this.currentScene && this.currentScene.name == "saferoom3") {
+        const exitPos2D = this.maze3.getGridExitPosition();
+        this.player.playerController.setPosition(
+          exitPos2D.x,
+          exitPos2D.z,
+          exitPos2D.x - 1,
+          exitPos2D.z
+        );
+      }
+
+      await this.loadMaze("maze3", this.maze3, this.grid3);
+      this.currentMaze = this.maze3;
+      this.currentGrid = this.grid3;
+      this.currentWorldManager = this.worldManager3;
+      this.currentMiniMap = this.miniMap3;
     } else if (nextSceneName == "saferoom1") {
       await this.loadRoom1();
       this.saferoom1.setupColliders(this.physics);
@@ -177,6 +197,9 @@ class SceneLoader {
           } else {
             child.material.dispose();
           }
+        }
+        if (child.texture) {
+          child.texture.dispose();
         }
         // this.scene.remove(child);
       }
@@ -226,8 +249,9 @@ class SceneLoader {
     );
     this.maze2.growingTree();
     this.grid2 = this.maze2.getThickGrid();
-    this.grid2[1][0] = false;
 
+    // opens up the entrance and the exit
+    this.grid2[1][0] = false;
     this.grid2[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
 
     this.worldManager2 = new WorldManager(this.player, this.grid2);
@@ -241,10 +265,11 @@ class SceneLoader {
       Constants.PROBABILITY_WALLS_REMOVED
     );
     this.maze3.growingTree();
-    this.grid3 = this.maze2.getThickGrid();
-    this.grid3[1][0] = false;
+    this.grid3 = this.maze3.getThickGrid();
 
-    this.grid3[2 * this.maze2.width - 1][2 * this.maze2.height] = false;
+    // opens up the entrance and the exit
+    this.grid3[1][0] = false;
+    this.grid3[2 * this.maze3.width - 1][2 * this.maze3.height] = false;
 
     this.worldManager3 = new WorldManager(this.player, this.grid3);
     this.miniMap3 = new MiniMap(this.player.playerController, this.grid3);
@@ -266,7 +291,7 @@ class SceneLoader {
 
           let binString = wallGenerator.genBinaryString(x, y, grid, maze);
           let config = wallGenerator.getWallConfig(binString);
-          wallMesh = wallGenerator.createWall(
+          wallMesh = await wallGenerator.createWall(
             config,
             Constants.WALL_SIZE,
             wallHeight,
@@ -315,6 +340,7 @@ class SceneLoader {
 
     // sets the name for a maze group
     mazeGroup.name = name;
+
     //this.currentSceneName = name;
 
     this.currentScene = mazeGroup;
@@ -330,8 +356,10 @@ class SceneLoader {
     //this.currentScene.name = "saferoom1"
   }
   async loadRoom2() {
-    this.saferoom2 = new SafeRoom("saferoom1");
-    await this.saferoom2.loadModel("SafeRoom1", this.physics);
+    this.saferoom2 = new SafeRoom("saferoom2");
+
+    //TODO: change the name of file here
+    await this.saferoom2.loadModel("SafeRoom2", this.physics);
 
     // model contains the scene name
     this.currentScene = this.saferoom2.model;

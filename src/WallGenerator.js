@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import NoiseGenerator from "./lib/NoiseGenerator";
 import Constants from "./Constants";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { Group } from "three";
 
 class WallGenerator {
   constructor(width, height) {
@@ -15,10 +17,7 @@ class WallGenerator {
     );
   }
 
-  createWall(type) {
-    var segments = Constants.WALL_SEGMENTS;
-    var tiltAngle = 0; //Math.PI / 12;
-
+  async createWall(type) {
     const wallMaterial = new THREE.MeshStandardMaterial({
       color: 0xffffff,
       map: this.wallTexture,
@@ -32,26 +31,6 @@ class WallGenerator {
     );
     var wallGroup = new THREE.Group();
 
-    // var wallOne = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    // wallOne.receiveShadow = true;
-    // wallOne.castShadow = true;
-    // wallOne.rotateX(-tiltAngle);
-    // wallOne.position.z = this.width / 2;
-
-    // var wallTwo = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    // wallTwo.receiveShadow = true;
-    // wallTwo.castShadow = true;
-    // wallTwo.rotateX(tiltAngle);
-    // wallTwo.rotateY(Math.PI);
-    // wallTwo.position.z = -this.width / 2;
-
-    // var wallThree = new THREE.Mesh(sideWallGeometry, wallMaterial);
-    // wallThree.receiveShadow = true;
-    // wallThree.castShadow = true;
-    // wallThree.rotateX(tiltAngle);
-    // wallThree.rotateY(-Math.PI / 2);
-    // wallThree.position.x = -this.width / 2;
-
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.width,
@@ -60,44 +39,49 @@ class WallGenerator {
     );
     this.applyNoise(10, topPlaneGeometry);
 
-    // var topPlane = new THREE.Mesh(topPlaneGeometry, wallMaterial);
-    // topPlane.receiveShadow = true;
-    // topPlane.castShadow = true;
-    // topPlane.rotateX(-Math.PI / 2);
-    // topPlane.position.y = this.height / 2;
     wallGroup.add(this.generatePlane(0, topPlaneGeometry, wallMaterial));
+
+    // add barbed wires based on a chance
+    if (Math.random() > 0.7)
+      wallGroup.add(await this.loadBarbedWireModel());
 
     switch (type) {
       case 0: // side walls front facing
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         break;
       case 1: // side walls side facing
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI / 2);
         break;
       case 2: // protruding wall facing forward
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         break;
       case 3: // protruding wall facing backward
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI);
         break;
       case 4: // protruding wall facing right
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI / 2);
         break;
       case 5: // protruding wall facing left
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(-Math.PI / 2);
         break;
       case 6: // corner, left, down empty
@@ -107,6 +91,7 @@ class WallGenerator {
       case 7: // corner, right, down empty
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         break;
       case 8: // corners left up empty
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
@@ -116,10 +101,12 @@ class WallGenerator {
       case 9: // corners right up empty
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI);
         break;
       case 10: // T junction, down empty
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         break;
       case 11:
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
@@ -138,10 +125,53 @@ class WallGenerator {
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(4, sideWallGeometry, wallMaterial));
+        wallGroup.add(await this.createSideLogWalls());
         break;
     }
     wallGroup.name = "wall"
     return wallGroup;
+  }
+
+  loadLogWallModel() {
+    const loader = new GLTFLoader();
+    const path = "./assets/models/";
+    const extension = ".glb";
+    return new Promise((resolve, reject) => {
+      loader.load(path + "LogWall2" + extension, (gltf) => {
+        const scene = gltf.scene;
+        scene.scale.set(3, 3, 4);
+        scene.rotateY(-Math.PI / 2)
+        scene.position.y = -10;
+        scene.position.z = 15;
+        resolve(scene);
+      }),
+        reject
+    })
+  }
+
+  loadBarbedWireModel() {
+    const loader = new GLTFLoader();
+    const path = "./assets/models/";
+    const extension = ".glb";
+    return new Promise((resolve, reject) => {
+      loader.load(path + "BarbedWire" + extension, (gltf) => {
+        const scene = gltf.scene;
+        scene.scale.set(3 / 4, 3 / 4, 1 / 4);
+        scene.position.y = 13;
+        scene.rotateY(Math.random() * Math.PI / 2)
+        scene.rotateY((1 / 3) * Math.random() * Math.PI / 2)
+
+        scene.position.x = -13;
+        resolve(scene);
+      }),
+        reject
+    })
+  }
+
+  async createSideLogWalls() {
+    const logWall = await this.loadLogWallModel();
+    return logWall;
+
   }
 
   generatePlane(config, geometry, material) {

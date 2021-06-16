@@ -12,7 +12,7 @@ class SnowManager {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
     makeSnow() {
-        const particleNum = 10000;
+        const particleNum = 5000;
         const max = 100;
         const min = -100;
         const textureSize = 64.0;
@@ -115,26 +115,28 @@ class SnowManager {
         this.snowParticles.visible = true;
     }
     updateSnow(delta) {
-        var playerX = this.player.getPosition().x;
-        var playerZ = this.player.getPosition().z;
-        const posArr = this.snowParticles.geometry.getAttribute("position").array;
+        if (this.snowParticles.visible) {
+            var playerX = this.player.getPosition().x;
+            var playerZ = this.player.getPosition().z;
+            const posArr = this.snowParticles.geometry.getAttribute("position").array;
 
-        var offset = 100;
+            var offset = 100;
 
-        for (let i = 0; i < posArr.length; i += 3) {
-            var x = i;
-            var y = i + 1;
-            var z = i + 2;
+            for (let i = 0; i < posArr.length; i += 3) {
+                var x = i;
+                var y = i + 1;
+                var z = i + 2;
 
-            posArr[y] += -15 * delta;
-            if (posArr[y] < 0) {
-                posArr[y] = this.randomIntFromInterval(-10, 50);
-                posArr[x] = this.randomIntFromInterval(playerX - offset, playerX + offset);
-                posArr[z] = this.randomIntFromInterval(playerZ - offset, playerZ + offset);
+                posArr[y] += -15 * delta;
+                if (posArr[y] < 0) {
+                    posArr[y] = this.randomIntFromInterval(-10, 50);
+                    posArr[x] = this.randomIntFromInterval(playerX - offset, playerX + offset);
+                    posArr[z] = this.randomIntFromInterval(playerZ - offset, playerZ + offset);
+                }
             }
-        }
 
-        this.snowParticles.geometry.attributes.position.needsUpdate = true;
+            this.snowParticles.geometry.attributes.position.needsUpdate = true;
+        }
     }
 }
 
