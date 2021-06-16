@@ -108,6 +108,12 @@ class SnowManager {
         this.scene.add(this.snowParticles);
     }
 
+    hideSnow() {
+        this.snowParticles.visible = false;
+    }
+    showSnow() {
+        this.snowParticles.visible = true;
+    }
     updateSnow(delta) {
         var playerX = this.player.getPosition().x;
         var playerZ = this.player.getPosition().z;

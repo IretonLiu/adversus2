@@ -71,6 +71,7 @@ class Player {
       }
     }
 
+    // this is causing frame drop over time
     ctx.fillStyle = "#ffffffa0";
     ctx.strokeStyle = "white";
     ctx.clearRect(100, 20, 200, 40);
