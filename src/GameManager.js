@@ -86,9 +86,10 @@ function setUpPostProcessing(worldManager) {
   outlinePass.edgeThickness = 0.5;
   outlinePass.edgeGlow = 0;
 
+  composer.addPass(outlinePass);
+
   // setting up the objects to be outlined
   setupOutlineObjects(worldManager);
-  composer.addPass(outlinePass);
 }
 
 function setupOutlineObjects(worldManager) {

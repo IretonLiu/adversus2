@@ -4,6 +4,9 @@ import {
   SpotLight,
   Object3D,
   Raycaster,
+  BoxBufferGeometry,
+  MeshBasicMaterial,
+  Mesh,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
@@ -14,7 +17,7 @@ class PlayerController {
   constructor(domElement, onInteractCB) {
     // setup player object for ammo
     const playerPos = Constants.PLAYER_INITIAL_POS;
-    this.playerObject = new Object3D();
+    this.playerObject = new Mesh(new BoxBufferGeometry(5, 5, 5), new MeshBasicMaterial({ color: 0xffffff, visible: false }));
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();
@@ -376,17 +379,25 @@ class PlayerController {
       moveDirection.z
     );
     resultantImpulse.op_mul(speed);
-    // let resultantImpulse = new Ammo.btVector3(1, 0, 0)
-    // resultantImpulse.op_mul(20);
 
     let physicsBody = this.playerObject.userData.physicsBody;
     physicsBody.setLinearVelocity(resultantImpulse);
 
-    // this.controls.moveRight(-this.velocity.x * delta);
-    // this.controls.moveForward(-this.velocity.z * delta);
 
     this.camera.position.y += this.velocity.y;
     this.playerObject.position.y += this.velocity.y;
+
+    var direction = this.camera
+      .getWorldDirection(new Vector3(0, 0, 0))
+      .normalize();
+    direction.y = 0;
+    var z = new Vector3(0, 0, -1);
+    var angle = z.angleTo(direction);
+    if (direction.x < 0) {
+      angle = 2 * Math.PI - angle;
+    }
+    this.playerObject.rotation.y = -angle;
+
     // this.camera.position.x += 1;
     this.prevTime = time;
   }

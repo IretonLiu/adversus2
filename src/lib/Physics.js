@@ -184,7 +184,7 @@ class Physics {
         let p = this.tmpTrans.getOrigin();
         let q = this.tmpTrans.getRotation();
         objThree.position.set(p.x(), p.y(), p.z());
-        objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        //objThree.quaternion.set(q.x(), q.y(), q.z(), q.w());
 
       }
     }
