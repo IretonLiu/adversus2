@@ -9,9 +9,9 @@ class WallGenerator {
     this.width = width;
     this.height = height;
     this.noiseGenerator = new NoiseGenerator();
-    this.normalMap = new THREE.TextureLoader().load(
-      "assets/normal_maps/snow_normal.jpg"
-    );
+    // this.normalMap = new THREE.TextureLoader().load(
+    //   "assets/normal_maps/snow_normal.jpg"
+    // );
     this.wallTexture = new THREE.TextureLoader().load(
       "assets/textures/snow_wall.jpg"
     );

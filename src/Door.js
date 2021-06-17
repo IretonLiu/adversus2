@@ -12,7 +12,7 @@ class Door {
     // loads the door model
     loadModel(filename, boundingBoxSize) {
         const loader = new GLTFLoader();
-        const path = "./assets/models/saferoom/"
+        const path = "./assets/models/"
         const extension = ".glb"
         return new Promise((resolve, reject) => {
             //loader.load(url, data => resolve(data), null, reject);
@@ -23,9 +23,13 @@ class Door {
                         child.material.metalness = 0;
                     }
                 });
-                scene.scale.x = 6;
-                scene.scale.y = 6;
-                scene.scale.z = 6;
+
+                if (filename == "Door") {
+                    scene.scale.set(6, 6, 6);
+
+                } else {
+                    scene.scale.set(4, 4, 4);
+                }
                 this.model.add(scene);
 
                 // this.model.name = this.name;

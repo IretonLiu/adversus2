@@ -25,10 +25,10 @@
     color:#fff;
     font-size: 2em;
     opacity: 1;
-    transition: 3s opacity;
 }
 
 #no-key-warning.fade-out{
+  transition: 3s opacity;
   opacity: 0;
 }
 /*   

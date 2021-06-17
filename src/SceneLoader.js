@@ -332,8 +332,14 @@ class SceneLoader {
       mazeGroup.add(door.model);
     }
     if (!grid[1][0]) {
+
       const door = new Door(name + "entrance");
-      await door.loadModel("Door", doorBoundingBoxSize);
+
+      if (name = "maze1") {
+        await door.loadModel("Gate", doorBoundingBoxSize);
+      } else {
+        await door.loadModel("Door", doorBoundingBoxSize);
+      }
       this.scene.add(door.model);
       door.model.position.x = Constants.WALL_SIZE * 0;
       door.model.position.z = Constants.WALL_SIZE * 1;

@@ -114,7 +114,7 @@ class WorldManager {
   pickUpBattery(player) {
     var x = player.playerController.playerObject.position.x;
     var z = player.playerController.playerObject.position.z;
-    
+
     for (let battery of this.batteries) {
       if (
         x <= battery.mesh.position.x + 10 &&
@@ -145,13 +145,16 @@ class WorldManager {
       this.keyDisplay();
       switch (this.scene.name) {
         case "maze1":
-          player.pickUpKey(0);
+          if (!player.hasKey(0))
+            player.pickUpKey(0);
           break;
         case "maze2":
-          player.pickUpKey(1);
+          if (!player.hasKey(1))
+            player.pickUpKey(1);
           break;
         case "maze3":
-          player.pickUpKey(2);
+          if (!player.hasKey(2))
+            player.pickUpKey(2);
           break;
       }
 
