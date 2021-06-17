@@ -56,7 +56,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => { });
+    removeLoadingScreen();
 
     setUpPostProcessing(sceneLoader.currentWorldManager);
     //render();
@@ -105,9 +105,10 @@ function removeLoadingScreen() {
   loadingScreen.classList.add("fade-out");
 
   //optional: remove loader from DOM via event listener
-  // loadingScreen.addEventListener("transitionend", () => {
-  //   loadingScreen.remove();
-  // });
+  loadingScreen.addEventListener("transitionend", () => {
+    loadingScreen.style.visibility = "hidden";
+    loadingScreen.classList.remove("fade-out");
+  });
 }
 
 // initialises all the graphics of the game
@@ -267,14 +268,27 @@ async function onInteractCB() {
     setupOutlineObjects(worldManager);
     snowManager.showSnow();
   }
+
+  const noKeyWarning = () => {
+    const noKeyText = document.getElementById("no-key-warning");
+    noKeyText.style.visibility = "visible";
+    noKeyText.classList.add("fade-out");
+    noKeyText.addEventListener("transitionend", () => {
+      console.log(noKeyText);
+      noKeyText.style.visibility = "hidden";
+      noKeyText.classList.remove("fade-out");
+    })
+  }
   // checks the name of the object the player is interacting with
   if (interactingObject) {
     switch (interactingObject.name) {
       case "maze1exit":
-        if (player.hasKey) {
+        if (player.hasKey(0)) {
           mMap.hideMap();
           snowManager.hideSnow();
           await sceneLoader.loadScene("saferoom1", true);
+        } else {
+          noKeyWarning();
         }
         break;
       case "saferoom1entrance":

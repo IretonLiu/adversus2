@@ -1,20 +1,9 @@
 import * as THREE from "three";
-import { Vector3 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import GameManager from "./GameManager.js";
 import { Battery } from "./PickUps.js";
 import { GateKey } from "./PickUps.js";
-import PlayerController from "./PlayerController.js";
-import Constants from "./Constants.js";
-import Player from "./Player.js";
 
 //control the spawning of the Pickups
-
-let playerController;
-let gameManager;
 let animateHelper = 0;
-let torchLife = 1500;
-let batteryCounter = 0;
 
 const ctx = document.getElementById("inventory").getContext("2d");
 
@@ -152,7 +141,18 @@ class WorldManager {
       z >= this.gateKey.mesh.position.z - 10
     ) {
       this.keyDisplay();
-      player.pickUpKey();
+      switch (this.scene.name) {
+        case "maze1":
+          player.pickUpKey(0);
+          break;
+        case "maze2":
+          player.pickUpKey(1);
+          break;
+        case "maze3":
+          player.pickUpKey(2);
+          break;
+      }
+
       this.gateKey.mesh.visible = false;
     }
   }

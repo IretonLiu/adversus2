@@ -15,6 +15,22 @@
     visibility: hidden;
 
   }
+
+#no-key-warning{
+    position: absolute; 
+    top:40%; 
+    left:40%;
+    visibility: hidden; 
+    z-index: 10;
+    color:#fff;
+    font-size: 2em;
+    opacity: 1;
+    transition: 3s opacity;
+}
+
+#no-key-warning.fade-out{
+  opacity: 0;
+}
 /*   
   .button:hover{
     cursor: pointer;

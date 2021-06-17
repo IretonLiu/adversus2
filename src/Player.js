@@ -8,7 +8,8 @@ class Player {
   constructor(position, playerController) {
     // this position is in world coordinates
     this.position = position;
-    this.hasKey = false;
+    this.keys = [false, false, false]
+    //this.hasKey = false;
     this.playerController = playerController;
 
     this.torchLife = 100;
@@ -19,10 +20,13 @@ class Player {
     this.prevGridCoordinates = this.position;
   }
 
-  pickUpKey() {
-    this.hasKey = true;
+  pickUpKey(index) {
+    this.keys[index] = true;
   }
 
+  hasKey(index) {
+    return this.keys[index]
+  }
 
   getPosition() {
     return this.playerController.playerObject.position;
