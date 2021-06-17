@@ -17,8 +17,7 @@ class SoundManagerGlobal {
 
 
         })
-
-        const sound2 = new THREE.Audio(listener);
+ const sound2 = new THREE.Audio(listener);
         this.sound2 = sound2
         //const audioLoader2 = new THREE.AudioLoader();
         audioLoader.load(footstep, function (buffer) {
@@ -29,17 +28,48 @@ class SoundManagerGlobal {
         sound2.hasPlaybackControl = true;
 
         this.isWalkPlaying = false;
+        sound2.hasPlaybackControl = true;
+
+        this.isWalkPlaying = false;
+
+        const batterySound = new THREE.Audio(listener);
+        this.batterySound = batterySound
+        audioLoader.load("assets/Sounds/batteryPickup.mp3", function (buffer) {
+            batterySound.setBuffer(buffer);
+            batterySound.setLoop(false);
+            batterySound.setVolume(0.1);
+        })
+
+        
+        const keySound = new THREE.Audio(listener);
+        this.keySound = keySound
+        audioLoader.load("assets/Sounds/keyPickup.mp3", function (buffer) {
+            keySound.setBuffer(buffer);
+            keySound.setLoop(false);
+            keySound.setVolume(0.5);
+        })
 
     }
 
-    // getSound() {
-    //     return this.sound
-    // }
+    nondefault()
+    {
+        this.sound.pause()
+        this.sound2.pause()
+    }
 
-    //updateVolume()
-    //{
-    //this.sound.setRefDistance()
-    //}
+    batteryPickup(){
+        this.batterySound.play()
+    }
+
+    keyPickup(){
+        console.log("keypicked up")
+        if(!this.keySound.isPlaying)
+        {
+        this.keySound.play()
+        }
+    }
+
+
     walking() {
         const walking = this.playerController.isMoving()
         if (walking) {

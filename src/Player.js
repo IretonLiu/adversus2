@@ -2,14 +2,23 @@ import Utils from "./Utils";
 import * as THREE from "three";
 import { Vector2 } from "three";
 import Constants from "./Constants";
+import SoundManagerGlobal from "./SoundManagerGlobal";
 
 class Player {
   constructor(position, playerController) {
     // this position is in world coordinates
-    this.position = position;
-    this.hasKey = false;
-    this.playerController = playerController;
 
+    this.position = position;
+    this.keys = [false, false, false];
+    //this.hasKey = false;
+    this.playerController = playerController;
+    const soundmanager = new SoundManagerGlobal(
+      this.playerController,
+      "assets/Sounds/ambience.mp3",
+      "assets/Sounds/walking.mp3"
+    );
+    soundmanager.nondefault();
+    this.soundmanager = soundmanager;
     this.torchLife = 100;
 
     this.batteryCount = 0;
@@ -18,8 +27,13 @@ class Player {
     this.prevGridCoordinates = this.position;
   }
 
-  pickUpKey() {
-    this.hasKey = true;
+  pickUpKey(index) {
+    this.soundmanager.keyPickup();
+    this.keys[index] = true;
+  }
+
+  hasKey(index) {
+    return this.keys[index];
   }
 
   getPosition() {

@@ -41,7 +41,6 @@ class Door {
 
                 this.model.add(doorBoundingBoxMesh);
 
-                console.log(this.model);
                 resolve("success");
             }, (xhr) => {
                 console.log("loading door: " + (xhr.loaded / xhr.total * 100) + '% loaded');

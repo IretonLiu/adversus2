@@ -401,8 +401,14 @@ class PlayerController {
     const intersects = this.raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
       this.intersect = intersects[0].object;
+      if (this.intersect.name.includes("saferoom") || this.intersect.name.includes("maze")) {
+        const element = document.getElementById("e-button");
+        element.style.visibility = "visible";
+      }
     } else {
       this.intersect = null;
+      const element = document.getElementById("e-button");
+      element.style.visibility = "hidden";
     }
   }
 }

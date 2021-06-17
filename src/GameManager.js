@@ -24,10 +24,11 @@ let player,
   monsterManager,
   snowManager,
   stats,
-  soundmanagerGlobal,
+  skybox,
   worldManager,
-  sceneLoader,
-  composer;
+  sceneLoader;
+
+let composer, outlinePass;
 
 let devMap;
 
@@ -55,16 +56,16 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => {});
+    removeLoadingScreen();
 
-    setUpPostProcessing();
+    setUpPostProcessing(sceneLoader.currentWorldManager);
     //render();
     animate();
   }
 }
 
 // set up all the post processing needed
-function setUpPostProcessing() {
+function setUpPostProcessing(worldManager) {
   // initialization of post processing
   composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, player.playerController.camera);
@@ -72,7 +73,7 @@ function setUpPostProcessing() {
   composer.addPass(renderPass);
 
   // setting up outlines and its parameters
-  const outlinePass = new OutlinePass(
+  outlinePass = new OutlinePass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
     scene,
     player.playerController.camera
@@ -86,7 +87,11 @@ function setUpPostProcessing() {
 
   composer.addPass(outlinePass);
 
+  setupOutlineObjects(worldManager);
   // setting up the objects to be outlined
+}
+
+function setupOutlineObjects(worldManager) {
   const outlineObjects = [];
   for (let battery of worldManager.batteries) {
     outlineObjects.push(battery.mesh);
@@ -94,15 +99,15 @@ function setUpPostProcessing() {
   outlineObjects.push(worldManager.gateKey.mesh);
   outlinePass.selectedObjects = outlineObjects;
 }
-
 // TODO: polish the loading screen removal logic;
 function removeLoadingScreen() {
   loadingScreen.classList.add("fade-out");
 
   //optional: remove loader from DOM via event listener
-  // loadingScreen.addEventListener("transitionend", () => {
-  //   loadingScreen.remove();
-  // });
+  loadingScreen.addEventListener("transitionend", () => {
+    loadingScreen.style.visibility = "hidden";
+    loadingScreen.classList.remove("fade-out");
+  });
 }
 
 // initialises all the graphics of the game
@@ -128,6 +133,8 @@ function initGraphics() {
 function animate() {
   if (state.isPlaying) {
     let deltaTime = clock.getDelta();
+    skybox.update(deltaTime);
+
     player.playerController.update(deltaTime, sceneLoader.currentScene);
     physics.updatePhysics(deltaTime);
 
@@ -141,7 +148,11 @@ function animate() {
 
     snowManager.updateSnow(deltaTime);
 
-    mMap.worldUpdate();
+    if (
+      sceneLoader.currentScene.name != "saferoom1" &&
+      sceneLoader.currentScene.name != "saferoom2"
+    )
+      mMap.worldUpdate();
 
     monsterManager.update();
     monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
@@ -165,9 +176,9 @@ function animate() {
 
 // initialises the game world
 async function initWorld() {
-  const skybox = new Skybox("nightsky");
+  skybox = new Skybox("nightsky", 8000);
   //TODO: Make this dynamic based on map size
-  scene.add(skybox.createSkybox(8000));
+  scene.add(skybox.mesh);
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
@@ -249,70 +260,77 @@ function setUpAmbientLight() {
 async function onInteractCB() {
   const interactingObject = player.playerController.intersect;
 
+  const loadMaze = async (mazeName) => {
+    await sceneLoader.loadScene(mazeName, true);
+    devMap = sceneLoader.getDevMap();
+    mMap = sceneLoader.getMiniMap();
+    mMap.showMap();
+    worldManager = sceneLoader.getWorldManager();
+    setupOutlineObjects(worldManager);
+    snowManager.showSnow();
+  };
+
+  const noKeyWarning = () => {
+    const noKeyText = document.getElementById("no-key-warning");
+    noKeyText.style.visibility = "visible";
+    noKeyText.classList.add("fade-out");
+    noKeyText.addEventListener("transitionend", () => {
+      console.log(noKeyText);
+      noKeyText.style.visibility = "hidden";
+      noKeyText.classList.remove("fade-out");
+    });
+  };
   // checks the name of the object the player is interacting with
   if (interactingObject) {
     switch (interactingObject.name) {
       case "maze1exit":
-        if (player.hasKey) {
+        if (player.hasKey(0)) {
           mMap.hideMap();
           snowManager.hideSnow();
           await sceneLoader.loadScene("saferoom1", true);
+        } else {
+          noKeyWarning();
         }
         break;
       case "saferoom1entrance":
-        await sceneLoader.loadScene("maze1", true);
-        devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.getMiniMap();
-        mMap.showMap();
-        worldManager = sceneLoader.getWorldManager();
-        snowManager.showSnow();
+        await loadMaze("maze1");
         break;
       case "saferoom1exit":
-        await sceneLoader.loadScene("maze2", true);
-        devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.getMiniMap();
-        mMap.showMap();
-        worldManager = sceneLoader.getWorldManager();
-        snowManager.showSnow();
-        // var winScreen = document.getElementById("win-screen");
-        // winScreen.classList.remove("hidden");
-        // state.isPlaying = false;
-        // state.gameover = true;
-        // player.playerController.controls.unlock();
-        // document.getElementById("restart-button-1").onclick = () => {
-        //   location.reload();
-        // };
+        await loadMaze("maze2");
         break;
       case "maze2entrance":
+        mMap.hideMap();
         await sceneLoader.loadScene("saferoom1", true);
         snowManager.hideSnow();
         break;
-
       case "maze2exit":
-        await sceneLoader.loadScene("saferoom2", true);
-        snowManager.hideSnow();
+        if (player.hasKey(1)) {
+          mMap.hideMap();
+          await sceneLoader.loadScene("saferoom2", true);
+          snowManager.hideSnow();
+        } else {
+          noKeyWarning();
+        }
         break;
       case "saferoom2entrance":
-        await sceneLoader.loadScene("maze2", true);
-        devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.getMiniMap();
-        mMap.showMap();
-        worldManager = sceneLoader.getWorldManager();
-        snowManager.showSnow();
+        await loadMaze("maze2");
         break;
       case "saferoom2exit":
-        await sceneLoader.loadScene("maze3", true);
-        devMap = sceneLoader.getDevMap();
-        mMap = sceneLoader.getMiniMap();
-        mMap.showMap();
-        worldManager = sceneLoader.getWorldManager();
-        snowManager.showSnow();
+        await loadMaze("maze3");
         break;
     }
   }
+  // var winScreen = document.getElementById("win-screen");
+  // winScreen.classList.remove("hidden");
+  // state.isPlaying = false;
+  // state.gameover = true;
+  // player.playerController.controls.unlock();
+  // document.getElementById("restart-button-1").onclick = () => {
+  //   location.reload();
+  // };
 }
 
-// resize the game
+// resize the viewport when the window size changes
 function onWindowResize() {
   player.playerController.camera.aspect =
     window.innerWidth / window.innerHeight;

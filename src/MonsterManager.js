@@ -58,6 +58,8 @@ class MonsterManager {
 
   despawnMonster() {
     if (this.monster) {
+      this.soundmanager.pause()
+      this.soundmanager = null
       this.monster.remove();
       this.monster.mesh = null;
       this.monster = null;

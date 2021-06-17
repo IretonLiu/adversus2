@@ -1,0 +1,41 @@
+
+#e-button{
+    position: absolute;
+    z-index: 100;
+    background-color: #000;
+    color: #ffffff;
+    padding: 0.6em;
+    display: inline-block;
+    font-size: 2em;
+    border-radius: 10px;
+    width: min-content;
+    letter-spacing: 3px;
+    top: 50%;
+    left: 50%;
+    visibility: hidden;
+
+  }
+
+#no-key-warning{
+    position: absolute; 
+    top:40%; 
+    left:40%;
+    visibility: hidden; 
+    z-index: 10;
+    color:#fff;
+    font-size: 2em;
+    opacity: 1;
+    transition: 3s opacity;
+}
+
+#no-key-warning.fade-out{
+  opacity: 0;
+}
+/*   
+  .button:hover{
+    cursor: pointer;
+    transform: scale(1.02) translateY(-3px);
+    color: #ffffff;
+    background-color: #121212;
+    outline: 2px solid white;
+  } */

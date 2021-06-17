@@ -80,7 +80,7 @@ class SceneLoader {
       this.playLoadingVideo();
     }
     state.isPlaying = false;
-    this.loadingScreen.classList.remove("fade-out");
+    this.loadingScreen.style.visibility = "visible";
     //this.loadingScreen.style.opacity = "1";
 
     // clear the scene if one exists
@@ -175,11 +175,14 @@ class SceneLoader {
     if (this.soundManagerGlobal) this.loadSound();
 
     this.scene.add(this.currentScene);
-    this.loadingScreen.classList.add("fade-out");
-    state.isPlaying = true;
+
 
     // update the class's objects to use the new context
     await this.updatePlayableObjects();
+
+    this.loadingScreen.classList.add("fade-out");
+    state.isPlaying = true;
+
   }
 
   clearScene() {
@@ -235,6 +238,8 @@ class SceneLoader {
     );
     this.maze1.growingTree();
     this.grid1 = this.maze1.getThickGrid();
+
+    this.grid1[1][0] = false;
     this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
 
     this.worldManager1 = new WorldManager(this.player, this.grid1);
