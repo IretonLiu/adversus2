@@ -339,6 +339,11 @@ async function onInteractCB() {
       case "saferoom2exit":
         await loadMaze("maze3");
         break;
+      case "maze3entrance":
+        mMap.hideMap();
+        await sceneLoader.loadScene("saferoom2", true);
+        snowManager.hideSnow();
+        break;
     }
   }
 
