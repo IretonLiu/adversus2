@@ -40,7 +40,7 @@ class Monster {
     this.backtracking = false;
 
     // track path travelled
-    this.backtrackPath = [];
+    // this.backtrackPath = [];
 
     //this.Mesh = new Mesh();
 
@@ -211,7 +211,7 @@ class Monster {
 
     // we have a new path, so we don't have any backtracking available yet
     // this.backtrackPath = [];
-    this.backtracking = false;
+    // this.backtracking = false;
 
     // have a new path - moving forwards
     this.setSpeed(Constants.MONSTER_SPEED);
@@ -244,7 +244,7 @@ class Monster {
       bufferAngle = 0;
     } else {
       // viewport
-      bufferAngle /= 2;
+      bufferAngle = 0;
     }
 
     // console.log(angle, viewAngle + bufferAngle);
@@ -261,7 +261,7 @@ class Monster {
     // can't see anything beyond the fog
     return (
       this.monsterObject.position.distanceTo(playerController.camera.position) >
-      Constants.FOG_FAR * 0.66 // add 10% buffer to fog threshold
+      Constants.FOG_FAR * 0.88 // add 10% buffer to fog threshold
     );
   }
 
@@ -342,12 +342,6 @@ class Monster {
   }
 
   startBacktrack() {
-    // need to update the path to be followed with the backtracking path
-    this.path = this.backtrackPath;
-
-    // empty the backtrack path
-    this.backtrackPath = [];
-
     // set the backtracking flag
     this.backtracking = true;
 
@@ -394,7 +388,8 @@ class Monster {
     ) {
       // if monster is within a radius around the next point in the path, then remove that point from the path (we have reached it)
       // keep track of the previously travelled-to points
-      this.backtrackPath.push(this.path.pop());
+      // this.backtrackPath.push(this.path.pop());
+      this.path.pop();
     }
   }
 }

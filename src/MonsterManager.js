@@ -3,7 +3,7 @@ import Constants from "./Constants";
 import Monster from "./Monster";
 import SoundManager from "./SoundManager";
 import * as THREE from "three";
-import { Mesh, StaticReadUsage } from "three";
+import { Mesh, StaticReadUsage, Vector2 } from "three";
 import state from "./State";
 
 class MonsterManager {
@@ -88,6 +88,9 @@ class MonsterManager {
   backtrackMonster() {
     // cause the monster to retrace its steps
     // only start the backtrack if we aren't already doing so
+    const furthestCorner = this.getFurthestCorner();
+    console.log(furthestCorner);
+    this.monster.getAstarPath(this.grid, Utils.convertThickGridToWorld(furthestCorner));
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
@@ -112,11 +115,12 @@ class MonsterManager {
 
         return;
       }
-
-      if (this.monster.path == "") {
-        this.despawnMonster();
-        this.fear -= 15;
-        return;
+      if (this.monster.backtracking) {
+        if (!this.monster.isVisible(this.player.playerController, false)) {
+          this.despawnMonster();
+          this.fear -= 15;
+          return;
+        }
       } else if (
         !this.monster.backtracking && // optimisation to prevent unnecessary raycasts in isVisible
         this.monster.isVisible(this.player.playerController, true)
@@ -125,6 +129,7 @@ class MonsterManager {
         this.backtrackMonster();
         return;
       }
+
       // this.monsterSoundTracker()
       this.monster.update();
       //this.soundmanager.bind(this.monster.Mesh)
@@ -181,27 +186,27 @@ class MonsterManager {
     }
   }
 
-  monsterSoundTracker() {
-    if (this.monster != null) {
-      if (this.soundmanager == null) {
-        this.soundmanager = new SoundManager(
-          this.monster,
-          player.playerController,
-          "assets/Sounds/monster.mp3"
-        );
-      } else {
-        if (this.monster != null) {
-          this.soundmanager.bind(this.monster.Mesh);
-        } else {
-          this.soundmanager.pause();
-        }
-      }
-    } else {
-      if (this.soundmanager != null) {
-        this.soundmanager.pause();
-        this.soundmanager = null;
+  getFurthestCorner() {
+    const corner1 = new Vector2(1, 1) // bottom left
+    const corner2 = new Vector2(this.grid.length - 2, 1) //top left
+    const corner3 = new Vector2(1, this.grid.length - 2) // bottom right
+    const corner4 = new Vector2(this.grid.length - 2, this.grid.length - 2) // bottom right
+    const corners = [corner1, corner2, corner3, corner4]
+    var maxDistance = -10;
+    var furthestCorner = null;
+    const playerGridPos = Utils.convertWorldToThickGrid(this.player.position);
+    for (var corner of corners) {
+      var dist = this.getManhattanDistance(corner.x, corner.y, playerGridPos.x, playerGridPos.y);
+      if (dist > maxDistance) {
+        maxDistance = dist;
+        furthestCorner = corner;
       }
     }
+    return furthestCorner;
+  }
+
+  getManhattanDistance(x1, z1, x2, z2) {
+    return (Math.abs(x1 - x2) + Math.abs(z1 - z2));
   }
 }
 
