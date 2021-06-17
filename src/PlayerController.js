@@ -4,6 +4,9 @@ import {
   SpotLight,
   Object3D,
   Raycaster,
+  BoxBufferGeometry,
+  MeshBasicMaterial,
+  Mesh,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
@@ -14,7 +17,7 @@ class PlayerController {
   constructor(domElement, onInteractCB) {
     // setup player object for ammo
     const playerPos = Constants.PLAYER_INITIAL_POS;
-    this.playerObject = new Object3D();
+    this.playerObject = new Mesh(new BoxBufferGeometry(5, 20, 5), new MeshBasicMaterial({ color: 0xffffff }));
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();

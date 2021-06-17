@@ -88,8 +88,8 @@ function setUpPostProcessing(worldManager) {
 
   composer.addPass(outlinePass);
 
-  //setupOutlineObjects(worldManager);
   // setting up the objects to be outlined
+  setupOutlineObjects(worldManager);
 }
 
 function setupOutlineObjects(worldManager) {
