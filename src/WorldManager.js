@@ -102,10 +102,11 @@ class WorldManager {
   }
 
   async setKey() {
+
     let randX =
-      Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
+      Math.floor((Math.random()*(1-0.5)+0.5) * ((this.grid.length - 1) / 2)) * 2 +1;
     let randZ =
-      Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
+      Math.floor((Math.random()*(1-0.5)+0.5) * ((this.grid.length - 1) / 2)) * 2 + 1;
     if (this.grid[randX][randZ] === false) {
       await this.loadKey(randX, randZ);
     }
