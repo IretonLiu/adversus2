@@ -114,6 +114,7 @@ class WorldManager {
   pickUpBattery(player) {
     var x = player.playerController.playerObject.position.x;
     var z = player.playerController.playerObject.position.z;
+    
     for (let battery of this.batteries) {
       if (
         x <= battery.mesh.position.x + 10 &&
@@ -122,6 +123,7 @@ class WorldManager {
         z >= battery.mesh.position.z - 10
       ) {
         let index = this.batteries.indexOf(battery);
+        player.soundmanager.batteryPickup()
         player.batteryCount++;
         //this.updateBatteyLife();
         battery.mesh.visible = false;
