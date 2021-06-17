@@ -9,6 +9,7 @@ import state from "./State";
 import SoundManagerGlobal from "./SoundManagerGlobal";
 import DevMap from "./DevMap";
 import WorldManager from "./WorldManager";
+
 class SceneLoader {
   constructor(physics, scene, loadingScreen) {
     this.physics = physics;
@@ -18,7 +19,6 @@ class SceneLoader {
     this.player = null;
     // this.monsterManager = monsterManager;
     // this.minimap = minimap;
-
 
     // information of each level held by the scene loader for loading
     // each hold separate information about different levels
@@ -278,8 +278,8 @@ class SceneLoader {
     this.worldManager3 = new WorldManager(this.player, this.grid3);
     this.miniMap3 = new MiniMap(this.player.playerController, this.grid3);
   }
-  // render and add the maze to the scene
 
+  // render and add the maze to the scene
   async loadMaze(name, maze, grid) {
     const wallHeight = 25;
     const wallWidth = 30;

@@ -142,19 +142,19 @@ class WorldManager {
       z <= this.gateKey.mesh.position.z + 10 &&
       z >= this.gateKey.mesh.position.z - 10
     ) {
-      this.keyDisplay();
+
       switch (this.scene.name) {
         case "maze1":
-          if (!player.hasKey(0))
-            player.pickUpKey(0);
+          player.pickUpKey(0);
+          this.keyDisplay(-80);
           break;
         case "maze2":
-          if (!player.hasKey(1))
-            player.pickUpKey(1);
+          player.pickUpKey(1);
+          this.keyDisplay(680);
           break;
         case "maze3":
-          if (!player.hasKey(2))
-            player.pickUpKey(2);
+          player.pickUpKey(2);
+          this.keyDisplay(1440);
           break;
       }
 
@@ -183,14 +183,15 @@ class WorldManager {
     ctx.restore();
   }
 
-  keyDisplay() {
+  keyDisplay(xPos) {
     let img = document.getElementById("keyPic");
 
     ctx.save();
     ctx.scale(0.1, 0.07);
-    ctx.drawImage(img, -80, 1300);
+    ctx.drawImage(img, xPos, 1300);
     ctx.restore();
   }
+
 
   torchDisplay() {
     let img = document.getElementById("torchPic");
@@ -204,7 +205,9 @@ class WorldManager {
   displayItems() {
     this.batteryDisplay();
     this.torchDisplay();
-    this.keyDisplay();
+    // this.keyDisplay();
+    // this.keyDisplay2();
+    // this.keyDisplay3();
   }
 }
 

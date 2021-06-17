@@ -4,13 +4,12 @@ import { Vector2 } from "three";
 import Constants from "./Constants";
 import SoundManagerGlobal from "./SoundManagerGlobal";
 
-
 class Player {
   constructor(position, playerController) {
     // this position is in world coordinates
 
     this.position = position;
-    this.keys = [false, false, false]
+    this.keys = [false, false, false];
     //this.hasKey = false;
     this.playerController = playerController;
     const soundmanager = new SoundManagerGlobal(
@@ -18,8 +17,8 @@ class Player {
       "assets/Sounds/ambience.mp3",
       "assets/Sounds/walking.mp3"
     );
-    soundmanager.nondefault()
-    this.soundmanager = soundmanager
+    soundmanager.nondefault();
+    this.soundmanager = soundmanager;
     this.torchLife = 100;
 
     this.batteryCount = 0;
@@ -29,12 +28,12 @@ class Player {
   }
 
   pickUpKey(index) {
-    this.soundmanager.keyPickup()
+    this.soundmanager.keyPickup();
     this.keys[index] = true;
   }
 
   hasKey(index) {
-    return this.keys[index]
+    return this.keys[index];
   }
 
   getPosition() {
@@ -77,9 +76,7 @@ class Player {
     if (Math.floor(this.torchLife) <= 0) {
       if (this.batteryCount > 0) {
         this.refillTorch();
-
-      }
-      else {
+      } else {
         this.playerController.turnTorchOff();
       }
     }
@@ -88,14 +85,14 @@ class Player {
     ctx.fillStyle = "#ffffffa0";
     ctx.strokeStyle = "white";
     ctx.clearRect(100, 20, 200, 40);
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.rect(100, 20, 160, 20);
-    ctx.closePath()
+    ctx.closePath();
     ctx.stroke();
     ctx.fillRect(100, 20, (this.torchLife / 20) * 32, 20);
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.rect(100 + 160, 25, 6, 10);
-    ctx.closePath()
+    ctx.closePath();
     ctx.stroke();
   }
 
@@ -103,11 +100,7 @@ class Player {
   refillTorch() {
     this.torchLife = 100;
     this.batteryCount--;
-
   }
-
 }
-
-
 
 export default Player;

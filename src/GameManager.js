@@ -89,7 +89,6 @@ function setUpPostProcessing(worldManager) {
 
   setupOutlineObjects(worldManager);
   // setting up the objects to be outlined
-
 }
 
 function setupOutlineObjects(worldManager) {
@@ -149,7 +148,10 @@ function animate() {
 
     snowManager.updateSnow(deltaTime);
 
-    if (sceneLoader.currentScene.name != "saferoom1" && sceneLoader.currentScene.name != "saferoom2")
+    if (
+      sceneLoader.currentScene.name != "saferoom1" &&
+      sceneLoader.currentScene.name != "saferoom2"
+    )
       mMap.worldUpdate();
 
     monsterManager.update();
@@ -164,7 +166,6 @@ function animate() {
     )
       .toISOString()
       .substr(11, 8);
-
 
     render();
     stats.update();
@@ -267,7 +268,7 @@ async function onInteractCB() {
     worldManager = sceneLoader.getWorldManager();
     setupOutlineObjects(worldManager);
     snowManager.showSnow();
-  }
+  };
 
   const noKeyWarning = (isFinal) => {
     const noKeyText = document.getElementById("no-key-warning");

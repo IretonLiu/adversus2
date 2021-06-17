@@ -1,186 +1,213 @@
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import {
-    Group,
-    PointLight,
-    Mesh,
-    MeshBasicMaterial,
-    FrontSide,
-    DoubleSide,
-    ShaderMaterial,
-    SphereBufferGeometry,
-    BackSide,
-    BoxGeometry,
-    MeshStandardMaterial,
-    Vector3,
-    Object3D
-} from "three"
+  Group,
+  PointLight,
+  Mesh,
+  MeshBasicMaterial,
+  FrontSide,
+  DoubleSide,
+  ShaderMaterial,
+  SphereBufferGeometry,
+  BackSide,
+  BoxGeometry,
+  MeshStandardMaterial,
+  Vector3,
+  Object3D,
+} from "three";
+import Reflection from "./reflections/Reflection";
 
 class SafeRoom {
-    constructor(name) {
-        this.model = new Group();
-        this.flameMaterials = [];
-        this.candleLights = [];
-        this.time = 0;
-        this.name = name;
+  constructor(name) {
+    this.model = new Group();
+    this.flameMaterials = [];
+    this.candleLights = [];
+    this.time = 0;
+    this.name = name;
+  }
+
+  loadModel(filename) {
+    const loader = new GLTFLoader();
+    const path = "./assets/models/saferoom/";
+    const extension = ".glb";
+    return new Promise((resolve, reject) => {
+      //loader.load(url, data => resolve(data), null, reject);
+      loader.load(
+        path + filename + extension,
+        (gltf) => {
+          const scene = gltf.scene;
+          scene.traverse(function (child) {
+            if (child.isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+              child.material.side = DoubleSide;
+              child.material.shadowSide = BackSide;
+            }
+          });
+
+          scene.scale.x = 6;
+          scene.scale.y = 6;
+          scene.scale.z = 6;
+          this.model.add(scene);
+
+          // the actual light source of the candle light
+          const candle1Pos = { x: 31.5, y: 12.5, z: -21.5 };
+          const candle2Pos = { x: -8.4, y: 12.5, z: 78.7 };
+
+          const candleLight1 = new PointLight(0xffaa33, 10, 100, 5);
+          candleLight1.shadow.bias = -0.001;
+          candleLight1.castShadow = true;
+          this.candleLights.push(candleLight1);
+          // the candle light shape and material using glsl shader
+          const flame1 = this.createCandleLight();
+          const candleFlame1 = new Group();
+          candleFlame1.add(candleLight1);
+          candleFlame1.add(flame1);
+          candleFlame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z);
+
+          const candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
+          candleLight2.shadow.bias = -0.001;
+          candleLight2.castShadow = true;
+          this.candleLights.push(candleLight2);
+          const flame2 = this.createCandleLight();
+          const candleFlame2 = new Group();
+          candleFlame2.add(candleLight2);
+          candleFlame2.add(flame2);
+          candleFlame2.position.set(
+            candle2Pos.x,
+            candle2Pos.y + 0.6,
+            candle2Pos.z
+          );
+          // set up the bounding boxes for the exits of the saferoom
+
+          this.setupDoors();
+          //this.setupColliders(physics);
+          this.model.add(candleFlame1);
+          this.model.add(candleFlame2);
+          this.model.position.set(40, -5, 40);
+
+          this.model.name = this.name;
+
+          // add a mirror to the wall opposite the beds
+          this.addMirror(new Vector3(0, 15, -58.5));
+
+          resolve("success");
+        },
+        (xhr) => {
+          console.log(
+            "loading saferoom: " + (xhr.loaded / xhr.total) * 100 + "% loaded"
+          );
+        },
+        reject
+      );
+    });
+  }
+
+  addMirror(position) {
+    // create and add a mirror to the current scene
+    // add mirror
+    const reflection = new Reflection();
+    const mirror = reflection.createGroundMirror(position);
+
+    this.model.add(mirror);
+  }
+
+  setupColliders(physics) {
+    const wallColliderSize = {
+      x: 0.6,
+      y: 48,
+      z: 150,
+    };
+
+    //exitBoundingBoxMaterial.visible = false;
+    const frontWall = new Object3D();
+    frontWall.position.x = 60;
+    frontWall.position.z = 15;
+    this.model.add(frontWall);
+    physics.createRoomRB(this.model, frontWall, wallColliderSize);
+
+    const backWall = new Object3D();
+    backWall.position.x = -60;
+    backWall.position.z = 15;
+    this.model.add(backWall);
+    physics.createRoomRB(this.model, backWall, wallColliderSize);
+
+    const leftWall = new Object3D();
+    leftWall.rotateY(Math.PI / 2);
+    leftWall.position.z = 83;
+    this.model.add(leftWall);
+    physics.createRoomRB(this.model, leftWall, wallColliderSize);
+
+    const rightWall = new Object3D();
+    rightWall.rotateY(Math.PI / 2);
+    rightWall.position.z = -62;
+    this.model.add(rightWall);
+    physics.createRoomRB(this.model, rightWall, wallColliderSize);
+  }
+
+  setupDoors() {
+    // set up the bounding box geometry for the entrance and exit doors
+    const doorBoundingBoxGeometry = new BoxGeometry(5, 18, 18);
+    const doorBoundingBoxMaterial = new MeshStandardMaterial({
+      color: 0xffffff,
+    });
+    doorBoundingBoxMaterial.visible = true;
+
+    // set up the exit bounding box
+    const exitBoundingBoxMesh = new Mesh(
+      doorBoundingBoxGeometry,
+      doorBoundingBoxMaterial
+    );
+    exitBoundingBoxMesh.name = this.name + "exit";
+    exitBoundingBoxMesh.position.x = 60;
+    exitBoundingBoxMesh.position.z = 70;
+    exitBoundingBoxMesh.position.y = 10.5;
+    this.model.add(exitBoundingBoxMesh);
+
+    // set up the entrance bounding box
+    const entranceBoundingBoxMesh = new Mesh(
+      doorBoundingBoxGeometry,
+      doorBoundingBoxMaterial
+    );
+    entranceBoundingBoxMesh.name = this.name + "entrance";
+    entranceBoundingBoxMesh.position.x = -60;
+    entranceBoundingBoxMesh.position.z = -45;
+    entranceBoundingBoxMesh.position.y = 10.5;
+    this.model.add(entranceBoundingBoxMesh);
+  }
+
+  createCandleLight() {
+    let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
+    flameGeo.translate(0, 0.5, 0);
+    let flameMat = this.createShaderMaterial();
+    this.flameMaterials.push(flameMat);
+    let flame = new Mesh(flameGeo, flameMat);
+    flame.position.y = -1;
+    flame.scale.x = 0.5;
+    flame.scale.y = 0.5;
+    flame.scale.z = 0.5;
+
+    return flame;
+  }
+
+  update(time) {
+    this.time += time;
+    this.time = this.time % 1000;
+    this.flameMaterials[0].uniforms.time.value = this.time;
+    this.flameMaterials[1].uniforms.time.value = this.time;
+    for (var i = 0; i < this.candleLights.length; i++) {
+      this.candleLights[i].position.x += Math.sin(this.time * Math.PI) * 0.0001;
+      // this.candleLights[i].position.z += Math.cos(this.time * Math.PI * 0.75) * 0.0001;
     }
+  }
 
-    loadModel(filename) {
+  // create the flame shader, credits to prisoner849
 
-        const loader = new GLTFLoader();
-        const path = "./assets/models/saferoom/"
-        const extension = ".glb"
-        return new Promise((resolve, reject) => {
-            //loader.load(url, data => resolve(data), null, reject);
-            loader.load(path + filename + extension, (gltf) => {
-
-
-                const scene = gltf.scene;
-                scene.traverse(function (child) {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                        child.material.side = DoubleSide;
-                        child.material.shadowSide = BackSide;
-                    }
-                });
-
-                scene.scale.x = 6;
-                scene.scale.y = 6;
-                scene.scale.z = 6;
-                this.model.add(scene)
-
-                // the actual light source of the candle light
-                const candle1Pos = { x: 31.5, y: 12.5, z: -21.5 }
-                const candle2Pos = { x: -8.4, y: 12.5, z: 78.7 }
-
-                const candleLight1 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight1.shadow.bias = -0.001
-                candleLight1.castShadow = true;
-                this.candleLights.push(candleLight1);
-                // the candle light shape and material using glsl shader
-                const flame1 = this.createCandleLight();
-                const candleFlame1 = new Group();
-                candleFlame1.add(candleLight1)
-                candleFlame1.add(flame1)
-                candleFlame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z,);
-
-                const candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
-                candleLight2.shadow.bias = -0.001
-                candleLight2.castShadow = true;
-                this.candleLights.push(candleLight2);
-                const flame2 = this.createCandleLight();
-                const candleFlame2 = new Group();
-                candleFlame2.add(candleLight2)
-                candleFlame2.add(flame2)
-                candleFlame2.position.set(candle2Pos.x, candle2Pos.y + 0.6, candle2Pos.z,);
-                // set up the bounding boxes for the exits of the saferoom
-
-                this.setupDoors();
-                //this.setupColliders(physics);
-                this.model.add(candleFlame1);
-                this.model.add(candleFlame2);
-                this.model.position.set(40, -5, 40);
-
-                this.model.name = this.name;
-                resolve("success");
-            }, (xhr) => {
-                console.log("loading saferoom: " + (xhr.loaded / xhr.total * 100) + '% loaded');
-            }, reject)
-        });
-    }
-
-    setupColliders(physics) {
-        const wallColliderSize = {
-            x: 0.6,
-            y: 48,
-            z: 150
-        }
-
-        //exitBoundingBoxMaterial.visible = false;
-        const frontWall = new Object3D();
-        frontWall.position.x = 60;
-        frontWall.position.z = 15;
-        this.model.add(frontWall);
-        physics.createRoomRB(this.model, frontWall, wallColliderSize);
-
-        const backWall = new Object3D();
-        backWall.position.x = -60;
-        backWall.position.z = 15;
-        this.model.add(backWall);
-        physics.createRoomRB(this.model, backWall, wallColliderSize);
-
-        const leftWall = new Object3D();
-        leftWall.rotateY(Math.PI / 2)
-        leftWall.position.z = 83;
-        this.model.add(leftWall);
-        physics.createRoomRB(this.model, leftWall, wallColliderSize);
-
-        const rightWall = new Object3D();
-        rightWall.rotateY(Math.PI / 2)
-        rightWall.position.z = -62;
-        this.model.add(rightWall);
-        physics.createRoomRB(this.model, rightWall, wallColliderSize);
-    }
-
-    setupDoors() {
-
-        // set up the bounding box geometry for the entrance and exit doors
-        const doorBoundingBoxGeometry = new BoxGeometry(5, 18, 18,);
-        const doorBoundingBoxMaterial = new MeshStandardMaterial({ color: 0xffffff });
-        doorBoundingBoxMaterial.visible = true;
-
-        // set up the exit bounding box
-        const exitBoundingBoxMesh = new Mesh(doorBoundingBoxGeometry, doorBoundingBoxMaterial);
-        exitBoundingBoxMesh.name = this.name + "exit";
-        exitBoundingBoxMesh.position.x = 60;
-        exitBoundingBoxMesh.position.z = 70;
-        exitBoundingBoxMesh.position.y = 10.5;
-        this.model.add(exitBoundingBoxMesh)
-
-        // set up the entrance bounding box
-        const entranceBoundingBoxMesh = new Mesh(doorBoundingBoxGeometry, doorBoundingBoxMaterial);
-        entranceBoundingBoxMesh.name = this.name + "entrance";
-        entranceBoundingBoxMesh.position.x = -60;
-        entranceBoundingBoxMesh.position.z = -45;
-        entranceBoundingBoxMesh.position.y = 10.5;
-        this.model.add(entranceBoundingBoxMesh)
-
-
-    }
-
-    createCandleLight() {
-        let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
-        flameGeo.translate(0, 0.5, 0);
-        let flameMat = this.createShaderMaterial();
-        this.flameMaterials.push(flameMat);
-        let flame = new Mesh(flameGeo, flameMat);
-        flame.position.y = -1;
-        flame.scale.x = 0.5;
-        flame.scale.y = 0.5;
-        flame.scale.z = 0.5;
-
-        return flame;
-    }
-
-    update(time) {
-        this.time += time;
-        this.time = this.time % 1000;
-        this.flameMaterials[0].uniforms.time.value = this.time;
-        this.flameMaterials[1].uniforms.time.value = this.time;
-        for (var i = 0; i < this.candleLights.length; i++) {
-            this.candleLights[i].position.x += Math.sin(this.time * Math.PI) * 0.0001;
-            // this.candleLights[i].position.z += Math.cos(this.time * Math.PI * 0.75) * 0.0001;
-        }
-    }
-
-    // create the flame shader, credits to prisoner849
-
-    createShaderMaterial() {
-        return new ShaderMaterial({
-            uniforms: {
-                time: { value: 0 }
-            },
-            vertexShader: `
+  createShaderMaterial() {
+    return new ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+      },
+      vertexShader: `
               uniform float time;
               varying vec2 vUv;
               varying float hValue;
@@ -234,7 +261,7 @@ class SafeRoom {
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos,1.0);
               }
             `,
-            fragmentShader: `
+      fragmentShader: `
               varying float hValue;
               varying vec2 vUv;
       
@@ -253,10 +280,10 @@ class SafeRoom {
                 gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.66, 0.32, 0.03), smoothstep(0.95, 1., hValue)); // tip
               }
             `,
-            transparent: true,
-            side: FrontSide
-        });
-    }
+      transparent: true,
+      side: FrontSide,
+    });
+  }
 }
 
 export default SafeRoom;

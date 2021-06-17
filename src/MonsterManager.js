@@ -90,7 +90,7 @@ class MonsterManager {
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
-  update(deltaTime) {
+  update() {
     if (this.monster) {
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
@@ -112,7 +112,7 @@ class MonsterManager {
 
         return;
       }
-      
+
       if (this.monster.path == "") {
         this.despawnMonster();
         this.fear -= 15;
