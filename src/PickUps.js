@@ -66,12 +66,25 @@ class GateKey extends PickUps {
   makeKey(scene, x, z) {
     return new Promise((resolve, reject) => {
       //loader.load(url, data => resolve(data), null, reject);
+      var modelToLoad =""
+
+      switch (scene.name) {
+        case "maze1":
+          modelToLoad="./assets/models/key1.glb"
+          break;
+        case "maze2":
+          modelToLoad="./assets/models/key2.glb"
+          break;
+        case "maze3":
+          modelToLoad="./assets/models/key3.glb"
+          break;
+      }
       loader.load(
-        "./assets/models/Worn_Key.glb",
+        modelToLoad,
         (gltf) => {
           this.mesh = gltf.scene;
           //console.log(this.mesh)
-          this.mesh.scale.set(30, 30, 30);
+          this.mesh.scale.set(1, 1, 1);
           this.mesh.position.x = x * Constants.WALL_SIZE;
           this.mesh.position.z = z * Constants.WALL_SIZE;
 
