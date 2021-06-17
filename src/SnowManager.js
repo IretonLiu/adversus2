@@ -12,7 +12,7 @@ class SnowManager {
         return Math.floor(Math.random() * (max - min + 1) + min);
     }
     makeSnow() {
-        const particleNum = 5000;
+        const particleNum = 2000;
         const max = 100;
         const min = -100;
         const textureSize = 64.0;
@@ -120,7 +120,7 @@ class SnowManager {
             var playerZ = this.player.getPosition().z;
             const posArr = this.snowParticles.geometry.getAttribute("position").array;
 
-            var offset = 100;
+            var offset = 50;
 
             for (let i = 0; i < posArr.length; i += 3) {
                 var x = i;

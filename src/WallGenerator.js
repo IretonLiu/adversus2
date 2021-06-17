@@ -9,9 +9,9 @@ class WallGenerator {
     this.width = width;
     this.height = height;
     this.noiseGenerator = new NoiseGenerator();
-    this.normalMap = new THREE.TextureLoader().load(
-      "assets/normal_maps/snow_normal.jpg"
-    );
+    // this.normalMap = new THREE.TextureLoader().load(
+    //   "assets/normal_maps/snow_normal.jpg"
+    // );
     this.wallTexture = new THREE.TextureLoader().load(
       "assets/textures/snow_wall.jpg"
     );
@@ -34,27 +34,26 @@ class WallGenerator {
     var topPlaneGeometry = new THREE.PlaneBufferGeometry(
       this.width,
       this.width,
-      10,
-      10
+      4,
+      4,
     );
-    this.applyNoise(10, topPlaneGeometry);
+    this.applyNoise(4, topPlaneGeometry);
 
     wallGroup.add(this.generatePlane(0, topPlaneGeometry, wallMaterial));
 
     // add barbed wires based on a chance
-    if (Math.random() > 0.7)
+    if (Math.random() > 0.8)
       wallGroup.add(await this.loadBarbedWireModel());
 
     switch (type) {
       case 0: // side walls front facing
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
-        wallGroup.add(await this.createSideLogWalls());
         break;
       case 1: // side walls side facing
         wallGroup.add(this.generatePlane(1, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
-        wallGroup.add(await this.createSideLogWalls());
+        //wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI / 2);
         break;
       case 2: // protruding wall facing forward
@@ -101,12 +100,12 @@ class WallGenerator {
       case 9: // corners right up empty
         wallGroup.add(this.generatePlane(2, sideWallGeometry, wallMaterial));
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
-        wallGroup.add(await this.createSideLogWalls());
+        //wallGroup.add(await this.createSideLogWalls());
         wallGroup.rotateY(Math.PI);
         break;
       case 10: // T junction, down empty
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
-        wallGroup.add(await this.createSideLogWalls());
+        //wallGroup.add(await this.createSideLogWalls());
         break;
       case 11:
         wallGroup.add(this.generatePlane(3, sideWallGeometry, wallMaterial));
@@ -219,7 +218,7 @@ class WallGenerator {
     var vertices = geometry.attributes.position.array;
 
     for (let i = 0, j = 0, l = vertices.length; i < l; i++, j += 3) {
-      vertices[j + 2] += noise[i] * 2;
+      vertices[j + 2] += noise[i] * 4;
     }
   }
 

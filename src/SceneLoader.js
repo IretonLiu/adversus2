@@ -274,7 +274,6 @@ class SceneLoader {
 
     // opens up the entrance and the exit
     this.grid3[1][0] = false;
-    this.grid3[2 * this.maze3.width - 1][2 * this.maze3.height] = false;
 
     this.worldManager3 = new WorldManager(this.player, this.grid3);
     this.miniMap3 = new MiniMap(this.player.playerController, this.grid3);
@@ -332,8 +331,14 @@ class SceneLoader {
       mazeGroup.add(door.model);
     }
     if (!grid[1][0]) {
+
       const door = new Door(name + "entrance");
-      await door.loadModel("Door", doorBoundingBoxSize);
+      console.log(name)
+      if (name == "maze1") {
+        await door.loadModel("Gate", doorBoundingBoxSize);
+      } else {
+        await door.loadModel("Door", doorBoundingBoxSize);
+      }
       this.scene.add(door.model);
       door.model.position.x = Constants.WALL_SIZE * 0;
       door.model.position.z = Constants.WALL_SIZE * 1;

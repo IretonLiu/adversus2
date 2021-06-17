@@ -20,8 +20,8 @@ let Constants = {
 
   // map size
   MAP1_SIZE: 5,
-  MAP2_SIZE: 5,
-  MAP3_SIZE: 5,
+  MAP2_SIZE: 6,
+  MAP3_SIZE: 7,
 
   // percentage of walls removed
   PROBABILITY_WALLS_REMOVED: 0.75,

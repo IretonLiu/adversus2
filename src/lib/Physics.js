@@ -78,7 +78,7 @@ class Physics {
 
     // setup the shape of the collider that matches the shape of the mesh
     // let colliderShape = new Ammo.btBoxShape(new Ammo.btVector3(boxBreadth, boxHeight, boxWidth));
-    let colliderShape = new Ammo.btSphereShape(3);
+    let colliderShape = new Ammo.btSphereShape(5);
     colliderShape.setMargin(0.05);
 
     // setup inertia of the object

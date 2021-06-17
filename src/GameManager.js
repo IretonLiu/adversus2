@@ -270,19 +270,41 @@ async function onInteractCB() {
     snowManager.showSnow();
   };
 
-  const noKeyWarning = () => {
+  const noKeyWarning = (isFinal) => {
     const noKeyText = document.getElementById("no-key-warning");
-    noKeyText.style.visibility = "visible";
-    noKeyText.classList.add("fade-out");
-    noKeyText.addEventListener("transitionend", () => {
-      console.log(noKeyText);
-      noKeyText.style.visibility = "hidden";
-      noKeyText.classList.remove("fade-out");
-    });
-  };
+    if (!noKeyText.classList.contains("fade-out")) {
+      if (isFinal) {
+        noKeyText.innerHTML = "You need all three keys to escape the maze...";
+      } else {
+        noKeyText.innerHTML = "You need a key to unlock this door...";
+      }
+      noKeyText.style.visibility = "visible";
+      noKeyText.classList.add("fade-out");
+      noKeyText.addEventListener("transitionend", () => {
+        noKeyText.classList.remove("fade-out");
+        noKeyText.style.visibility = "hidden";
+
+      })
+    }
+
+  }
   // checks the name of the object the player is interacting with
   if (interactingObject) {
     switch (interactingObject.name) {
+      case "maze1entrance":
+        if (player.hasKey(0) && player.hasKey(1) && player.hasKey(2)) {
+          var winScreen = document.getElementById("win-screen");
+          winScreen.classList.remove("hidden");
+          state.isPlaying = false;
+          state.gameover = true;
+          player.playerController.controls.unlock();
+          document.getElementById("restart-button-1").onclick = () => {
+            location.reload();
+          };
+        } else {
+          noKeyWarning(true);
+        }
+        break;
       case "maze1exit":
         if (player.hasKey(0)) {
           mMap.hideMap();
@@ -318,16 +340,14 @@ async function onInteractCB() {
       case "saferoom2exit":
         await loadMaze("maze3");
         break;
+      case "maze3entrance":
+        mMap.hideMap();
+        await sceneLoader.loadScene("saferoom2", true);
+        snowManager.hideSnow();
+        break;
     }
   }
-  // var winScreen = document.getElementById("win-screen");
-  // winScreen.classList.remove("hidden");
-  // state.isPlaying = false;
-  // state.gameover = true;
-  // player.playerController.controls.unlock();
-  // document.getElementById("restart-button-1").onclick = () => {
-  //   location.reload();
-  // };
+
 }
 
 // resize the viewport when the window size changes

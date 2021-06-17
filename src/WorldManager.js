@@ -114,7 +114,7 @@ class WorldManager {
   pickUpBattery(player) {
     var x = player.playerController.playerObject.position.x;
     var z = player.playerController.playerObject.position.z;
-    
+
     for (let battery of this.batteries) {
       if (
         x <= battery.mesh.position.x + 10 &&
@@ -142,7 +142,7 @@ class WorldManager {
       z <= this.gateKey.mesh.position.z + 10 &&
       z >= this.gateKey.mesh.position.z - 10
     ) {
-      
+
       switch (this.scene.name) {
         case "maze1":
           player.pickUpKey(0);
