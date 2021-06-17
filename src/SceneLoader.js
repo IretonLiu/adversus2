@@ -9,6 +9,7 @@ import state from "./State";
 import SoundManagerGlobal from "./SoundManagerGlobal";
 import DevMap from "./DevMap";
 import WorldManager from "./WorldManager";
+import { Vector3 } from "three";
 
 class SceneLoader {
   constructor(physics, scene, loadingScreen) {
@@ -76,6 +77,12 @@ class SceneLoader {
   }
 
   async loadScene(nextSceneName, playVideo) {
+    // set position of saferoom doors
+    const saferoom1Exit = new Vector3(60, 10.5, 70);
+    const saferoom1Entrance = new Vector3(-60, 10.5, -45);
+    const saferoom2Exit = new Vector3(60, 10.5, 70);
+    const saferoom2Entrance = new Vector3(-60, 10.5, -45);
+
     if (playVideo) {
       this.playLoadingVideo();
     }
@@ -102,7 +109,7 @@ class SceneLoader {
       // checks if the player just returned to the previous maze
       // and set the players position accordingly
       if (this.currentScene && this.currentScene.name == "saferoom1") {
-        console.log("from saferoom");
+        // set position
         const exitPos2D = this.maze1.getGridExitPosition();
         this.player.playerController.setPosition(
           exitPos2D.x,
@@ -159,9 +166,43 @@ class SceneLoader {
       this.currentWorldManager = this.worldManager3;
       this.currentMiniMap = this.miniMap3;
     } else if (nextSceneName == "saferoom1") {
+      // set the looking direction of the player to the next door to travel through
+      if (this.currentScene.name == "maze1") {
+        // look at the exit door
+        this.player.playerController.camera.lookAt(
+          saferoom1Exit.x,
+          saferoom1Exit.y,
+          saferoom1Exit.z
+        );
+      } else if (this.currentScene.name == "maze2") {
+        // look at the entrance door
+        this.player.playerController.camera.lookAt(
+          saferoom1Entrance.x,
+          saferoom1Entrance.y,
+          saferoom1Entrance.z
+        );
+      }
+
       await this.loadRoom1();
       this.saferoom1.setupColliders(this.physics);
     } else if (nextSceneName == "saferoom2") {
+      // set the looking direction of the player to the next door to travel through
+      if (this.currentScene.name == "maze2") {
+        // look at the exit door
+        this.player.playerController.camera.lookAt(
+          saferoom2Exit.x,
+          saferoom2Exit.y,
+          saferoom2Exit.z
+        );
+      } else if (this.currentScene.name == "maze3") {
+        // look at the entrance door
+        this.player.playerController.camera.lookAt(
+          saferoom2Entrance.x,
+          saferoom2Entrance.y,
+          saferoom2Entrance.z
+        );
+      }
+
       await this.loadRoom2();
       this.saferoom2.setupColliders(this.physics);
     }
@@ -176,13 +217,11 @@ class SceneLoader {
 
     this.scene.add(this.currentScene);
 
-
     // update the class's objects to use the new context
     await this.updatePlayableObjects();
 
     this.loadingScreen.classList.add("fade-out");
     state.isPlaying = true;
-
   }
 
   clearScene() {
@@ -332,9 +371,8 @@ class SceneLoader {
       mazeGroup.add(door.model);
     }
     if (!grid[1][0]) {
-
       const door = new Door(name + "entrance");
-      console.log(name)
+      console.log(name);
       if (name == "maze1") {
         await door.loadModel("Gate", doorBoundingBoxSize);
       } else {

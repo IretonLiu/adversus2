@@ -17,7 +17,10 @@ class PlayerController {
   constructor(domElement, onInteractCB) {
     // setup player object for ammo
     const playerPos = Constants.PLAYER_INITIAL_POS;
-    this.playerObject = new Mesh(new BoxBufferGeometry(5, 5, 5), new MeshBasicMaterial({ color: 0xffffff, visible: false }));
+    this.playerObject = new Mesh(
+      new BoxBufferGeometry(5, 5, 5),
+      new MeshBasicMaterial({ color: 0xffffff, visible: false })
+    );
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();
@@ -383,7 +386,6 @@ class PlayerController {
     let physicsBody = this.playerObject.userData.physicsBody;
     physicsBody.setLinearVelocity(resultantImpulse);
 
-
     this.camera.position.y += this.velocity.y;
     this.playerObject.position.y += this.velocity.y;
 
@@ -411,13 +413,33 @@ class PlayerController {
     const intersects = this.raycaster.intersectObjects(scene.children, true);
     if (intersects.length > 0) {
       this.intersect = intersects[0].object;
-      if (this.intersect.name.includes("saferoom") || this.intersect.name.includes("maze")) {
-        const element = document.getElementById("e-button");
+      if (
+        this.intersect.name.includes("saferoom") ||
+        this.intersect.name.includes("maze")
+      ) {
+        const element = document.getElementById("button-prompt");
         element.style.visibility = "visible";
+
+        switch (this.intersect.name) {
+          case "saferoom1entrance":
+            element.innerText = "Press E to enter Maze 1";
+            break;
+          case "saferoom1exit":
+            element.innerText = "Press E to enter Maze 2";
+            break;
+          case "saferoom2entrance":
+            element.innerText = "Press E to enter Maze 2";
+            break;
+          case "saferoom2exit":
+            element.innerText = "Press E to enter Maze 3";
+            break;
+          default:
+            element.innerText = "Press E";
+        }
       }
     } else {
       this.intersect = null;
-      const element = document.getElementById("e-button");
+      const element = document.getElementById("button-prompt");
       element.style.visibility = "hidden";
     }
   }
