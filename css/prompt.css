@@ -11,18 +11,21 @@
   letter-spacing: 3px;
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
   visibility: hidden;
 }
 
 #no-key-warning {
   position: absolute;
   top: 40%;
-  left: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   visibility: hidden;
-  z-index: 10;
+  z-index: 200;
   color: #fff;
   font-size: 2em;
   opacity: 1;
+  text-align: center;
 }
 
 #no-key-warning.fade-out {
