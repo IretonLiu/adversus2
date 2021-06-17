@@ -58,8 +58,8 @@ class MonsterManager {
 
   despawnMonster() {
     if (this.monster) {
-      this.soundmanager.pause()
-      this.soundmanager = null
+      this.soundmanager.pause();
+      this.soundmanager = null;
       this.monster.remove();
       this.monster.mesh = null;
       this.monster = null;
@@ -83,7 +83,6 @@ class MonsterManager {
       playerPosition
       // new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
     );
-
   }
 
   backtrackMonster() {
@@ -103,7 +102,6 @@ class MonsterManager {
         )
       ) {
         state.isPlaying = false;
-        this.soundmanager.pa
         var loseScreen = document.getElementById("lose-screen");
         loseScreen.classList.remove("hidden");
         state.gameover = true;
@@ -185,7 +183,6 @@ class MonsterManager {
 
   monsterSoundTracker() {
     if (this.monster != null) {
-      console.log("hi")
       if (this.soundmanager == null) {
         this.soundmanager = new SoundManager(
           this.monster,

@@ -14,14 +14,17 @@ class SoundManager {
       sound.setBuffer(buffer);
       sound.setLoop(true);
       sound.setVolume(5);
-      sound.play()
-    })
+      sound.play();
+    });
     sound.setRefDistance(2);
-    this.monsterMesh.add(sound);
+
+    this.sound = sound;
+
+    this.monsterMesh.add(this.sound);
   }
 
   getSound() {
-    return this.sound
+    return this.sound;
   }
   // monsterSoundTracker() {
   //   if (monsterManager.monster != null) {
@@ -47,10 +50,10 @@ class SoundManager {
   //}
 
   pause() {
-    this.sound.pause()
+    this.sound.pause();
   }
   getIsplaying() {
-    return this.sound.getIsplaying()
+    return this.sound.getIsplaying();
   }
 
   // bind(mesh) {
@@ -61,4 +64,4 @@ class SoundManager {
   // }
 }
 
-export default SoundManager
+export default SoundManager;
