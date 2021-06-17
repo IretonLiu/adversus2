@@ -86,10 +86,9 @@ function setUpPostProcessing(worldManager) {
   outlinePass.edgeThickness = 0.5;
   outlinePass.edgeGlow = 0;
 
-  composer.addPass(outlinePass);
-
-  //setupOutlineObjects(worldManager);
   // setting up the objects to be outlined
+  setupOutlineObjects(worldManager);
+  composer.addPass(outlinePass);
 }
 
 function setupOutlineObjects(worldManager) {
@@ -284,11 +283,9 @@ async function onInteractCB() {
       noKeyText.addEventListener("transitionend", () => {
         noKeyText.classList.remove("fade-out");
         noKeyText.style.visibility = "hidden";
-
-      })
+      });
     }
-
-  }
+  };
   // checks the name of the object the player is interacting with
   if (interactingObject) {
     switch (interactingObject.name) {
@@ -320,7 +317,7 @@ async function onInteractCB() {
         break;
       case "saferoom1exit":
         await loadMaze("maze2");
-        ambientLight.color.setHex(0xff5555)
+        ambientLight.color.setHex(0xff5555);
         ambientLight.color.intensity = 0.5;
         break;
       case "maze2entrance":
@@ -342,7 +339,7 @@ async function onInteractCB() {
         break;
       case "saferoom2exit":
         await loadMaze("maze3");
-        ambientLight.color.setHex(0xff0000)
+        ambientLight.color.setHex(0xff0000);
         break;
       case "maze3entrance":
         mMap.hideMap();
@@ -351,7 +348,6 @@ async function onInteractCB() {
         break;
     }
   }
-
 }
 
 // resize the viewport when the window size changes
