@@ -19,6 +19,7 @@ import SnowManager from "./SnowManager";
 let player,
   scene,
   renderer,
+  ambientLight,
   physics,
   mMap,
   monsterManager,
@@ -87,7 +88,7 @@ function setUpPostProcessing(worldManager) {
 
   composer.addPass(outlinePass);
 
-  setupOutlineObjects(worldManager);
+  //setupOutlineObjects(worldManager);
   // setting up the objects to be outlined
 }
 
@@ -251,9 +252,9 @@ function setUpGround() {
 
 function setUpAmbientLight() {
   // adds the ambient light into scene graph
-  const light = new THREE.AmbientLight(0xffffff);
-  light.intensity = Constants.AMBIENT_INTENSITY;
-  scene.add(light);
+  ambientLight = new THREE.AmbientLight(0xffffff);
+  ambientLight.intensity = Constants.AMBIENT_INTENSITY;
+  scene.add(ambientLight);
 }
 
 // callback to the player when interacting with and interactable object
@@ -319,6 +320,8 @@ async function onInteractCB() {
         break;
       case "saferoom1exit":
         await loadMaze("maze2");
+        ambientLight.color.setHex(0xff5555)
+        ambientLight.color.intensity = 0.5;
         break;
       case "maze2entrance":
         mMap.hideMap();
@@ -339,6 +342,7 @@ async function onInteractCB() {
         break;
       case "saferoom2exit":
         await loadMaze("maze3");
+        ambientLight.color.setHex(0xff0000)
         break;
       case "maze3entrance":
         mMap.hideMap();

@@ -39,8 +39,9 @@ class Candle {
           })
 
           this.model.add(gltf.scene);
+          //this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
 
-          this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
+          this.candleLight = new PointLight(0xffcc66, 1, 100, 5);
           this.candleLight.shadow.bias = -0.001;
           this.candleLight.castShadow = true;
           this.candleLight.position.y = 1;

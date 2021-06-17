@@ -68,7 +68,13 @@ class MonsterManager {
 
   spawnMonster(monsterGridLoc) {
     var monsterWorldPos = Utils.convertThickGridToWorld(monsterGridLoc);
-    this.monster = new Monster(monsterWorldPos, this.scene);
+    this.monster = new Monster(monsterWorldPos, this.scene, () => {
+      this.soundmanager = new SoundManager(
+        this.monster.monsterObject,
+        this.player.playerController,
+        "assets/Sounds/JockeySounds.mp3"
+      );
+    });
     var playerPosition = Utils.convertThickGridToWorld(
       Utils.convertWorldToThickGrid(this.player.position)
     );
@@ -77,11 +83,7 @@ class MonsterManager {
       playerPosition
       // new THREE.Vector3(1 * Constants.WALL_SIZE, 0, 1 * Constants.WALL_SIZE)
     );
-    this.soundmanager = new SoundManager(
-      this.monster.Mesh,
-      this.player.playerController,
-      "assets/Sounds/JockeySounds.mp3"
-    );
+
   }
 
   backtrackMonster() {
@@ -125,15 +127,15 @@ class MonsterManager {
         this.backtrackMonster();
         return;
       }
-     // this.monsterSoundTracker()
+      // this.monsterSoundTracker()
       this.monster.update();
-      this.soundmanager.bind(this.monster.Mesh)
-      this.monster.Mesh.position.setX(this.monster.position.x)
-      this.monster.Mesh.position.setY(this.monster.position.y)
-      this.monster.Mesh.position.setZ(this.monster.position.z)
-      this.soundmanager.listener.position.setX(this.monster.Mesh.position.x)
-      this.soundmanager.listener.position.setY(this.monster.Mesh.position.y)
-      this.soundmanager.listener.position.setZ(this.monster.Mesh.position.z)
+      //this.soundmanager.bind(this.monster.Mesh)
+      // this.monster.Mesh.position.setX(this.monster.position.x)
+      // this.monster.Mesh.position.setY(this.monster.position.y)
+      // this.monster.Mesh.position.setZ(this.monster.position.z)
+      // this.soundmanager.listener.position.setX(this.monster.Mesh.position.x)
+      // this.soundmanager.listener.position.setY(this.monster.Mesh.position.y)
+      // this.soundmanager.listener.position.setZ(this.monster.Mesh.position.z)
     }
     this.fearDecision();
   }

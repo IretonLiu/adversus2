@@ -186,6 +186,8 @@ class SceneLoader {
   }
 
   clearScene() {
+    // despawn the monster
+    if (this.monsterManager.monster) this.monsterManager.despawnMonster();
     // empty the geometry and the material used in the previous scene
     this.scene.traverse((child) => {
       if (child.userData.physicsBody)
@@ -211,7 +213,6 @@ class SceneLoader {
     this.physics.physicsWorld.removeRigidBody(
       this.player.playerController.playerObject.userData.physicsBody
     );
-    if (this.monsterManager.monster) this.monsterManager.despawnMonster();
 
     //console.log(this.scene);
   }

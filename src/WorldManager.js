@@ -145,16 +145,25 @@ class WorldManager {
 
       switch (this.scene.name) {
         case "maze1":
-          player.pickUpKey(0);
-          this.keyDisplay(-80);
+          if (!player.hasKey(0)) {
+            player.pickUpKey(0);
+            this.keyDisplay(-80);
+          }
+
           break;
         case "maze2":
-          player.pickUpKey(1);
-          this.keyDisplay(680);
+          if (!player.hasKey(1)) {
+            player.pickUpKey(1);
+            this.keyDisplay(680);
+          }
+
           break;
         case "maze3":
-          player.pickUpKey(2);
-          this.keyDisplay(1440);
+          if (!player.hasKey(2)) {
+            player.pickUpKey(2);
+            this.keyDisplay(1440);
+          }
+
           break;
       }
 

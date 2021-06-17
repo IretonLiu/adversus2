@@ -18,14 +18,13 @@ import Utils from "./Utils";
 import playerController from "./PlayerController";
 
 class Monster {
-  constructor(position, scene, playerController) {
+  constructor(position, scene, onLoaded) {
     // position is the monster's current position in world coordinates
     this.position = new Vector3(position.x, position.y, position.z);
-
     // local refernce to the scene
     this.scene = scene;
 
-    this.playerController = playerController;
+    //this.playerController = playerController;
 
     // keep track of the game clock
     this.clock = new Clock();
@@ -43,7 +42,7 @@ class Monster {
     // track path travelled
     this.backtrackPath = [];
 
-    this.Mesh = new Mesh();
+    //this.Mesh = new Mesh();
 
     this.monsterObject = null;
 
@@ -52,10 +51,10 @@ class Monster {
     this.size = new Vector3(2, 2, 2);
 
     // create the monster visuals
-    this.initThreeObject();
+    this.initThreeObject(onLoaded);
   }
 
-  initThreeObject() {
+  initThreeObject(onLoaded) {
     const loader = new GLTFLoader();
     loader.load("assets/models/monster/scene.gltf", (gltf) => {
       // load custom model
@@ -90,13 +89,12 @@ class Monster {
         this.position.y,
         this.position.z
       );
-      this.Mesh.position.setX(this.position.x)
-      this.Mesh.position.setY(this.position.y)
-      this.Mesh.position.setZ(this.position.z)
-
-
+      // this.Mesh.position.setX(this.position.x)
+      // this.Mesh.position.setY(this.position.y)
+      // this.Mesh.position.setZ(this.position.z)
       // add the monster to the scene
       this.scene.add(this.monsterObject);
+      onLoaded();
     });
   }
 
@@ -361,9 +359,9 @@ class Monster {
     // don't do anything if the monster doesn't exist
     if (!this.monsterObject) return;
 
-    this.Mesh.position.setX(this.monsterObject.position.x)
-    this.Mesh.position.setY(this.monsterObject.position.y)
-    this.Mesh.position.setZ(this.monsterObject.position.z)
+    // this.Mesh.position.setX(this.monsterObject.position.x)
+    // this.Mesh.position.setY(this.monsterObject.position.y)
+    // this.Mesh.position.setZ(this.monsterObject.position.z)
     // get movement direction as direction from current position to astar next position
     let nextPoint = this.path[this.path.length - 1]; // the array representation of the path
 

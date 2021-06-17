@@ -324,7 +324,6 @@ class PlayerController {
   handleMovement() {
     const speed = Constants.PLAYER_MOVE_SPEED; // TODO: change to normal
     const time = performance.now();
-    const delta = (time - this.prevTime) / 1000;
 
     // get the direction by subtracting booleans
     // since only one of the 2 can be true at any instance
