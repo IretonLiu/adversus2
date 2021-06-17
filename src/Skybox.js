@@ -48,7 +48,7 @@ class Skybox {
   }
 
   update(deltaTime) {
-    this.mesh.rotateX(deltaTime / 30);
+    this.mesh.rotateX(deltaTime / 100);
   }
 }
 
