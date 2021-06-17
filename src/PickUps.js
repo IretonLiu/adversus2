@@ -29,7 +29,7 @@ class Battery extends PickUps {
     return new Promise((resolve, reject) => {
       //loads the glb model from the assests folder
       loader.load(
-        "./assets/models/Battery.glb",
+        "assets/models/Battery.glb",
         (gltf) => {
           //rendering details for the battery
           this.mesh = gltf.scene;
@@ -76,13 +76,13 @@ class GateKey extends PickUps {
       //switch case to set the modelToLoad to the correct path
       switch (scene.name) {
         case "maze1":
-          modelToLoad="./assets/models/key1.glb"
+          modelToLoad="assets/models/key1.glb"
           break;
         case "maze2":
-          modelToLoad="./assets/models/key2.glb"
+          modelToLoad="assets/models/key2.glb"
           break;
         case "maze3":
-          modelToLoad="./assets/models/key3.glb"
+          modelToLoad="assets/models/key3.glb"
           break;
       }
       //loads the correct model
