@@ -55,7 +55,7 @@ class GameManager {
         devCanvas.style.display = "none";
       }
     });
-    removeLoadingScreen(() => { });
+    removeLoadingScreen(() => {});
 
     setUpPostProcessing();
     //render();
@@ -312,7 +312,7 @@ async function onInteractCB() {
   }
 }
 
-// resize the game 
+// resize the game
 function onWindowResize() {
   player.playerController.camera.aspect =
     window.innerWidth / window.innerHeight;

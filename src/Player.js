@@ -3,7 +3,6 @@ import * as THREE from "three";
 import { Vector2 } from "three";
 import Constants from "./Constants";
 
-
 class Player {
   constructor(position, playerController) {
     // this position is in world coordinates
@@ -22,7 +21,6 @@ class Player {
   pickUpKey() {
     this.hasKey = true;
   }
-
 
   getPosition() {
     return this.playerController.playerObject.position;
@@ -64,9 +62,7 @@ class Player {
     if (Math.floor(this.torchLife) <= 0) {
       if (this.batteryCount > 0) {
         this.refillTorch();
-
-      }
-      else {
+      } else {
         this.playerController.turnTorchOff();
       }
     }
@@ -75,14 +71,14 @@ class Player {
     ctx.fillStyle = "#ffffffa0";
     ctx.strokeStyle = "white";
     ctx.clearRect(100, 20, 200, 40);
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.rect(100, 20, 160, 20);
-    ctx.closePath()
+    ctx.closePath();
     ctx.stroke();
     ctx.fillRect(100, 20, (this.torchLife / 20) * 32, 20);
-    ctx.beginPath()
+    ctx.beginPath();
     ctx.rect(100 + 160, 25, 6, 10);
-    ctx.closePath()
+    ctx.closePath();
     ctx.stroke();
   }
 
@@ -90,11 +86,7 @@ class Player {
   refillTorch() {
     this.torchLife = 100;
     this.batteryCount--;
-
   }
-
 }
-
-
 
 export default Player;
