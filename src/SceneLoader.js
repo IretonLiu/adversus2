@@ -238,6 +238,8 @@ class SceneLoader {
     );
     this.maze1.growingTree();
     this.grid1 = this.maze1.getThickGrid();
+
+    this.grid2[1][0] = false;
     this.grid1[2 * this.maze1.width - 1][2 * this.maze1.height] = false;
 
     this.worldManager1 = new WorldManager(this.player, this.grid1);

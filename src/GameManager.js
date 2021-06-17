@@ -303,9 +303,13 @@ async function onInteractCB() {
         snowManager.hideSnow();
         break;
       case "maze2exit":
-        mMap.hideMap();
-        await sceneLoader.loadScene("saferoom2", true);
-        snowManager.hideSnow();
+        if (player.hasKey(1)) {
+          mMap.hideMap();
+          await sceneLoader.loadScene("saferoom2", true);
+          snowManager.hideSnow();
+        } else {
+          noKeyWarning();
+        }
         break;
       case "saferoom2entrance":
         await loadMaze("maze2");
