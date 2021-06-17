@@ -64,8 +64,6 @@ class SafeRoom {
                 candleFlame1.add(flame1)
                 candleFlame1.position.set(candle1Pos.x, candle1Pos.y, candle1Pos.z,);
 
-
-
                 const candleLight2 = new PointLight(0xffaa33, 10, 100, 5);
                 candleLight2.shadow.bias = -0.001
                 candleLight2.castShadow = true;
