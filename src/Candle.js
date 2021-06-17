@@ -20,7 +20,7 @@ class Candle {
 
   loadModel() {
     const loader = new GLTFLoader();
-    const path = "./assets/models/";
+    const path = "assets/models/";
     const extension = ".glb";
     return new Promise((resolve, reject) => {
       //loader.load(url, data => resolve(data), null, reject);

@@ -133,7 +133,7 @@ class WallGenerator {
 
   loadLogWallModel() {
     const loader = new GLTFLoader();
-    const path = "./assets/models/";
+    const path = "assets/models/";
     const extension = ".glb";
     return new Promise((resolve, reject) => {
       loader.load(path + "LogWall2" + extension, (gltf) => {
@@ -150,7 +150,7 @@ class WallGenerator {
 
   loadBarbedWireModel() {
     const loader = new GLTFLoader();
-    const path = "./assets/models/";
+    const path = "assets/models/";
     const extension = ".glb";
     return new Promise((resolve, reject) => {
       loader.load(path + "BarbedWire" + extension, (gltf) => {

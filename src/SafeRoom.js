@@ -27,7 +27,7 @@ class SafeRoom {
 
   loadModel(filename) {
     const loader = new GLTFLoader();
-    const path = "./assets/models/saferoom/";
+    const path = "assets/models/saferoom/";
     const extension = ".glb";
     return new Promise((resolve, reject) => {
       //loader.load(url, data => resolve(data), null, reject);

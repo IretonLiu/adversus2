@@ -15,7 +15,7 @@ class Skybox {
   }
 
   createPathStrings() {
-    const basePath = "./assets/textures/skybox/";
+    const basePath = "assets/textures/skybox/";
     const baseFilename = basePath + this.filename;
     const fileType = ".png";
     const sides = ["", "", "", "", "", ""]; //["ft", "bk", "up", "dn", "rt", "lf"];
