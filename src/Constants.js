@@ -31,8 +31,8 @@ let Constants = {
   WALL_SEGMENTS: 1,
 
   // player constants
-  //PLAYER_MOVE_SPEED: 35,
-  PLAYER_MOVE_SPEED: 100,
+  PLAYER_MOVE_SPEED: 35,
+  // PLAYER_MOVE_SPEED: 100,
   PLAYER_INITIAL_POS: {
     x: 30,
     y: 12,

@@ -94,7 +94,7 @@ class MonsterManager {
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
-  update() {
+  update(deltaTime) {
     if (this.monster) {
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
@@ -131,7 +131,7 @@ class MonsterManager {
       }
 
       // this.monsterSoundTracker()
-      this.monster.update();
+      this.monster.update(deltaTime);
       //this.soundmanager.bind(this.monster.Mesh)
       // this.monster.Mesh.position.setX(this.monster.position.x)
       // this.monster.Mesh.position.setY(this.monster.position.y)

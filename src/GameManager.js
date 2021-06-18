@@ -155,7 +155,7 @@ function animate() {
     )
       mMap.worldUpdate();
 
-    monsterManager.update();
+    monsterManager.update(deltaTime);
     monsterManager.updatePercentageExplored(mMap.getPercentageExplored());
 
     devMap.update();
@@ -197,9 +197,9 @@ async function initWorld() {
     renderer.domElement,
     onInteractCB
   );
+  await playerController.loadModel();
   physics.createPlayerRB(playerController.playerObject);
   await playerController.initCandle();
-
   player = new Player(playerPos, playerController);
   monsterManager = new MonsterManager(
     sceneLoader.currentScene,
