@@ -76,7 +76,8 @@ class PlayerController {
   // this is used when scene changing takes player
   reset() {
     const playerPos = Constants.PLAYER_INITIAL_POS;
-
+    this.torchOn = false;
+    this.torch.intensity = 0;
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
     this.camera.lookAt(playerPos.x + 1, playerPos.y, playerPos.z);
