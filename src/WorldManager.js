@@ -17,7 +17,6 @@ class WorldManager {
     this.gateKey = null;
     this.clock = new THREE.Clock();
     this.hasSetObjects = false;
-
   }
 
   //updates all the aspects of the worldManager
@@ -39,7 +38,6 @@ class WorldManager {
       battery.displayBattery(this.scene);
     }
   }
-
 
   //updates the rotation and movement of the battery and keys
   updateObjs() {
@@ -93,8 +91,8 @@ class WorldManager {
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
       let randZ =
         Math.floor(Math.random() * ((this.grid.length - 1) / 2)) * 2 + 1;
-        //check to see if the battery is spawing in a valid location
-        //i.e. not inside a wall
+      //check to see if the battery is spawing in a valid location
+      //i.e. not inside a wall
       if (this.grid[randX][randZ] === false) {
         //check to see if any "battery" has been added to the batteries array
         if (this.batteries.length != 0) {
@@ -111,7 +109,7 @@ class WorldManager {
               break;
             }
           }
-          //if its not a duplicate position we add a battery to the batteries array 
+          //if its not a duplicate position we add a battery to the batteries array
           if (!duplicate) {
             await this.loadBattery(randX, randZ);
             numBats++;
@@ -130,17 +128,25 @@ class WorldManager {
     // gives a random x and z value to the keys position
     //make sure it spawns in the latter halfs of the mazes
     let randX =
-      Math.floor((Math.random()*(1-0.5)+0.5) * ((this.grid.length - 1) / 2)) * 2 +1;
+      Math.floor(
+        (Math.random() * (1 - 0.5) + 0.5) * ((this.grid.length - 1) / 2)
+      ) *
+        2 +
+      1;
     let randZ =
-      Math.floor((Math.random()*(1-0.5)+0.5) * ((this.grid.length - 1) / 2)) * 2 + 1;
-      //makes sure that it is spawning in a valid square
+      Math.floor(
+        (Math.random() * (1 - 0.5) + 0.5) * ((this.grid.length - 1) / 2)
+      ) *
+        2 +
+      1;
+    //makes sure that it is spawning in a valid square
     if (this.grid[randX][randZ] === false) {
       await this.loadKey(randX, randZ);
     }
   }
 
   //what happens when a battery is picked up
-  pickUpBattery(player) {
+  pickUpBattery(player, monsterManager) {
     //we get the players x and z positions
     var x = player.playerController.playerObject.position.x;
     var z = player.playerController.playerObject.position.z;
@@ -156,19 +162,22 @@ class WorldManager {
         //if it is we go through the battery array to get the index of the battery
         let index = this.batteries.indexOf(battery);
         //plays a sound to show that the battery has been picked up
-        player.soundmanager.batteryPickup()
+        player.soundmanager.batteryPickup();
         //increasing the number of batteries the player has
         player.batteryCount++;
         //make the battery not visible
         battery.mesh.visible = false;
         //remove the picked up battery from the batteries array
         this.batteries.splice(index, 1);
+
+        // update the monster aggression level
+        monsterManager.pickedUpItem();
       }
     }
   }
 
   //what happens when a key is picked up
-  pickUpKey(player) {
+  pickUpKey(player, monsterManager) {
     //get the x and z value of the player
     var x = player.playerController.playerObject.position.x;
     var z = player.playerController.playerObject.position.z;
@@ -179,7 +188,6 @@ class WorldManager {
       z <= this.gateKey.mesh.position.z + 10 &&
       z >= this.gateKey.mesh.position.z - 10
     ) {
-
       //switch case to display the correct keys for the relevant mazes
       switch (this.scene.name) {
         case "maze1":
@@ -188,6 +196,9 @@ class WorldManager {
             player.pickUpKey(0);
             //x translation of the key and the key number to be displayed
             this.keyDisplay(5, 1);
+
+            // update the monster aggression level
+            monsterManager.pickedUpItem();
           }
 
           break;
@@ -195,6 +206,9 @@ class WorldManager {
           if (!player.hasKey(1)) {
             player.pickUpKey(1);
             this.keyDisplay(225, 2);
+
+            // update the monster aggression level
+            monsterManager.pickedUpItem();
           }
 
           break;
@@ -202,6 +216,9 @@ class WorldManager {
           if (!player.hasKey(2)) {
             player.pickUpKey(2);
             this.keyDisplay(445, 3);
+
+            // update the monster aggression level
+            monsterManager.pickedUpItem();
           }
 
           break;
@@ -212,21 +229,21 @@ class WorldManager {
   }
 
   //all update functions for worldManager
-  update(player) {
+  update(player, monsterManager) {
     //updates the movement of the objects
     this.updateObjs();
     //updates the picked up items
-    this.pickUpItems(player);
+    this.pickUpItems(player, monsterManager);
     //displays appropriate items
     this.displayItems();
   }
 
   //deals with item pick up's.
-  pickUpItems(player) {
+  pickUpItems(player, monsterManager) {
     //battery pick up
-    this.pickUpBattery(player);
+    this.pickUpBattery(player, monsterManager);
     //key pickup
-    this.pickUpKey(player);
+    this.pickUpKey(player, monsterManager);
   }
 
   //handles displaying of the battery image
@@ -245,10 +262,10 @@ class WorldManager {
   //takes in an x translation and which key number the player has picked up
   keyDisplay(xPos, picNum) {
     //initiale an image variable
-    let img
+    let img;
 
     //depending on which key has been picked up the img variable gets set to the appropriate element
-    //gets the element id from the index.html 
+    //gets the element id from the index.html
     switch (picNum) {
       case 1:
         img = document.getElementById("keyPic1");

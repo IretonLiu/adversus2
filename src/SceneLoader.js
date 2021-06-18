@@ -258,8 +258,25 @@ class SceneLoader {
 
   async updatePlayableObjects() {
     // set the new context for the monster manager
+    let numKeys = 0;
+    switch (this.currentScene.name) {
+      case "maze1":
+        numKeys += this.player.hasKey(0);
+        break;
+      case "maze2":
+        numKeys += this.player.hasKey(1);
+        break;
+      case "maze3":
+        numKeys += this.player.hasKey(2);
+        break;
+    }
     if (this.monsterManager) {
-      this.monsterManager.setNewScene(this.currentScene, this.currentGrid);
+      this.monsterManager.setNewScene(
+        this.currentScene,
+        this.currentGrid,
+        numKeys,
+        this.player.batteryCount
+      );
     }
 
     // set a new dev map

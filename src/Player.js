@@ -61,12 +61,12 @@ class Player {
     }
   }
 
-  update(deltaTime, position, positionChangeCallback) {
-    this.updateTorchLife(deltaTime);
+  update(deltaTime, position, monstermanager, positionChangeCallback) {
+    this.updateTorchLife(deltaTime, monstermanager);
     this.updatePosition(position, positionChangeCallback);
   }
 
-  updateTorchLife(deltaTime) {
+  updateTorchLife(deltaTime, monsterManager) {
     const ctx = document.getElementById("inventory").getContext("2d");
     document.getElementById("numBats").innerHTML = "X" + this.batteryCount;
 
@@ -79,7 +79,7 @@ class Player {
 
     if (Math.floor(this.torchLife) <= 0) {
       if (this.batteryCount > 0) {
-        this.refillTorch();
+        this.refillTorch(monsterManager);
       } else {
         this.playerController.turnTorchOff();
       }
@@ -101,9 +101,10 @@ class Player {
   }
 
   //refills the torch to full after the battery runs out
-  refillTorch() {
+  refillTorch(monsterManager) {
     this.torchLife = 100;
     this.batteryCount--;
+    monsterManager.usedItem();
   }
 }
 
