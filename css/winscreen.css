@@ -8,10 +8,30 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  color: #fff;
 }
 
 #win-screen h1 {
   color: #fff;
   font-size: 100px;
   text-align: center;
+}
+
+#win-screen .button {
+  color: black;
+}
+
+#credits {
+  position: relative;
+  overflow: scroll;
+  font-family: "Courier New", Courier, monospace;
+  margin: auto;
+  margin-bottom: 2rem;
+  max-width: 80vw;
+}
+
+#credits a {
+  text-decoration: none;
+  color: white;
 }
