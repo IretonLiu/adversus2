@@ -7,20 +7,21 @@ import {
   BoxBufferGeometry,
   MeshBasicMaterial,
   Mesh,
+  Group,
+  DoubleSide,
+  AnimationMixer,
 } from "three";
 import { PointerLockControls } from "three/examples/jsm/controls/PointerLockControls";
 import Constants from "./Constants";
 import state from "./State";
 import Candle from "./Candle";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 class PlayerController {
   constructor(domElement, onInteractCB) {
     // setup player object for ammo
     const playerPos = Constants.PLAYER_INITIAL_POS;
-    this.playerObject = new Mesh(
-      new BoxBufferGeometry(5, 5, 5),
-      new MeshBasicMaterial({ color: 0xffffff, visible: false })
-    );
+    this.playerObject = new Group();
     this.playerObject.position.set(playerPos.x, playerPos.y, playerPos.z);
     // initializing all the variables
     this.velocity = new Vector3();
@@ -36,7 +37,7 @@ class PlayerController {
     this.camera = new PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
-      0.1,
+      0.01,
       Constants.CAMERA_FAR
     );
     this.camera.position.set(playerPos.x, playerPos.y, playerPos.z);
@@ -66,11 +67,10 @@ class PlayerController {
     this.intersect = null;
     // this.scene = null;
     this.onInteractCB = onInteractCB;
-  }
 
-  // setScene(scene) {
-  //   this.scene = scene;
-  // }
+    // animation for the player
+    this.animMixer = null;
+  }
 
   // reset the player position to the initial position
   // this is used when scene changing takes player
@@ -99,6 +99,33 @@ class PlayerController {
     this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 
+  loadModel() {
+    const loader = new GLTFLoader();
+    const path = "assets/models/";
+    const extension = ".glb";
+    return new Promise((resolve, reject) => {
+      loader.load(path + "Grim" + extension, (gltf) => {
+        const scene = gltf.scene;
+        scene.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            // child.material.side = DoubleSide;
+          }
+        })
+        console.log(scene);
+        scene.position.set(0, -7, 3);
+        scene.rotateY(Math.PI / 2)
+        scene.scale.set(5, 8, 5);
+        this.playerObject.add(gltf.scene);
+        this.animMixer = new AnimationMixer(scene);
+        this.animMixer.timeScale = 1.5;
+        var walk = this.animMixer.clipAction(gltf.animations[4]);
+        walk.play()
+        resolve("success")
+      })
+    })
+  }
+
   // initialize the pointer lock controls for the player
   initControls(domElement) {
     const controls = new PointerLockControls(this.camera, domElement);
@@ -108,40 +135,6 @@ class PlayerController {
       if (!state.gameover) this.openPauseMenu();
     });
     return controls;
-  }
-
-  initPlayerRB() {
-    const pos = this.camera.position;
-    const quat = this.camera.quaternion;
-    // setup ammo.js tranform object
-    const mass = 1;
-    let transform = new Ammo.btTransform();
-    transform.setIdentity();
-    transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
-    transform.setRotation(
-      new Ammo.btQuaternion(quat.x, quat.y, quat.z, quat.w)
-    );
-    let motionState = new Ammo.btDefaultMotionState(transform);
-
-    // setup the shape of the collider that matches the shape of the mesh
-    let colliderShape = new Ammo.btBoxShape(5, 5, 5);
-    colliderShape.setMargin(0.05);
-
-    // setup inertia of the object
-    let localInertia = new Ammo.btVector3(0, 0, 0);
-    colliderShape.calculateLocalInertia(mass, localInertia);
-
-    // generate the rigidbody
-    let rbInfo = new Ammo.btRigidBodyConstructionInfo(
-      mass,
-      motionState,
-      colliderShape,
-      localInertia
-    );
-    let rb = new Ammo.btRigidBody(rbInfo);
-    rb.setFriction(4);
-
-    //this.rigidbody = threeObj;
   }
 
   openPauseMenu() {
@@ -274,8 +267,10 @@ class PlayerController {
 
   update(time, scene) {
     this.handleMovement();
-    this.raycasterForward(scene);
+    this.raycastForward(scene);
     this.handleTorch();
+    if (this.isMoving())
+      this.animMixer.update(time);
     this.candle.update(time);
   }
 
@@ -319,7 +314,9 @@ class PlayerController {
     const candle = new Candle();
     await candle.loadModel();
     this.candle = candle;
-    this.camera.add(this.candle.model);
+
+    this.playerObject.add(this.candle.model);
+    //this.camera.add(this.candle.model);
   }
 
   handleTorch() {
@@ -337,12 +334,7 @@ class PlayerController {
     this.direction.z = Number(this.moveRight) - Number(this.moveLeft);
     //this.direction.normalize(); // this ensures consistent movements in all directions
 
-    // example code with acceleration
-    // if ( this.moveForward || this.moveBackward ) this.velocity.z -= this.direction.z * 400.0 * delta;
-    // if ( this.moveLeft || this.moveRight ) this.velocity.x -= this.direction.x * 400.0 * delta;
-
     // constant velocity
-
     // the direction of the impulse;
     let moveDirection = new Vector3(0, 0, 0);
 
@@ -404,7 +396,7 @@ class PlayerController {
     this.prevTime = time;
   }
 
-  raycasterForward(scene) {
+  raycastForward(scene) {
     this.raycaster.set(
       this.controls.getObject().position,
       this.camera.getWorldDirection(new Vector3(0, 0, 0))
@@ -443,6 +435,8 @@ class PlayerController {
       element.style.visibility = "hidden";
     }
   }
+
+
 }
 
 export default PlayerController;

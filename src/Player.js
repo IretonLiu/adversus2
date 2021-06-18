@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { Vector2 } from "three";
 import Constants from "./Constants";
 import SoundManagerGlobal from "./SoundManagerGlobal";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 class Player {
   constructor(position, playerController) {
@@ -25,7 +26,10 @@ class Player {
 
     // grid coordinate - check if it changed
     this.prevGridCoordinates = this.position;
+    this.model = null;
   }
+
+
 
   pickUpKey(index) {
     this.soundmanager.keyPickup();

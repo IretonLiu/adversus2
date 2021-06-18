@@ -10,6 +10,11 @@ import {
   Box3,
   Vector2,
   Clock,
+  AnimationMixer,
+  SphereBufferGeometry,
+  Material,
+  PointLight,
+  Group,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Astar } from "./pathfinder/astar";
@@ -39,12 +44,11 @@ class Monster {
     // have a backtracking flag
     this.backtracking = false;
 
-    // track path travelled
-    // this.backtrackPath = [];
-
-    //this.Mesh = new Mesh();
-
+    // monster 3D object
     this.monsterObject = null;
+
+    // animation mixer
+    this.animMixer = null;
 
     // record the monster's size - Vector3
     // have a buffer
@@ -56,13 +60,22 @@ class Monster {
 
   initThreeObject(onLoaded) {
     const loader = new GLTFLoader();
-    loader.load("assets/models/monster/scene.gltf", (gltf) => {
+    loader.load("assets/models/monster.glb", (gltf) => {
       // load custom model
       const model = gltf.scene;
 
       // set model size and position
-      model.scale.set(10, 10, 10);
-      model.translateY(-10);
+      model.scale.set(8, 9, 8);
+      model.translateY(-7);
+      model.rotateY(-Math.PI / 2)
+
+      const eye = new Group();
+      const eyeLight = new PointLight(0xab1600, 1, 10);
+      const eyeBall = new Mesh(new SphereBufferGeometry(0.1, 2, 2), new MeshStandardMaterial({ emissive: 0xff0000 }));
+      eye.add(eyeLight);
+      eye.add(eyeBall);
+      eye.position.set(-0.8, 12, 11.5)
+
 
       // determine the size of the model
       let bbox = new Box3().setFromObject(model);
@@ -84,16 +97,27 @@ class Monster {
 
       // set monster position
       this.monsterObject.add(model);
+      this.monsterObject.add(eye)
       this.monsterObject.position.set(
         this.position.x,
         this.position.y,
         this.position.z
       );
-      // this.Mesh.position.setX(this.position.x)
-      // this.Mesh.position.setY(this.position.y)
-      // this.Mesh.position.setZ(this.position.z)
+
       // add the monster to the scene
       this.scene.add(this.monsterObject);
+      console.log(model.animations)
+      this.animMixer = new AnimationMixer(model);
+      this.animMixer.timeScale = 1;
+
+      var chase = this.animMixer.clipAction(gltf.animations[1]);
+      chase.play();
+
+      console.log(model);
+      // setup animation
+      // this.animMixer = new AnimationMixer(model);
+
+
       onLoaded();
     });
   }
@@ -349,7 +373,7 @@ class Monster {
     this.setSpeed(Constants.MONSTER_SPEED * 2);
   }
 
-  update() {
+  update(deltaTime) {
     // don't do anything if the monster doesn't exist
     if (!this.monsterObject) return;
 
@@ -369,7 +393,7 @@ class Monster {
       .normalize();
 
     // update the monster's position using the delta time
-    const deltaTime = this.clock.getDelta();
+    //const deltaTime = this.clock.getDelta();
 
     this.position.x += deltaTime * this.speed * worldDirection.x;
     this.position.z += deltaTime * this.speed * worldDirection.z;
@@ -391,6 +415,7 @@ class Monster {
       // this.backtrackPath.push(this.path.pop());
       this.path.pop();
     }
+    this.animMixer.update(deltaTime)
   }
 }
 

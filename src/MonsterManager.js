@@ -147,8 +147,7 @@ class MonsterManager {
     if (!this.monster.backtracking) this.monster.startBacktrack();
   }
 
-  update() {
-    const delta = this.clock.getDelta();
+  update(deltaTime) {
     if (this.monster) {
       //console.log(this.monster.position.distanceTo(this.player.playerController.camera.position))
       if (
@@ -185,12 +184,11 @@ class MonsterManager {
         return;
       }
 
-      // this.monsterSoundTracker()
-      this.monster.update();
-      this.updateFear(delta * 0.1);
+      this.monster.update(deltaTime);
+      this.updateFear(deltaTime * 0.1);
     }
 
-    this.updateFear(delta * 0.1);
+    this.updateFear(deltaTime * 0.1);
     this.fearDecision();
   }
 

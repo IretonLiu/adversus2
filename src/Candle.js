@@ -31,13 +31,14 @@ class Candle {
           const scene = gltf.scene;
           scene.traverse((child) => {
             if (child.isMesh) {
-              child.castShadow = true;
+              //child.castShadow = true;
               child.receiveShadow = true;
               child.material.side = DoubleSide;
               child.material.shadowSide = BackSide;
             }
           })
 
+          scene.scale.set(1.1, 1.1, 1.1)
           this.model.add(gltf.scene);
           //this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
 
@@ -47,14 +48,14 @@ class Candle {
           this.candleLight.position.y = 1;
 
           const flame = this.createCandleLight();
-          flame.position.y = 0.65;
+          flame.position.y = 0.8;
 
           this.model.add(this.candleLight);
           this.model.add(flame);
           this.model.rotateY((10 * Math.PI) / 9);
-          this.model.position.z = -2;
-          this.model.position.y = -1.2;
-          this.model.position.x = 1.5;
+          this.model.position.z = -3;
+          this.model.position.y = 0.8;
+          this.model.position.x = 1.6;
           resolve("success");
         },
         (xhr) => {
