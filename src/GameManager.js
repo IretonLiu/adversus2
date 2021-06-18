@@ -141,11 +141,16 @@ function animate() {
 
     // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
-    player.update(deltaTime, player.playerController.camera.position, () => {
-      monsterManager.updateMonsterPath();
-    });
+    player.update(
+      deltaTime,
+      player.playerController.camera.position,
+      monsterManager,
+      () => {
+        monsterManager.updateMonsterPath();
+      }
+    );
 
-    worldManager.update(player);
+    worldManager.update(player, monsterManager);
 
     snowManager.updateSnow(deltaTime);
 
