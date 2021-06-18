@@ -147,10 +147,8 @@ class SafeRoom {
   setupDoors() {
     // set up the bounding box geometry for the entrance and exit doors
     const doorBoundingBoxGeometry = new BoxGeometry(5, 18, 18);
-    const doorBoundingBoxMaterial = new MeshStandardMaterial({
-      color: 0xffffff,
-    });
-    doorBoundingBoxMaterial.visible = true;
+    const doorBoundingBoxMaterial = new MeshStandardMaterial();
+    doorBoundingBoxMaterial.visible = false;
 
     // set up the exit bounding box
     const exitBoundingBoxMesh = new Mesh(
@@ -175,6 +173,7 @@ class SafeRoom {
     this.model.add(entranceBoundingBoxMesh);
   }
 
+  // create the candle light shape
   createCandleLight() {
     let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
     flameGeo.translate(0, 0.5, 0);

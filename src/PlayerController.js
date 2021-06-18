@@ -99,6 +99,7 @@ class PlayerController {
     this.camera.lookAt(lx * Constants.WALL_SIZE, 10, lz * Constants.WALL_SIZE);
   }
 
+  //s load the 3d model
   loadModel() {
     const loader = new GLTFLoader();
     const path = "assets/models/";
@@ -117,6 +118,8 @@ class PlayerController {
         scene.rotateY(Math.PI / 2)
         scene.scale.set(5, 8, 5);
         this.playerObject.add(gltf.scene);
+
+        // setups the animation 
         this.animMixer = new AnimationMixer(scene);
         this.animMixer.timeScale = 1.5;
         var walk = this.animMixer.clipAction(gltf.animations[4]);
@@ -153,6 +156,7 @@ class PlayerController {
     });
   }
 
+  // setup the keypress and the corresponding actions
   setUpControls(self) {
     self.controls.lock();
     this.setUpPauseScreen();
@@ -175,13 +179,13 @@ class PlayerController {
           self.moveRight = true;
           break;
 
-        case "Space":
-          self.velocity.y = 2;
-          break;
+        // case "Space":
+        //   self.velocity.y = 2;
+        //   break;
 
-        case "KeyZ":
-          self.velocity.y = -2;
-          break;
+        // case "KeyZ":
+        //   self.velocity.y = -2;
+        //   break;
       }
     };
 
@@ -273,7 +277,11 @@ class PlayerController {
       this.animMixer.update(time);
     this.candle.update(time);
   }
-
+  updatePosition() {
+    const pos = this.playerObject.position;
+    this.camera.position.set(pos.x, this.camera.position.y, pos.z);
+  }
+  // changes if the player is moving
   isMoving() {
     if (
       this.moveForward ||
@@ -286,10 +294,7 @@ class PlayerController {
       return false;
     }
   }
-  updatePosition() {
-    const pos = this.playerObject.position;
-    this.camera.position.set(pos.x, this.camera.position.y, pos.z);
-  }
+
 
   initTorch() {
     // const mapSize = Constants.MAP_SIZE;

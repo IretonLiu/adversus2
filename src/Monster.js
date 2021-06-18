@@ -65,7 +65,7 @@ class Monster {
       const model = gltf.scene;
 
       // set model size and position
-      model.scale.set(8, 9, 8);
+      model.scale.set(7, 8, 7);
       model.translateY(-7);
       model.rotateY(-Math.PI / 2)
 

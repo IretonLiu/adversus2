@@ -42,7 +42,7 @@ class Candle {
           this.model.add(gltf.scene);
           //this.candleLight = new PointLight(0xFFFACD, 1, 100, 5);
 
-          this.candleLight = new PointLight(0xffcc66, 1, 100, 5);
+          this.candleLight = new PointLight(0xffcc66, 0.8, 70, 5);
           this.candleLight.shadow.bias = -0.001;
           this.candleLight.castShadow = true;
           this.candleLight.position.y = 1;
@@ -76,6 +76,7 @@ class Candle {
     this.candleLight.position.x += Math.sin(this.time * Math.PI) * 0.0001;
   }
 
+  // create the candle shape with custom shader
   createCandleLight() {
     let flameGeo = new SphereBufferGeometry(0.5, 32, 32);
     flameGeo.translate(0, 0.5, 0);
@@ -88,6 +89,7 @@ class Candle {
     return flame;
   }
 
+  // custom shader for the candle written by @prisoner849
   createShaderMaterial() {
     return new ShaderMaterial({
       uniforms: {

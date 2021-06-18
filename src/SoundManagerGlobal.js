@@ -35,7 +35,7 @@ class SoundManagerGlobal {
     audioLoader.load("assets/Sounds/batteryPickup.mp3", function (buffer) {
       batterySound.setBuffer(buffer);
       batterySound.setLoop(false);
-      batterySound.setVolume(0.1);
+      batterySound.setVolume(0.5);
     });
 
     const keySound = new THREE.Audio(listener);

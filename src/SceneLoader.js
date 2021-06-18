@@ -119,7 +119,7 @@ class SceneLoader {
         );
       }
 
-      // load the actual maze
+      // load the actual maze threejs object(meshes)
       await this.loadMaze("maze1", this.maze1, this.grid1);
       this.currentMaze = this.maze1;
       this.currentGrid = this.grid1;

@@ -138,8 +138,6 @@ function animate() {
 
     player.playerController.update(deltaTime, sceneLoader.currentScene);
     physics.updatePhysics(deltaTime);
-
-    // TODO: potentially refactor the player update logic
     player.playerController.updatePosition();
     player.update(
       deltaTime,
@@ -167,11 +165,11 @@ function animate() {
     devMap.drawBatterys(worldManager.batteries);
     devMap.drawKey(worldManager.gateKey);
 
-    document.getElementById("timer").innerHTML = new Date(
-      clock.getElapsedTime() * 1000
-    )
-      .toISOString()
-      .substr(11, 8);
+    // document.getElementById("timer").innerHTML = new Date(
+    //   clock.getElapsedTime() * 1000
+    // )
+    //   .toISOString()
+    //   .substr(11, 8);
 
     render();
     stats.update();
@@ -183,16 +181,16 @@ function animate() {
 // initialises the game world
 async function initWorld() {
   skybox = new Skybox("nightsky", 8000);
-  //TODO: Make this dynamic based on map size
   scene.add(skybox.mesh);
 
   stats = new Stats(); // <-- remove me
   document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
+  // initialise the scene loader which will load all the different scene in subsequent calls
   sceneLoader = new SceneLoader(physics, scene, loadingScreen);
 
-  // TODO: there is quite a bit of circular dependency here
+  // initialise the player
   var playerPos = new THREE.Vector3(
     Constants.PLAYER_INITIAL_POS.x,
     Constants.PLAYER_INITIAL_POS.y,
@@ -206,6 +204,8 @@ async function initWorld() {
   physics.createPlayerRB(playerController.playerObject);
   await playerController.initCandle();
   player = new Player(playerPos, playerController);
+
+  // initialise the monster
   monsterManager = new MonsterManager(
     sceneLoader.currentScene,
     player,
@@ -213,13 +213,17 @@ async function initWorld() {
     clock
   );
 
+  // add player and monster
   sceneLoader.addActors(player, monsterManager);
   sceneLoader.initSound();
 
+  // load the actual scene
   await sceneLoader.loadScene("maze1", false);
   worldManager = sceneLoader.getWorldManager();
 
+  // set up the minimap
   mMap = sceneLoader.getMiniMap();
+
   scene.add(playerController.controls.getObject());
   scene.add(playerController.playerObject);
   scene.add(sceneLoader.currentScene);
@@ -229,10 +233,7 @@ async function initWorld() {
   sceneLoader.createDevMap();
   devMap = sceneLoader.getDevMap();
 
-  //makeSnow(scene);
-
   snowManager = new SnowManager(scene, player);
-  //makeSnow(sceneLoader.currentScene);
 }
 
 function setUpGround() {
@@ -266,6 +267,7 @@ function setUpAmbientLight() {
 async function onInteractCB() {
   const interactingObject = player.playerController.intersect;
 
+  // subroutine to load the mazes
   const loadMaze = async (mazeName) => {
     await sceneLoader.loadScene(mazeName, true);
     devMap = sceneLoader.getDevMap();
@@ -276,6 +278,7 @@ async function onInteractCB() {
     snowManager.showSnow();
   };
 
+  // function to show a prompt when you don't have the keys to the doors/gate
   const noKeyWarning = (isFinal) => {
     const noKeyText = document.getElementById("no-key-warning");
     if (!noKeyText.classList.contains("fade-out")) {
@@ -293,6 +296,7 @@ async function onInteractCB() {
     }
   };
   // checks the name of the object the player is interacting with
+  // and loads the scene accordingly
   if (interactingObject) {
     switch (interactingObject.name) {
       case "maze1entrance":
