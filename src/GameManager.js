@@ -4,7 +4,6 @@ import PlayerController from "./PlayerController.js";
 import Physics from "./lib/Physics.js";
 import Constants from "./Constants.js";
 import state from "./State";
-import Stats from "three/examples/jsm/libs/stats.module";
 import MonsterManager from "./MonsterManager";
 import Player from "./Player";
 import SceneLoader from "./SceneLoader";
@@ -21,7 +20,6 @@ let player,
   mMap,
   monsterManager,
   snowManager,
-  stats,
   skybox,
   worldManager,
   sceneLoader;
@@ -169,7 +167,7 @@ function animate() {
     //   .substr(11, 8);
 
     render();
-    stats.update();
+    //stats.update();
     sceneLoader.soundManagerGlobal.walking();
   }
   requestAnimationFrame(animate);
@@ -180,8 +178,8 @@ async function initWorld() {
   skybox = new Skybox("nightsky", 8000);
   scene.add(skybox.mesh);
 
-  stats = new Stats(); // <-- remove me
-  document.body.appendChild(stats.dom); // <-- remove me
+  //stats = new Stats(); // <-- remove me
+  //document.body.appendChild(stats.dom); // <-- remove me
   setUpGround();
 
   // initialise the scene loader which will load all the different scene in subsequent calls

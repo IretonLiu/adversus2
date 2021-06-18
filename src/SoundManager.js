@@ -30,9 +30,7 @@ class SoundManager {
   pause() {
     this.sound.pause();
   }
-  getIsplaying() {
-    return this.sound.getIsplaying();
-  }
+
 }
 
 export default SoundManager;

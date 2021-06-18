@@ -87,9 +87,7 @@ class SoundManagerGlobal {
       this.sound.play();
     }
   }
-  getIsplaying() {
-    return this.sound.getIsplaying();
-  }
+
 }
 
 export default SoundManagerGlobal;

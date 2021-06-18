@@ -19,12 +19,12 @@ let Constants = {
   MINIMAP_DISCOVER_THRESHOLD: 0.8,
 
   // map size
-  MAP1_SIZE: 5,
-  MAP2_SIZE: 6,
-  MAP3_SIZE: 7,
+  MAP1_SIZE: 6,
+  MAP2_SIZE: 7,
+  MAP3_SIZE: 8,
 
   // percentage of walls removed
-  PROBABILITY_WALLS_REMOVED: 0.75,
+  PROBABILITY_WALLS_REMOVED: 0.25,
 
   // blockiness of visuals
   BLOCKINESS: 4,
