@@ -100,6 +100,9 @@ class SceneLoader {
       this.player.playerController.reset();
     }
 
+    // start the sounds
+    this.startMonsterSounds();
+
     // load another scene based on the scene name
     if (nextSceneName == "maze1") {
       if (!this.maze1) {
@@ -185,6 +188,9 @@ class SceneLoader {
 
       await this.loadRoom1();
       this.saferoom1.setupColliders(this.physics);
+
+      // stop monster sound
+      this.stopMonsterSounds();
     } else if (nextSceneName == "saferoom2") {
       // set the looking direction of the player to the next door to travel through
       if (this.currentScene.name == "maze2") {
@@ -205,6 +211,9 @@ class SceneLoader {
 
       await this.loadRoom2();
       this.saferoom2.setupColliders(this.physics);
+
+      // stop monster sound
+      this.stopMonsterSounds();
     }
     if (this.player) {
       this.physics.createPlayerRB(this.player.playerController.playerObject);
@@ -222,6 +231,20 @@ class SceneLoader {
 
     this.loadingScreen.classList.add("fade-out");
     state.isPlaying = true;
+  }
+
+  stopMonsterSounds() {
+    if (this.monsterManager && this.monsterManager.soundmanager) {
+      this.soundManagerGlobal.sound.pause();
+      this.monsterManager.soundmanager.pause();
+    }
+  }
+
+  startMonsterSounds() {
+    if (this.monsterManager && this.monsterManager.soundmanager) {
+      this.soundManagerGlobal.sound.play();
+      this.monsterManager.soundmanager.play();
+    }
   }
 
   clearScene() {
